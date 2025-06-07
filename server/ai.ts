@@ -80,16 +80,36 @@ POSITIONING GUIDE:
 - Form area (0-99): Customer input fields and related elements
 - Payment area (100+): PIX QR codes and payment confirmation
 
-STYLE INHERITANCE: Use existing template colors and maintain visual consistency.
+STYLE INHERITANCE: Generate elements using existing template colors in lighter/darker tones.
+- Use primaryColor as base: create lighter background versions (add opacity or lighten)
+- Text should be darker version of primaryColor or high contrast color
+- Maintain visual harmony with existing design
 
 EXAMPLES:
-- Countdown timer: position 15, red background (#EF4444) with white text (#FFFFFF)
-- Urgency text: position 20, orange background (#F97316) with white text
-- Below logo elements: positions 0-10
+- If primaryColor is #8615D3 (purple): use #F3E8FF (light purple bg) with #4C1D95 (dark purple text)
+- If primaryColor is #0EA5E9 (blue): use #DBEAFE (light blue bg) with #1E40AF (dark blue text)
+- Position countdown/urgency: 15-20 (below form fields)
 
 ${brandResearch ? "Brand: " + brandResearch : ""}
 
 Return JSON:`;
+
+    // Generate color palette based on existing primary color
+    const generateColorPalette = (primaryColor: string) => {
+      // Common color combinations for different primary colors
+      const colorMappings: Record<string, { lightBg: string, darkText: string }> = {
+        '#8615D3': { lightBg: '#F3E8FF', darkText: '#4C1D95' }, // Purple
+        '#8A05BE': { lightBg: '#F3E8FF', darkText: '#4C1D95' }, // Nubank Purple
+        '#0EA5E9': { lightBg: '#DBEAFE', darkText: '#1E40AF' }, // Blue
+        '#00AA55': { lightBg: '#D1FAE5', darkText: '#065F46' }, // Green (PagBank)
+        '#EC7000': { lightBg: '#FED7AA', darkText: '#9A3412' }, // Orange (Itau)
+        '#CC092F': { lightBg: '#FECACA', darkText: '#7F1D1D' }, // Red (Bradesco)
+      };
+      
+      return colorMappings[primaryColor] || { lightBg: '#F3F4F6', darkText: '#1F2937' };
+    };
+
+    const colorPalette = generateColorPalette(currentTemplate.formData.primaryColor);
 
     // Simplify the template data to reduce token count
     const simplifiedTemplate = {
@@ -97,12 +117,13 @@ Return JSON:`;
         ...currentTemplate.formData,
         logoUrl: currentTemplate.formData.logoUrl ? "EXISTING_LOGO" : undefined
       },
-      customElements: currentTemplate.customElements
+      customElements: currentTemplate.customElements,
+      suggestedColors: colorPalette
     };
 
     const userPrompt = `Template: ${JSON.stringify(simplifiedTemplate)}
 Command: "${command}"
-Return modified JSON:`;
+Use suggestedColors for new elements. Return modified JSON:`;
 
     const response = await anthropic.messages.create({
       model: "claude-sonnet-4-20250514",
