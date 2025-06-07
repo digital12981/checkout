@@ -418,15 +418,18 @@ export default function EditPage() {
     if (!aiCommand.trim()) return;
     
     setIsAiProcessing(true);
+    setAiStatus("Salvando estado atual...");
     saveTemplateSnapshot();
 
     try {
+      setAiStatus("Enviando comando para Claude...");
       const currentTemplate = {
         formData: form.getValues(),
         customElements: customElements,
-        currentTab: "form" // You can track which tab is active
+        currentTab: activeStep
       };
 
+      setAiStatus("Claude está processando...");
       const response = await fetch('/api/ai/process-template', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -440,27 +443,35 @@ export default function EditPage() {
         throw new Error('Falha ao processar comando da IA');
       }
 
+      setAiStatus("Aplicando mudanças...");
       const result = await response.json();
       
-      // Apply the AI-generated changes
+      // Apply changes immediately with visual feedback
       if (result.formData) {
+        setAiStatus("Atualizando cores e textos...");
         form.reset(result.formData);
       }
       if (result.customElements) {
+        setAiStatus("Adicionando elementos...");
         setCustomElements(result.customElements);
       }
 
+      setAiStatus("Concluído!");
+      setTimeout(() => setAiStatus(""), 2000);
+
       toast({
-        title: "Comando processado",
-        description: "O template foi atualizado com base no seu comando",
+        title: "Template atualizado",
+        description: "Claude aplicou suas modificações com sucesso",
       });
       
       setAiCommand("");
     } catch (error) {
       console.error('Erro ao processar comando:', error);
+      setAiStatus("Erro ao processar comando");
+      setTimeout(() => setAiStatus(""), 3000);
       toast({
         title: "Erro",
-        description: "Falha ao processar o comando da IA",
+        description: "Falha ao processar comando da IA",
         variant: "destructive",
       });
     } finally {
@@ -1533,6 +1544,15 @@ export default function EditPage() {
                               disabled={isAiProcessing}
                             />
                           </div>
+                          
+                          {aiStatus && (
+                            <div className="mb-3 p-3 bg-blue-50 border border-blue-200 rounded-lg">
+                              <div className="flex items-center text-blue-700">
+                                <div className="w-4 h-4 border-2 border-blue-500 border-t-transparent rounded-full animate-spin mr-2" />
+                                <span className="text-sm font-medium">{aiStatus}</span>
+                              </div>
+                            </div>
+                          )}
                           
                           <div className="flex space-x-2">
                             <Button
