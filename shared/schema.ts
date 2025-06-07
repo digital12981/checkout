@@ -1,0 +1,63 @@
+import { pgTable, text, serial, integer, boolean, timestamp, decimal } from "drizzle-orm/pg-core";
+import { createInsertSchema } from "drizzle-zod";
+import { z } from "zod";
+
+export const users = pgTable("users", {
+  id: serial("id").primaryKey(),
+  username: text("username").notNull().unique(),
+  password: text("password").notNull(),
+});
+
+export const paymentPages = pgTable("payment_pages", {
+  id: serial("id").primaryKey(),
+  productName: text("product_name").notNull(),
+  productDescription: text("product_description"),
+  price: decimal("price", { precision: 10, scale: 2 }).notNull(),
+  template: text("template").notNull().default("modern"),
+  status: text("status").notNull().default("active"),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+});
+
+export const pixPayments = pgTable("pix_payments", {
+  id: serial("id").primaryKey(),
+  paymentPageId: integer("payment_page_id").references(() => paymentPages.id).notNull(),
+  customerName: text("customer_name").notNull(),
+  customerEmail: text("customer_email").notNull(),
+  customerCpf: text("customer_cpf").notNull(),
+  customerPhone: text("customer_phone"),
+  amount: decimal("amount", { precision: 10, scale: 2 }).notNull(),
+  pixCode: text("pix_code"),
+  pixQrCode: text("pix_qr_code"),
+  transactionId: text("transaction_id"),
+  status: text("status").notNull().default("pending"),
+  expiresAt: timestamp("expires_at"),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+});
+
+export const insertUserSchema = createInsertSchema(users).pick({
+  username: true,
+  password: true,
+});
+
+export const insertPaymentPageSchema = createInsertSchema(paymentPages).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export const insertPixPaymentSchema = createInsertSchema(pixPayments).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export type InsertUser = z.infer<typeof insertUserSchema>;
+export type User = typeof users.$inferSelect;
+
+export type InsertPaymentPage = z.infer<typeof insertPaymentPageSchema>;
+export type PaymentPage = typeof paymentPages.$inferSelect;
+
+export type InsertPixPayment = z.infer<typeof insertPixPaymentSchema>;
+export type PixPayment = typeof pixPayments.$inferSelect;
