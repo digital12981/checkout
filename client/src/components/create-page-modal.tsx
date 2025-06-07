@@ -61,8 +61,11 @@ export default function CreatePageModal({ open, onOpenChange }: CreatePageModalP
     mutationFn: async (data: CreatePageForm) => {
       // Create the page with charge description
       const pageData = {
-        ...data,
-        productDescription: data.chargeDescription // Map for backend compatibility
+        productName: data.productName,
+        productDescription: data.chargeDescription, // Map charge description to product description
+        price: data.price,
+        template: data.template,
+        status: data.status
       };
       const response = await apiRequest("POST", "/api/payment-pages", pageData);
       const pageResult = await response.json();

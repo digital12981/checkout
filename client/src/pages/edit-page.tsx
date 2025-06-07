@@ -449,7 +449,11 @@ export default function EditPage() {
       // Apply changes immediately with visual feedback
       if (result.formData) {
         setAiStatus("Atualizando cores e textos...");
-        form.reset(result.formData);
+        // Reset form and force re-render by setting each field individually
+        Object.keys(result.formData).forEach(key => {
+          form.setValue(key as any, result.formData[key]);
+        });
+        form.trigger(); // Trigger validation and re-render
       }
       if (result.customElements) {
         setAiStatus("Adicionando elementos...");

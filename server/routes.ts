@@ -343,10 +343,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       if (template && template.formData) {
         // Update the payment page with the generated template
-        const updatedPage = await storage.updatePaymentPage(pageId, {
+        const updateData = {
           ...template.formData,
+          price: parseFloat(template.formData.price) || parseFloat(price), // Ensure numeric
           customElements: JSON.stringify(template.customElements || [])
-        });
+        };
+        
+        const updatedPage = await storage.updatePaymentPage(pageId, updateData);
         
         if (updatedPage) {
           res.json({ success: true, template });
