@@ -292,9 +292,17 @@ export default function Checkout() {
             {/* QR Code */}
             <div className="text-center mb-6">
               <div className="w-48 h-48 bg-white border-2 border-neutral-200 rounded-lg mx-auto flex items-center justify-center mb-4">
-                <div className="w-40 h-40 bg-black/10 rounded flex items-center justify-center">
-                  <QrCode className="w-16 h-16 text-neutral-400" />
-                </div>
+                {pixPayment.pixQrCode ? (
+                  <img 
+                    src={pixPayment.pixQrCode} 
+                    alt="QR Code PIX" 
+                    className="w-40 h-40 object-contain"
+                  />
+                ) : (
+                  <div className="w-40 h-40 bg-black/10 rounded flex items-center justify-center">
+                    <QrCode className="w-16 h-16 text-neutral-400" />
+                  </div>
+                )}
               </div>
               <p className="text-sm text-neutral-600">
                 Escaneie o QR Code com seu app de pagamento
