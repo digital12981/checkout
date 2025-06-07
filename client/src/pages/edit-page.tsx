@@ -459,13 +459,15 @@ export default function EditPage() {
                 <img 
                   src={formData.logoUrl} 
                   alt="Logo" 
-                  className="w-16 h-16 object-contain rounded"
+                  className="object-contain rounded"
+                  style={{ width: `${formData.logoSize}px`, height: `${formData.logoSize}px` }}
                   onError={(e) => {
                     e.currentTarget.style.display = 'none';
                   }}
                 />
               ) : (
-                <div className="w-16 h-16 bg-white/20 rounded-full flex items-center justify-center">
+                <div className="bg-white/20 rounded-full flex items-center justify-center"
+                  style={{ width: `${formData.logoSize}px`, height: `${formData.logoSize}px` }}>
                   <ShoppingBag className="w-8 h-8" />
                 </div>
               )}
@@ -599,13 +601,15 @@ export default function EditPage() {
                 <img 
                   src={formData.logoUrl} 
                   alt="Logo" 
-                  className="w-16 h-16 object-contain rounded"
+                  className="object-contain rounded"
+                  style={{ width: `${formData.logoSize}px`, height: `${formData.logoSize}px` }}
                   onError={(e) => {
                     e.currentTarget.style.display = 'none';
                   }}
                 />
               ) : (
-                <div className="w-16 h-16 bg-white/20 rounded-full flex items-center justify-center">
+                <div className="bg-white/20 rounded-full flex items-center justify-center"
+                  style={{ width: `${formData.logoSize}px`, height: `${formData.logoSize}px` }}>
                   <ShoppingBag className="w-8 h-8" />
                 </div>
               )}
@@ -730,6 +734,26 @@ export default function EditPage() {
               O pagamento será confirmado automaticamente
             </p>
           </div>
+
+          {/* Payment page custom elements at the bottom */}
+          {customElements.filter(el => el.position >= 110).map(element => (
+            <div key={element.id}>
+              {renderCustomElement(element)}
+            </div>
+          ))}
+
+          {/* Drop zone at the bottom - only visible when dragging */}
+          {isDragging && (
+            <div
+              className="h-6 mt-3 border-2 border-dashed border-primary bg-primary/10 rounded transition-colors"
+              onDragOver={handleDragOver}
+              onDrop={(e) => handleDrop(e, 110)}
+            >
+              <div className="flex items-center justify-center h-full text-xs text-primary">
+                Solte na página de pagamento
+              </div>
+            </div>
+          )}
         </CardContent>
       </Card>
     </div>
