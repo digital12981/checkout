@@ -29,7 +29,7 @@ const createPageSchema = z.object({
   productName: z.string().min(1, "Nome do produto é obrigatório"),
   productDescription: z.string().optional(),
   price: z.string().min(1, "Preço é obrigatório").regex(/^\d+\.?\d*$/, "Preço inválido"),
-  template: z.enum(["modern", "minimal", "premium"]).default("modern"),
+  template: z.literal("premium").default("premium"),
   status: z.enum(["active", "inactive"]).default("active"),
 });
 
@@ -72,7 +72,7 @@ export default function CreatePageModal({ open, onOpenChange }: CreatePageModalP
       productName: "",
       productDescription: "",
       price: "",
-      template: "modern",
+      template: "premium",
       status: "active",
     },
   });
@@ -103,10 +103,7 @@ export default function CreatePageModal({ open, onOpenChange }: CreatePageModalP
   });
 
   const onSubmit = (data: CreatePageForm) => {
-    createPageMutation.mutate({
-      ...data,
-      template: selectedTemplate,
-    });
+    createPageMutation.mutate(data);
   };
 
   return (

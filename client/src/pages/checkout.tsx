@@ -154,19 +154,31 @@ export default function Checkout() {
     );
   }
 
-  const templateStyles = getTemplateStyles(page.template);
+  const customStyles = getCustomStyles(page);
 
   return (
-    <div className={cn("min-h-screen flex items-center justify-center p-4", templateStyles.bgColor)}>
+    <div 
+      className="min-h-screen flex items-center justify-center p-4"
+      style={{ backgroundColor: customStyles.backgroundColor }}
+    >
       <Card className="w-full max-w-md max-h-[90vh] overflow-y-auto">
         {/* Header */}
-        <div className={`bg-gradient-to-r ${templateStyles.gradient} p-6 text-white text-center rounded-t-xl`}>
-          <div className="w-16 h-16 bg-white/20 rounded-full flex items-center justify-center mx-auto mb-4">
-            <ShoppingBag className="w-8 h-8" />
-          </div>
-          <h1 className="text-xl font-bold mb-2">{page.productName}</h1>
-          {page.productDescription && (
-            <p className="text-white/90 text-sm">{page.productDescription}</p>
+        <div 
+          className="p-6 text-white text-center rounded-t-xl"
+          style={{ backgroundColor: customStyles.primaryColor }}
+        >
+          {page.showProductImage !== false && (
+            <div className="w-16 h-16 bg-white/20 rounded-full flex items-center justify-center mx-auto mb-4">
+              <ShoppingBag className="w-8 h-8" />
+            </div>
+          )}
+          <h1 className="text-xl font-bold mb-2">
+            {page.customTitle || page.productName}
+          </h1>
+          {(page.customSubtitle || page.productDescription) && (
+            <p className="text-white/90 text-sm">
+              {page.customSubtitle || page.productDescription}
+            </p>
           )}
         </div>
 
@@ -254,11 +266,12 @@ export default function Checkout() {
                 <Button
                   type="submit"
                   disabled={createPaymentMutation.isPending}
-                  className="w-full bg-secondary text-white hover:bg-secondary/90 py-3 font-medium flex items-center justify-center space-x-2"
+                  className="w-full text-white py-3 font-medium flex items-center justify-center space-x-2"
+                  style={{ backgroundColor: customStyles.accentColor }}
                 >
                   <QrCode className="w-5 h-5" />
                   <span>
-                    {createPaymentMutation.isPending ? "Gerando PIX..." : "Gerar PIX"}
+                    {createPaymentMutation.isPending ? "Gerando PIX..." : (page.customButtonText || "Pagar com PIX")}
                   </span>
                 </Button>
               </form>
@@ -333,6 +346,15 @@ export default function Checkout() {
                 </div>
               </AlertDescription>
             </Alert>
+
+            {/* Custom Instructions */}
+            {page.customInstructions && (
+              <div className="mb-4 p-4 bg-blue-50 rounded-lg">
+                <p className="text-sm" style={{ color: customStyles.textColor }}>
+                  {page.customInstructions}
+                </p>
+              </div>
+            )}
 
             {/* Payment Status */}
             <div className="text-center">
