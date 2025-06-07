@@ -105,6 +105,8 @@ export default function EditPage() {
   const [dragType, setDragType] = useState<"text" | "image" | null>(null);
   const [customElements, setCustomElements] = useState<CustomElement[]>([]);
   const [selectedElement, setSelectedElement] = useState<string | null>(null);
+  const [editingElementId, setEditingElementId] = useState<string | null>(null);
+  const [editingText, setEditingText] = useState<string>("");
   const { toast } = useToast();
   const queryClient = useQueryClient();
   
@@ -339,6 +341,51 @@ export default function EditPage() {
     setIsDragging(false);
     setDragType(null);
   };
+
+  const startEditingText = (elementId: string, currentText: string) => {
+    setEditingElementId(elementId);
+    setEditingText(currentText);
+  };
+
+  const saveTextEdit = () => {
+    if (editingElementId) {
+      const updatedElements = customElements.map(el => 
+        el.id === editingElementId 
+          ? { ...el, content: editingText }
+          : el
+      );
+      setCustomElements(updatedElements);
+      setEditingElementId(null);
+      setEditingText("");
+    }
+  };
+
+  const cancelTextEdit = () => {
+    setEditingElementId(null);
+    setEditingText("");
+  };
+
+  const toggleBold = () => {
+    if (editingElementId) {
+      const updatedElements = customElements.map(el => 
+        el.id === editingElementId 
+          ? { ...el, styles: { ...el.styles, isBold: !el.styles.isBold } }
+          : el
+      );
+      setCustomElements(updatedElements);
+    }
+  };
+
+  const updateElementStyle = (elementId: string, styleUpdates: Partial<CustomElement['styles']>) => {
+    const updatedElements = customElements.map(el => 
+      el.id === elementId 
+        ? { ...el, styles: { ...el.styles, ...styleUpdates } }
+        : el
+    );
+    setCustomElements(updatedElements);
+  };
+
+
 
   const renderCustomElement = (element: CustomElement) => {
     const isSelected = selectedElement === element.id;
