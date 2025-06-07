@@ -36,6 +36,14 @@ export const pixPayments = pgTable("pix_payments", {
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
 });
 
+export const settings = pgTable("settings", {
+  id: serial("id").primaryKey(),
+  key: text("key").notNull().unique(),
+  value: text("value").notNull(),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+});
+
 export const insertUserSchema = createInsertSchema(users).pick({
   username: true,
   password: true,
@@ -53,6 +61,12 @@ export const insertPixPaymentSchema = createInsertSchema(pixPayments).omit({
   updatedAt: true,
 });
 
+export const insertSettingSchema = createInsertSchema(settings).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
 export type InsertUser = z.infer<typeof insertUserSchema>;
 export type User = typeof users.$inferSelect;
 
@@ -61,3 +75,6 @@ export type PaymentPage = typeof paymentPages.$inferSelect;
 
 export type InsertPixPayment = z.infer<typeof insertPixPaymentSchema>;
 export type PixPayment = typeof pixPayments.$inferSelect;
+
+export type InsertSetting = z.infer<typeof insertSettingSchema>;
+export type Setting = typeof settings.$inferSelect;

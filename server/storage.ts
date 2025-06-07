@@ -2,12 +2,15 @@ import {
   users, 
   paymentPages, 
   pixPayments,
+  settings,
   type User, 
   type InsertUser,
   type PaymentPage,
   type InsertPaymentPage,
   type PixPayment,
-  type InsertPixPayment
+  type InsertPixPayment,
+  type Setting,
+  type InsertSetting
 } from "@shared/schema";
 import { db } from "./db";
 import { eq, desc } from "drizzle-orm";
@@ -30,6 +33,11 @@ export interface IStorage {
   getPixPaymentsByPageId(pageId: number): Promise<PixPayment[]>;
   createPixPayment(payment: InsertPixPayment): Promise<PixPayment>;
   updatePixPayment(id: number, payment: Partial<InsertPixPayment>): Promise<PixPayment | undefined>;
+  
+  // Settings
+  getSetting(key: string): Promise<Setting | undefined>;
+  setSetting(key: string, value: string): Promise<Setting>;
+  getSettings(): Promise<Setting[]>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -111,6 +119,34 @@ export class DatabaseStorage implements IStorage {
       .where(eq(pixPayments.id, id))
       .returning();
     return payment || undefined;
+  }
+
+  async getSetting(key: string): Promise<Setting | undefined> {
+    const [setting] = await db.select().from(settings).where(eq(settings.key, key));
+    return setting || undefined;
+  }
+
+  async setSetting(key: string, value: string): Promise<Setting> {
+    const existing = await this.getSetting(key);
+    
+    if (existing) {
+      const [setting] = await db
+        .update(settings)
+        .set({ value, updatedAt: new Date() })
+        .where(eq(settings.key, key))
+        .returning();
+      return setting;
+    } else {
+      const [setting] = await db
+        .insert(settings)
+        .values({ key, value })
+        .returning();
+      return setting;
+    }
+  }
+
+  async getSettings(): Promise<Setting[]> {
+    return await db.select().from(settings);
   }
 }
 

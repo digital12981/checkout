@@ -165,11 +165,23 @@ export class For4PaymentsAPI {
   }
 }
 
-export function createFor4PaymentsClient(): For4PaymentsAPI {
-  const secretKey = process.env.FOR4PAYMENTS_API_KEY || process.env.FOR4PAYMENTS_SECRET_KEY || "";
+export async function createFor4PaymentsClient(): Promise<For4PaymentsAPI> {
+  // First try environment variable
+  let secretKey = process.env.FOR4PAYMENTS_API_KEY || process.env.FOR4PAYMENTS_SECRET_KEY || "";
+  
+  // If not found in env, try to get from database settings
+  if (!secretKey) {
+    try {
+      const { storage } = await import("./storage");
+      const setting = await storage.getSetting("for4payments_api_key");
+      secretKey = setting?.value || "";
+    } catch (error) {
+      console.log("Could not fetch API key from database:", error);
+    }
+  }
   
   if (!secretKey) {
-    throw new Error("For4Payments API key not found in environment variables");
+    throw new Error("For4Payments API key not found. Please configure it in settings.");
   }
   
   return new For4PaymentsAPI(secretKey);

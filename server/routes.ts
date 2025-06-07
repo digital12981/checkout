@@ -1,7 +1,7 @@
 import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
-import { insertPaymentPageSchema, insertPixPaymentSchema } from "@shared/schema";
+import { insertPaymentPageSchema, insertPixPaymentSchema, insertSettingSchema } from "@shared/schema";
 import { createFor4PaymentsClient } from "./for4payments";
 import { z } from "zod";
 
@@ -191,6 +191,86 @@ export async function registerRoutes(app: Express): Promise<Server> {
       });
     } catch (error) {
       res.status(500).json({ message: "Failed to fetch stats" });
+    }
+  });
+
+  // Settings endpoints
+  app.get("/api/settings", async (req, res) => {
+    try {
+      const settings = await storage.getSettings();
+      const settingsObject = settings.reduce((acc, setting) => {
+        acc[setting.key] = setting.value;
+        return acc;
+      }, {} as Record<string, string>);
+      res.json(settingsObject);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch settings" });
+    }
+  });
+
+  app.get("/api/settings/:key", async (req, res) => {
+    try {
+      const setting = await storage.getSetting(req.params.key);
+      if (!setting) {
+        return res.status(404).json({ message: "Setting not found" });
+      }
+      res.json({ key: setting.key, value: setting.value });
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch setting" });
+    }
+  });
+
+  app.post("/api/settings", async (req, res) => {
+    try {
+      const { key, value } = req.body;
+      if (!key || !value) {
+        return res.status(400).json({ message: "Key and value are required" });
+      }
+      const setting = await storage.setSetting(key, value);
+      res.json(setting);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to save setting" });
+    }
+  });
+
+  app.post("/api/settings/test-for4payments", async (req, res) => {
+    try {
+      const { apiKey } = req.body;
+      if (!apiKey) {
+        return res.status(400).json({ message: "API key is required" });
+      }
+
+      // Test the API key by making a simple request
+      const testResponse = await fetch("https://app.for4payments.com.br/api/v1/transaction.purchase", {
+        method: 'POST',
+        headers: {
+          'Authorization': apiKey,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          name: "Test",
+          email: "test@test.com",
+          cpf: "12345678901",
+          phone: "11999999999",
+          paymentMethod: "PIX",
+          amount: 100,
+          items: [{
+            title: "Test Item",
+            quantity: 1,
+            unitPrice: 100,
+            tangible: false
+          }]
+        })
+      });
+
+      if (testResponse.status === 401) {
+        return res.status(401).json({ success: false, message: "API key inválida" });
+      }
+
+      // If we get any response other than 401, the key is probably valid
+      res.json({ success: true, message: "Conexão estabelecida com sucesso" });
+    } catch (error) {
+      res.status(500).json({ success: false, message: "Erro ao testar conexão" });
     }
   });
 
