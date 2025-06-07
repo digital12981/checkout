@@ -3,7 +3,7 @@ import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { insertPaymentPageSchema, insertPixPaymentSchema, insertSettingSchema } from "@shared/schema";
 import { createFor4PaymentsClient } from "./for4payments";
-import { processTemplateWithAI } from "./ai";
+import { processTemplateWithAI, generateCheckoutTemplate } from "./ai";
 import { z } from "zod";
 
 const createPixPaymentRequestSchema = z.object({
@@ -327,6 +327,38 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("AI processing error:", error);
       res.status(500).json({ message: "Failed to process AI command" });
+    }
+  });
+
+  // AI Checkout Generation
+  app.post("/api/ai/generate-checkout", async (req, res) => {
+    try {
+      const { pageId, chargeDescription, productName, price } = req.body;
+      
+      if (!pageId || !chargeDescription || !productName || !price) {
+        return res.status(400).json({ message: "Missing required fields" });
+      }
+
+      const template = await generateCheckoutTemplate(chargeDescription, productName, price);
+      
+      if (template && template.formData) {
+        // Update the payment page with the generated template
+        const updatedPage = await storage.updatePaymentPage(pageId, {
+          ...template.formData,
+          customElements: JSON.stringify(template.customElements || [])
+        });
+        
+        if (updatedPage) {
+          res.json({ success: true, template });
+        } else {
+          res.status(404).json({ message: "Payment page not found" });
+        }
+      } else {
+        res.status(500).json({ message: "Failed to generate template" });
+      }
+    } catch (error) {
+      console.error("AI checkout generation error:", error);
+      res.status(500).json({ message: "Failed to generate checkout template" });
     }
   });
 
