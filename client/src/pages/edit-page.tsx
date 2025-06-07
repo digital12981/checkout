@@ -383,6 +383,11 @@ export default function EditPage() {
     <div 
       className="min-h-screen flex items-center justify-center p-4"
       style={{ backgroundColor: formData.backgroundColor }}
+      onClick={(e) => {
+        if (e.target === e.currentTarget) {
+          setSelectedElement(null);
+        }
+      }}
     >
       <Card className="w-full max-w-md shadow-lg">
         {/* Header */}
@@ -515,6 +520,11 @@ export default function EditPage() {
     <div 
       className="min-h-screen flex items-center justify-center p-4"
       style={{ backgroundColor: formData.backgroundColor }}
+      onClick={(e) => {
+        if (e.target === e.currentTarget) {
+          setSelectedElement(null);
+        }
+      }}
     >
       <Card className="w-full max-w-md shadow-lg">
         {/* Header */}
@@ -1070,6 +1080,142 @@ export default function EditPage() {
                           <p><strong>Como usar:</strong> Clique para adicionar ao final ou arraste para o preview para posicionar onde desejar.</p>
                           <p className="mt-1">Total de elementos: {customElements.length}</p>
                         </div>
+
+                        {/* Element Properties Panel */}
+                        {selectedElement && (
+                          <div className="mt-6 p-4 border rounded-lg bg-white">
+                            <h5 className="font-medium mb-3">Editar Elemento</h5>
+                            {(() => {
+                              const element = customElements.find(el => el.id === selectedElement);
+                              if (!element) return null;
+
+                              if (element.type === "text") {
+                                return (
+                                  <div className="space-y-3">
+                                    <div>
+                                      <label className="block text-sm font-medium mb-1">Texto</label>
+                                      <textarea
+                                        value={element.content}
+                                        onChange={(e) => updateElement(element.id, { content: e.target.value })}
+                                        className="w-full p-2 border rounded text-sm"
+                                        rows={2}
+                                      />
+                                    </div>
+                                    <div className="grid grid-cols-2 gap-3">
+                                      <div>
+                                        <label className="block text-sm font-medium mb-1">Cor do texto</label>
+                                        <input
+                                          type="color"
+                                          value={element.styles.color || "#000000"}
+                                          onChange={(e) => updateElement(element.id, { 
+                                            styles: { ...element.styles, color: e.target.value } 
+                                          })}
+                                          className="w-full h-8 border rounded"
+                                        />
+                                      </div>
+                                      <div className="flex items-end">
+                                        <label className="flex items-center text-sm">
+                                          <input
+                                            type="checkbox"
+                                            checked={element.styles.isBold || false}
+                                            onChange={(e) => updateElement(element.id, { 
+                                              styles: { ...element.styles, isBold: e.target.checked } 
+                                            })}
+                                            className="mr-2"
+                                          />
+                                          Negrito
+                                        </label>
+                                      </div>
+                                    </div>
+                                    <div>
+                                      <label className="flex items-center text-sm">
+                                        <input
+                                          type="checkbox"
+                                          checked={element.styles.hasBox || false}
+                                          onChange={(e) => updateElement(element.id, { 
+                                            styles: { ...element.styles, hasBox: e.target.checked } 
+                                          })}
+                                          className="mr-2"
+                                        />
+                                        Adicionar caixa de fundo
+                                      </label>
+                                    </div>
+                                    {element.styles.hasBox && (
+                                      <div>
+                                        <label className="block text-sm font-medium mb-1">Cor da caixa</label>
+                                        <input
+                                          type="color"
+                                          value={element.styles.boxColor || "#f0f0f0"}
+                                          onChange={(e) => updateElement(element.id, { 
+                                            styles: { ...element.styles, boxColor: e.target.value } 
+                                          })}
+                                          className="w-full h-8 border rounded"
+                                        />
+                                      </div>
+                                    )}
+                                  </div>
+                                );
+                              }
+
+                              if (element.type === "image") {
+                                return (
+                                  <div className="space-y-3">
+                                    <div>
+                                      <label className="block text-sm font-medium mb-1">URL da imagem</label>
+                                      <input
+                                        type="url"
+                                        value={element.content}
+                                        onChange={(e) => updateElement(element.id, { content: e.target.value })}
+                                        className="w-full p-2 border rounded text-sm"
+                                        placeholder="https://exemplo.com/imagem.jpg"
+                                      />
+                                    </div>
+                                    <div className="grid grid-cols-2 gap-3">
+                                      <div>
+                                        <label className="block text-sm font-medium mb-1">Largura (px)</label>
+                                        <input
+                                          type="number"
+                                          value={element.styles.imageSize || 200}
+                                          onChange={(e) => updateElement(element.id, { 
+                                            styles: { ...element.styles, imageSize: parseInt(e.target.value) || 200 } 
+                                          })}
+                                          className="w-full p-2 border rounded text-sm"
+                                          min="50"
+                                          max="500"
+                                        />
+                                      </div>
+                                      <div>
+                                        <label className="block text-sm font-medium mb-1">Bordas arredondadas</label>
+                                        <input
+                                          type="number"
+                                          value={element.styles.borderRadius || 8}
+                                          onChange={(e) => updateElement(element.id, { 
+                                            styles: { ...element.styles, borderRadius: parseInt(e.target.value) || 0 } 
+                                          })}
+                                          className="w-full p-2 border rounded text-sm"
+                                          min="0"
+                                          max="50"
+                                        />
+                                      </div>
+                                    </div>
+                                  </div>
+                                );
+                              }
+
+                              return null;
+                            })()}
+                            <Button
+                              type="button"
+                              variant="destructive"
+                              size="sm"
+                              onClick={() => removeElement(selectedElement)}
+                              className="mt-3 w-full"
+                            >
+                              <X className="w-4 h-4 mr-2" />
+                              Remover Elemento
+                            </Button>
+                          </div>
+                        )}
                       </div>
                     </CardContent>
                   </Card>
