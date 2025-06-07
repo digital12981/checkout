@@ -9,6 +9,8 @@ import {
   type PixPayment,
   type InsertPixPayment
 } from "@shared/schema";
+import { db } from "./db";
+import { eq, desc } from "drizzle-orm";
 
 export interface IStorage {
   getUser(id: number): Promise<User | undefined>;
@@ -30,130 +32,86 @@ export interface IStorage {
   updatePixPayment(id: number, payment: Partial<InsertPixPayment>): Promise<PixPayment | undefined>;
 }
 
-export class MemStorage implements IStorage {
-  private users: Map<number, User>;
-  private paymentPages: Map<number, PaymentPage>;
-  private pixPayments: Map<number, PixPayment>;
-  private currentUserId: number;
-  private currentPageId: number;
-  private currentPaymentId: number;
-
-  constructor() {
-    this.users = new Map();
-    this.paymentPages = new Map();
-    this.pixPayments = new Map();
-    this.currentUserId = 1;
-    this.currentPageId = 1;
-    this.currentPaymentId = 1;
-  }
-
+export class DatabaseStorage implements IStorage {
   async getUser(id: number): Promise<User | undefined> {
-    return this.users.get(id);
+    const [user] = await db.select().from(users).where(eq(users.id, id));
+    return user || undefined;
   }
 
   async getUserByUsername(username: string): Promise<User | undefined> {
-    return Array.from(this.users.values()).find(
-      (user) => user.username === username,
-    );
+    const [user] = await db.select().from(users).where(eq(users.username, username));
+    return user || undefined;
   }
 
   async createUser(insertUser: InsertUser): Promise<User> {
-    const id = this.currentUserId++;
-    const user: User = { ...insertUser, id };
-    this.users.set(id, user);
+    const [user] = await db
+      .insert(users)
+      .values(insertUser)
+      .returning();
     return user;
   }
 
   async getPaymentPages(): Promise<PaymentPage[]> {
-    return Array.from(this.paymentPages.values()).sort((a, b) => 
-      new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
-    );
+    return await db.select().from(paymentPages).orderBy(desc(paymentPages.createdAt));
   }
 
   async getPaymentPage(id: number): Promise<PaymentPage | undefined> {
-    return this.paymentPages.get(id);
+    const [page] = await db.select().from(paymentPages).where(eq(paymentPages.id, id));
+    return page || undefined;
   }
 
   async createPaymentPage(insertPage: InsertPaymentPage): Promise<PaymentPage> {
-    const id = this.currentPageId++;
-    const now = new Date();
-    const page: PaymentPage = { 
-      ...insertPage,
-      productDescription: insertPage.productDescription || null,
-      template: insertPage.template || "modern",
-      status: insertPage.status || "active",
-      id, 
-      createdAt: now,
-      updatedAt: now
-    };
-    this.paymentPages.set(id, page);
+    const [page] = await db
+      .insert(paymentPages)
+      .values(insertPage)
+      .returning();
     return page;
   }
 
   async updatePaymentPage(id: number, updateData: Partial<InsertPaymentPage>): Promise<PaymentPage | undefined> {
-    const existing = this.paymentPages.get(id);
-    if (!existing) return undefined;
-
-    const updated: PaymentPage = {
-      ...existing,
-      ...updateData,
-      updatedAt: new Date()
-    };
-    this.paymentPages.set(id, updated);
-    return updated;
+    const [page] = await db
+      .update(paymentPages)
+      .set(updateData)
+      .where(eq(paymentPages.id, id))
+      .returning();
+    return page || undefined;
   }
 
   async deletePaymentPage(id: number): Promise<boolean> {
-    return this.paymentPages.delete(id);
+    const result = await db.delete(paymentPages).where(eq(paymentPages.id, id));
+    return (result.rowCount || 0) > 0;
   }
 
   async getPixPayments(): Promise<PixPayment[]> {
-    return Array.from(this.pixPayments.values()).sort((a, b) => 
-      new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
-    );
+    return await db.select().from(pixPayments).orderBy(desc(pixPayments.createdAt));
   }
 
   async getPixPayment(id: number): Promise<PixPayment | undefined> {
-    return this.pixPayments.get(id);
+    const [payment] = await db.select().from(pixPayments).where(eq(pixPayments.id, id));
+    return payment || undefined;
   }
 
   async getPixPaymentsByPageId(pageId: number): Promise<PixPayment[]> {
-    return Array.from(this.pixPayments.values()).filter(
-      payment => payment.paymentPageId === pageId
-    );
+    const payments = await db.select().from(pixPayments).where(eq(pixPayments.paymentPageId, pageId));
+    return payments;
   }
 
   async createPixPayment(insertPayment: InsertPixPayment): Promise<PixPayment> {
-    const id = this.currentPaymentId++;
-    const now = new Date();
-    const payment: PixPayment = { 
-      ...insertPayment,
-      customerPhone: insertPayment.customerPhone || null,
-      pixCode: insertPayment.pixCode || null,
-      pixQrCode: insertPayment.pixQrCode || null,
-      transactionId: insertPayment.transactionId || null,
-      status: insertPayment.status || "pending",
-      expiresAt: insertPayment.expiresAt || null,
-      id, 
-      createdAt: now,
-      updatedAt: now
-    };
-    this.pixPayments.set(id, payment);
+    const [payment] = await db
+      .insert(pixPayments)
+      .values(insertPayment)
+      .returning();
     return payment;
   }
 
   async updatePixPayment(id: number, updateData: Partial<InsertPixPayment>): Promise<PixPayment | undefined> {
-    const existing = this.pixPayments.get(id);
-    if (!existing) return undefined;
-
-    const updated: PixPayment = {
-      ...existing,
-      ...updateData,
-      updatedAt: new Date()
-    };
-    this.pixPayments.set(id, updated);
-    return updated;
+    const [payment] = await db
+      .update(pixPayments)
+      .set(updateData)
+      .where(eq(pixPayments.id, id))
+      .returning();
+    return payment || undefined;
   }
 }
 
-export const storage = new MemStorage();
+export const storage = new DatabaseStorage();
