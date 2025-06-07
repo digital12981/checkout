@@ -414,10 +414,10 @@ export default function EditPage() {
             </Button>
             <div>
               <h1 className="text-xl font-semibold text-neutral-800">
-                Editando: {page.productName}
+                Editando: {page?.productName || "Carregando..."}
               </h1>
               <div className="flex items-center space-x-2 mt-1">
-                <Badge variant="outline">ID: #PG{String(page.id).padStart(3, '0')}</Badge>
+                <Badge variant="outline">ID: #PG{String(page?.id || 0).padStart(3, '0')}</Badge>
                 <Badge className="bg-yellow-100 text-yellow-800">Premium</Badge>
               </div>
             </div>
@@ -456,8 +456,16 @@ export default function EditPage() {
       <div className="flex h-[calc(100vh-73px)]">
         {/* Left Panel - Editor */}
         <div className="flex-1 overflow-y-auto p-6">
-          <Form {...form}>
-            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+          {!page ? (
+            <div className="flex items-center justify-center h-full">
+              <div className="text-center">
+                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-4"></div>
+                <p className="text-neutral-600">Carregando editor...</p>
+              </div>
+            </div>
+          ) : (
+            <Form {...form}>
+              <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
               <Tabs defaultValue="basic" className="w-full">
                 <TabsList className="grid w-full grid-cols-4">
                   <TabsTrigger value="basic">Básico</TabsTrigger>
@@ -740,8 +748,9 @@ export default function EditPage() {
                   </Card>
                 </TabsContent>
               </Tabs>
-            </form>
-          </Form>
+              </form>
+            </Form>
+          )}
         </div>
 
         {/* Right Panel - Preview */}
@@ -756,9 +765,18 @@ export default function EditPage() {
             </p>
           </div>
           <div className="bg-neutral-100" style={{ height: 'calc(100% - 73px)' }}>
-            <div className="scale-75 origin-top-left w-[133%] h-[133%]">
-              {activeStep === "form" ? <FormStepPreview /> : <PaymentStepPreview />}
-            </div>
+            {!page ? (
+              <div className="flex items-center justify-center h-full">
+                <div className="text-center">
+                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-4"></div>
+                  <p className="text-neutral-600">Carregando preview...</p>
+                </div>
+              </div>
+            ) : (
+              <div className="scale-75 origin-top-left w-[133%] h-[133%]">
+                {activeStep === "form" ? <FormStepPreview /> : <PaymentStepPreview />}
+              </div>
+            )}
           </div>
         </div>
       </div>
