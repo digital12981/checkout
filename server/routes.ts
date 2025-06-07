@@ -3,6 +3,7 @@ import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { insertPaymentPageSchema, insertPixPaymentSchema, insertSettingSchema } from "@shared/schema";
 import { createFor4PaymentsClient } from "./for4payments";
+import { processTemplateWithAI } from "./ai";
 import { z } from "zod";
 
 const createPixPaymentRequestSchema = z.object({

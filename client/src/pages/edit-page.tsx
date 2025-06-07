@@ -109,6 +109,9 @@ export default function EditPage() {
   const [selectedElement, setSelectedElement] = useState<string | null>(null);
   const [editingElementId, setEditingElementId] = useState<string | null>(null);
   const [editingText, setEditingText] = useState<string>("");
+  const [aiCommand, setAiCommand] = useState<string>("");
+  const [isAiProcessing, setIsAiProcessing] = useState<boolean>(false);
+  const [templateSnapshot, setTemplateSnapshot] = useState<any>(null);
   const { toast } = useToast();
   const queryClient = useQueryClient();
   
@@ -389,6 +392,79 @@ export default function EditPage() {
         : el
     );
     setCustomElements(updatedElements);
+  };
+
+  const saveTemplateSnapshot = () => {
+    const snapshot = {
+      formData: form.getValues(),
+      customElements: [...customElements]
+    };
+    setTemplateSnapshot(snapshot);
+  };
+
+  const restoreTemplateSnapshot = () => {
+    if (templateSnapshot) {
+      form.reset(templateSnapshot.formData);
+      setCustomElements(templateSnapshot.customElements);
+      toast({
+        title: "Template restaurado",
+        description: "O template foi restaurado ao estado anterior",
+      });
+    }
+  };
+
+  const processAiCommand = async () => {
+    if (!aiCommand.trim()) return;
+    
+    setIsAiProcessing(true);
+    saveTemplateSnapshot();
+
+    try {
+      const currentTemplate = {
+        formData: form.getValues(),
+        customElements: customElements,
+        currentTab: "form" // You can track which tab is active
+      };
+
+      const response = await fetch('/api/ai/process-template', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          command: aiCommand,
+          currentTemplate: currentTemplate
+        })
+      });
+
+      if (!response.ok) {
+        throw new Error('Falha ao processar comando da IA');
+      }
+
+      const result = await response.json();
+      
+      // Apply the AI-generated changes
+      if (result.formData) {
+        form.reset(result.formData);
+      }
+      if (result.customElements) {
+        setCustomElements(result.customElements);
+      }
+
+      toast({
+        title: "Comando processado",
+        description: "O template foi atualizado com base no seu comando",
+      });
+      
+      setAiCommand("");
+    } catch (error) {
+      console.error('Erro ao processar comando:', error);
+      toast({
+        title: "Erro",
+        description: "Falha ao processar o comando da IA",
+        variant: "destructive",
+      });
+    } finally {
+      setIsAiProcessing(false);
+    }
   };
 
 
@@ -1431,6 +1507,65 @@ export default function EditPage() {
                         <div className="text-sm text-neutral-600 p-3 bg-neutral-50 rounded">
                           <p><strong>Como editar:</strong> Clique no elemento no preview para ver as opções ou duplo-clique no texto para editar diretamente.</p>
                           <p className="mt-1">Total de elementos: {customElements.length}</p>
+                        </div>
+                      </div>
+
+                      <Separator />
+
+                      <div>
+                        <h4 className="text-base font-medium mb-2 flex items-center">
+                          <Settings className="w-4 h-4 mr-2" />
+                          Edição com IA
+                        </h4>
+                        <p className="text-sm text-neutral-500 mb-4">
+                          Use comandos em linguagem natural para modificar o template
+                        </p>
+                        
+                        <div className="space-y-3">
+                          <div>
+                            <textarea
+                              value={aiCommand}
+                              onChange={(e) => setAiCommand(e.target.value)}
+                              placeholder="Ex: Mude as cores para o estilo da Nubank, adicione um texto de boas-vindas no topo, torne o botão mais chamativo..."
+                              className="w-full p-3 border rounded-lg resize-none text-sm"
+                              rows={3}
+                              disabled={isAiProcessing}
+                            />
+                          </div>
+                          
+                          <div className="flex space-x-2">
+                            <Button
+                              type="button"
+                              onClick={processAiCommand}
+                              disabled={!aiCommand.trim() || isAiProcessing}
+                              className="flex-1"
+                            >
+                              {isAiProcessing ? (
+                                <div className="flex items-center">
+                                  <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin mr-2" />
+                                  Processando...
+                                </div>
+                              ) : (
+                                "Enviar Comando"
+                              )}
+                            </Button>
+                            
+                            {templateSnapshot && (
+                              <Button
+                                type="button"
+                                variant="outline"
+                                onClick={restoreTemplateSnapshot}
+                                disabled={isAiProcessing}
+                                className="px-3"
+                              >
+                                <ArrowLeft className="w-4 h-4" />
+                              </Button>
+                            )}
+                          </div>
+                        </div>
+                        
+                        <div className="text-xs text-neutral-500 mt-3 p-3 bg-blue-50 rounded">
+                          <p><strong>Dica:</strong> A IA pode modificar cores, textos, layout e adicionar elementos. Para estilos de marcas específicas (como Nubank, PagSeguro), ela pesquisará as cores e padrões corretos automaticamente.</p>
                         </div>
 
                         {/* Element Properties Panel */}
