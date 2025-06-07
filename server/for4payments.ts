@@ -185,13 +185,7 @@ export class For4PaymentsAPI {
         cpf: cpf,
         phone: phone,
         paymentMethod: "PIX",
-        amount: amountInCents,
-        items: [{
-          title: "Caixa com 25",
-          quantity: 1,
-          unitPrice: amountInCents,
-          tangible: false
-        }]
+        amount: amountInCents
       };
 
       console.log("Payment data formatted:", paymentData);

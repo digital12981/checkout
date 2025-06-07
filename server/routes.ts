@@ -100,14 +100,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Create For4Payments client and process payment
       console.log("Creating For4Payments client...");
       
-      // Get API key from database first
-      let apiKey = process.env.FOR4PAYMENTS_API_KEY || "";
-      if (!apiKey) {
-        console.log("Fetching API key from database...");
-        const setting = await storage.getSetting("for4payments_api_key");
-        apiKey = setting?.value || "";
-        console.log("Database API key found:", apiKey ? `Yes (${apiKey.substring(0, 8)}...)` : "No");
-      }
+      // Always fetch fresh API key from database
+      console.log("Fetching fresh API key from database...");
+      const setting = await storage.getSetting("for4payments_api_key");
+      console.log("Raw setting from database:", setting);
+      const apiKey = setting?.value || "";
+      console.log("Database API key found:", apiKey ? `Yes (${apiKey.substring(0, 8)}...)` : "No");
+      console.log("Full API key for debugging:", apiKey);
       
       if (!apiKey) {
         return res.status(400).json({ 
