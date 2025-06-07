@@ -121,11 +121,17 @@ export default function EditPageModal({ page, open, onOpenChange }: EditPageModa
     mutationFn: async (data: EditPageForm) => {
       if (!page) throw new Error("Página não encontrada");
       
-      return apiRequest(`/api/payment-pages/${page.id}`, {
+      const response = await fetch(`/api/payment-pages/${page.id}`, {
         method: "PATCH",
         body: JSON.stringify(data),
         headers: { "Content-Type": "application/json" },
       });
+      
+      if (!response.ok) {
+        throw new Error("Falha ao atualizar página");
+      }
+      
+      return response.json();
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/payment-pages"] });

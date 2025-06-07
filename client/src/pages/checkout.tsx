@@ -105,29 +105,13 @@ export default function Checkout() {
     createPaymentMutation.mutate(data);
   };
 
-  const getTemplateStyles = (template: string) => {
-    switch (template) {
-      case "modern":
-        return {
-          gradient: "from-primary to-accent",
-          bgColor: "bg-neutral-50",
-        };
-      case "minimal":
-        return {
-          gradient: "from-neutral-400 to-neutral-600",
-          bgColor: "bg-white",
-        };
-      case "premium":
-        return {
-          gradient: "from-accent to-yellow-500",
-          bgColor: "bg-gradient-to-br from-yellow-50 to-purple-50",
-        };
-      default:
-        return {
-          gradient: "from-primary to-accent",
-          bgColor: "bg-neutral-50",
-        };
-    }
+  const getCustomStyles = (page: any) => {
+    return {
+      primaryColor: page.primaryColor || "#3B82F6",
+      accentColor: page.accentColor || "#10B981", 
+      backgroundColor: page.backgroundColor || "#F8FAFC",
+      textColor: page.textColor || "#1F2937"
+    };
   };
 
   if (isLoading) {

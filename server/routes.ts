@@ -71,6 +71,25 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  app.patch("/api/payment-pages/:id", async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const data = insertPaymentPageSchema.partial().parse(req.body);
+      const page = await storage.updatePaymentPage(id, data);
+      
+      if (!page) {
+        return res.status(404).json({ message: "Payment page not found" });
+      }
+      
+      res.json(page);
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ message: "Invalid data", errors: error.errors });
+      }
+      res.status(500).json({ message: "Failed to update payment page" });
+    }
+  });
+
   app.delete("/api/payment-pages/:id", async (req, res) => {
     try {
       const id = parseInt(req.params.id);
