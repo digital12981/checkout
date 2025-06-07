@@ -216,14 +216,6 @@ export default function EditPage() {
               )}
             </div>
           )}
-          <h1 className="text-xl font-bold mb-2">
-            {formData.customTitle || formData.productName}
-          </h1>
-          {(formData.customSubtitle || formData.productDescription) && (
-            <p className="text-white/90 text-sm">
-              {formData.customSubtitle || formData.productDescription}
-            </p>
-          )}
         </div>
 
         {/* Form */}
@@ -287,14 +279,6 @@ export default function EditPage() {
                 </div>
               )}
             </div>
-          )}
-          <h1 className="text-xl font-bold mb-2">
-            {formData.customTitle || formData.productName}
-          </h1>
-          {(formData.customSubtitle || formData.productDescription) && (
-            <p className="text-white/90 text-sm">
-              {formData.customSubtitle || formData.productDescription}
-            </p>
           )}
         </div>
 

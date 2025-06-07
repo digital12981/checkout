@@ -185,14 +185,6 @@ export default function Checkout() {
               )}
             </div>
           )}
-          <h1 className="text-xl font-bold mb-2">
-            {page.customTitle || page.productName}
-          </h1>
-          {(page.customSubtitle || page.productDescription) && (
-            <p className="text-white/90 text-sm">
-              {page.customSubtitle || page.productDescription}
-            </p>
-          )}
         </div>
 
         {/* Price */}
