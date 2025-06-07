@@ -28,8 +28,12 @@ export const paymentPages = pgTable("payment_pages", {
   customInstructions: text("custom_instructions"),
   
   // Layout options
-  showProductImage: boolean("show_product_image").default(true),
-  showCompanyLogo: boolean("show_company_logo").default(true),
+  showLogo: boolean("show_logo").default(true),
+  logoUrl: text("logo_url"),
+  logoPosition: text("logo_position").default("center"), // left, center, right
+  
+  // Custom elements (JSON array of draggable elements)
+  customElements: text("custom_elements").default("[]"),
   
   status: text("status").notNull().default("active"),
   createdAt: timestamp("created_at").defaultNow().notNull(),
