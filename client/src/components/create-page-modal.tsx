@@ -27,7 +27,7 @@ import { cn } from "@/lib/utils";
 
 const createPageSchema = z.object({
   productName: z.string().min(1, "Nome do produto é obrigatório"),
-  productDescription: z.string().optional(),
+  chargeDescription: z.string().min(1, "Descrição da cobrança é obrigatória"),
   price: z.string().min(1, "Preço é obrigatório").regex(/^\d+\.?\d*$/, "Preço inválido"),
   template: z.literal("premium").default("premium"),
   status: z.enum(["active", "inactive"]).default("active"),
@@ -50,7 +50,7 @@ export default function CreatePageModal({ open, onOpenChange }: CreatePageModalP
     resolver: zodResolver(createPageSchema),
     defaultValues: {
       productName: "",
-      productDescription: "",
+      chargeDescription: "",
       price: "",
       template: "premium",
       status: "active",
@@ -59,15 +59,36 @@ export default function CreatePageModal({ open, onOpenChange }: CreatePageModalP
 
   const createPageMutation = useMutation({
     mutationFn: async (data: CreatePageForm) => {
-      const response = await apiRequest("POST", "/api/payment-pages", data);
-      return response.json();
+      // Create the page with charge description
+      const pageData = {
+        ...data,
+        productDescription: data.chargeDescription // Map for backend compatibility
+      };
+      const response = await apiRequest("POST", "/api/payment-pages", pageData);
+      const pageResult = await response.json();
+      
+      // Auto-generate checkout template based on charge description
+      if (pageResult.id) {
+        try {
+          await apiRequest("POST", "/api/ai/generate-checkout", {
+            pageId: pageResult.id,
+            chargeDescription: data.chargeDescription,
+            productName: data.productName,
+            price: data.price
+          });
+        } catch (error) {
+          console.error("Failed to generate AI checkout template:", error);
+        }
+      }
+      
+      return pageResult;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/payment-pages"] });
       queryClient.invalidateQueries({ queryKey: ["/api/stats"] });
       toast({
         title: "Sucesso",
-        description: "Página de pagamento criada com sucesso!",
+        description: "Página de pagamento criada com template personalizado!",
       });
       form.reset();
       onOpenChange(false);
@@ -113,6 +134,27 @@ export default function CreatePageModal({ open, onOpenChange }: CreatePageModalP
                       />
                     </FormControl>
                     <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="chargeDescription"
+                render={({ field }) => (
+                  <FormItem className="md:col-span-2">
+                    <FormLabel>Descrição da Cobrança</FormLabel>
+                    <FormControl>
+                      <Textarea
+                        placeholder="Ex: Pagamento da taxa de inscrição para trabalhar na Nubank, curso de capacitação profissional"
+                        className="min-h-[80px]"
+                        {...field}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                    <p className="text-sm text-neutral-500 mt-1">
+                      Descreva como é realizada a cobrança. A IA usará essa descrição para gerar um checkout personalizado.
+                    </p>
                   </FormItem>
                 )}
               />

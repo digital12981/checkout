@@ -47,6 +47,98 @@ function getBrandColors(brandName: string): string {
   return brand ? JSON.stringify(brand) : '{}';
 }
 
+export async function generateCheckoutTemplate(chargeDescription: string, productName: string, price: string): Promise<any> {
+  try {
+    const systemPrompt = `You are a UI/UX designer creating checkout templates for payment pages based on charge descriptions.
+
+CRITICAL RULES:
+1. Generate complete checkout template with colors, texts, and custom elements
+2. Extract brand context from description (e.g., "Nubank" = purple theme, "PagBank" = green theme)
+3. Create urgency and trust elements appropriate to the charge type
+4. Use professional color schemes and readable typography
+5. Return ONLY valid JSON
+
+TEMPLATE STRUCTURE:
+- formData: {productName, productDescription, price, primaryColor, accentColor, backgroundColor, textColor, customTitle, customSubtitle, customButtonText, customInstructions, showLogo: false, logoUrl: "", logoPosition: "center", logoSize: 64, headerHeight: 96}
+- customElements: [{id, type, position, content, styles}]
+
+BRAND COLORS:
+- Nubank: primary #8A05BE, accent #FFFFFF, bg #F8FAFC, text #1F2937
+- PagBank: primary #00AA55, accent #FFFFFF, bg #F8FAFC, text #1F2937
+- Itau: primary #EC7000, accent #FFFFFF, bg #F8FAFC, text #1F2937
+- Default: primary #6366F1, accent #FFFFFF, bg #F8FAFC, text #1F2937
+
+Return JSON:`;
+
+    const userPrompt = `Generate checkout template for:
+Product: "${productName}"
+Price: R$ ${price}
+Charge: "${chargeDescription}"
+
+Create appropriate styling, colors, and elements based on the charge context.`;
+
+    const response = await anthropic.messages.create({
+      model: "claude-sonnet-4-20250514",
+      max_tokens: 3000,
+      messages: [
+        { role: "user", content: `${systemPrompt}\n\n${userPrompt}` }
+      ],
+    });
+
+    const content = response.content[0];
+    if (content.type === 'text') {
+      try {
+        let jsonText = content.text.trim();
+        
+        if (jsonText.startsWith('```json')) {
+          jsonText = jsonText.replace(/^```json\s*/, '').replace(/\s*```$/, '');
+        } else if (jsonText.startsWith('```')) {
+          jsonText = jsonText.replace(/^```\s*/, '').replace(/\s*```$/, '');
+        }
+        
+        const jsonStart = jsonText.indexOf('{');
+        const jsonEnd = jsonText.lastIndexOf('}');
+        
+        if (jsonStart !== -1 && jsonEnd !== -1) {
+          jsonText = jsonText.substring(jsonStart, jsonEnd + 1);
+        }
+        
+        const result = JSON.parse(jsonText);
+        return result;
+      } catch (parseError) {
+        console.error("Error parsing AI checkout generation:", parseError);
+        // Return default template if parsing fails
+        return {
+          formData: {
+            productName,
+            productDescription: chargeDescription,
+            price,
+            primaryColor: "#6366F1",
+            accentColor: "#FFFFFF", 
+            backgroundColor: "#F8FAFC",
+            textColor: "#1F2937",
+            customTitle: "",
+            customSubtitle: "",
+            customButtonText: "Pagar com PIX",
+            customInstructions: "",
+            showLogo: false,
+            logoUrl: "",
+            logoPosition: "center",
+            logoSize: 64,
+            headerHeight: 96
+          },
+          customElements: []
+        };
+      }
+    }
+
+    return null;
+  } catch (error) {
+    console.error("Error generating checkout template:", error);
+    throw error;
+  }
+}
+
 export async function processTemplateWithAI(command: string, currentTemplate: TemplateData): Promise<any> {
   try {
     // Check if the command mentions specific brands and get their colors
