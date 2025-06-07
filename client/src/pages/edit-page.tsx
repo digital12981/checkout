@@ -430,7 +430,7 @@ export default function EditPage() {
           className="p-6 rounded-t-lg text-white text-center"
           style={{ 
             backgroundColor: formData.primaryColor,
-            minHeight: `${formData.headerHeight}px`
+            height: `${formData.headerHeight}px`
           }}
         >
           {/* Header custom elements (negative positions for header) */}
@@ -592,7 +592,7 @@ export default function EditPage() {
           className="p-6 rounded-t-lg text-white text-center"
           style={{ 
             backgroundColor: formData.primaryColor,
-            minHeight: `${formData.headerHeight}px`
+            height: `${formData.headerHeight}px`
           }}
         >
           {formData.showLogo && (
