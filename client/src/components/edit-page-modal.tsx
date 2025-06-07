@@ -60,8 +60,10 @@ const editPageSchema = z.object({
   customInstructions: z.string().optional(),
   
   // Layout options
-  showProductImage: z.boolean(),
-  showCompanyLogo: z.boolean(),
+  showLogo: z.boolean(),
+  logoUrl: z.string().optional(),
+  logoPosition: z.enum(["left", "center", "right"]),
+  customElements: z.string().default("[]"),
 });
 
 type EditPageForm = z.infer<typeof editPageSchema>;
@@ -91,8 +93,10 @@ export default function EditPageModal({ page, open, onOpenChange }: EditPageModa
       customSubtitle: "",
       customButtonText: "Pagar com PIX",
       customInstructions: "",
-      showProductImage: true,
-      showCompanyLogo: true,
+      showLogo: true,
+      logoUrl: "",
+      logoPosition: "center" as const,
+      customElements: "[]",
     },
   });
 
@@ -111,8 +115,10 @@ export default function EditPageModal({ page, open, onOpenChange }: EditPageModa
         customSubtitle: page.customSubtitle || "",
         customButtonText: page.customButtonText || "Pagar com PIX",
         customInstructions: page.customInstructions || "",
-        showProductImage: page.showProductImage ?? true,
-        showCompanyLogo: page.showCompanyLogo ?? true,
+        showLogo: page.showLogo ?? true,
+        logoUrl: page.logoUrl || "",
+        logoPosition: (page.logoPosition as "left" | "center" | "right") || "center",
+        customElements: page.customElements || "[]",
       });
     }
   }, [page, open, form]);

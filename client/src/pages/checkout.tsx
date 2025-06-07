@@ -167,9 +167,22 @@ export default function Checkout() {
           className="p-6 text-white text-center rounded-t-xl"
           style={{ backgroundColor: customStyles.primaryColor }}
         >
-          {page.showProductImage !== false && (
-            <div className="w-16 h-16 bg-white/20 rounded-full flex items-center justify-center mx-auto mb-4">
-              <ShoppingBag className="w-8 h-8" />
+          {page.showLogo !== false && (
+            <div className={`mb-4 flex ${page.logoPosition === 'left' ? 'justify-start' : page.logoPosition === 'right' ? 'justify-end' : 'justify-center'}`}>
+              {page.logoUrl ? (
+                <img 
+                  src={page.logoUrl} 
+                  alt="Logo" 
+                  className="w-16 h-16 object-contain rounded"
+                  onError={(e) => {
+                    e.currentTarget.style.display = 'none';
+                  }}
+                />
+              ) : (
+                <div className="w-16 h-16 bg-white/20 rounded-full flex items-center justify-center">
+                  <ShoppingBag className="w-8 h-8" />
+                </div>
+              )}
             </div>
           )}
           <h1 className="text-xl font-bold mb-2">
