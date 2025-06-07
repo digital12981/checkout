@@ -313,6 +313,23 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // AI Template Processing
+  app.post("/api/ai/process-template", async (req, res) => {
+    try {
+      const { command, currentTemplate } = req.body;
+      
+      if (!command || !currentTemplate) {
+        return res.status(400).json({ message: "Missing command or currentTemplate" });
+      }
+
+      const result = await processTemplateWithAI(command, currentTemplate);
+      res.json(result);
+    } catch (error) {
+      console.error("AI processing error:", error);
+      res.status(500).json({ message: "Failed to process AI command" });
+    }
+  });
+
   const httpServer = createServer(app);
   return httpServer;
 }
