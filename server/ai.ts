@@ -59,53 +59,25 @@ export async function processTemplateWithAI(command: string, currentTemplate: Te
       brandResearch = `Brand research for ${brandName}: ${research}`;
     }
 
-    const systemPrompt = `You are a professional UI/UX designer and developer specializing in payment checkout templates. Your task is to modify checkout payment templates based on user commands while preserving the core PIX payment functionality.
+    const systemPrompt = `You are a professional UI/UX designer. Modify payment templates based on commands while preserving PIX functionality.
 
-CRITICAL RULES:
-1. NEVER remove or break the PIX payment integration functionality
-2. Preserve all form fields necessary for payment processing
-3. Maintain QR code and PIX code display functionality
-4. Keep the checkout flow functional (form → payment page)
-5. PRESERVE EXISTING LOGOS: If showLogo is true and logoUrl exists, NEVER remove or change these values
-6. ENSURE COLOR CONTRAST: When adding text elements, always use colors that contrast well with backgrounds
-7. When adding new elements, respect the currentTab context (form elements go to form preview, payment elements go to payment preview)
-8. Always return valid JSON with the exact structure provided
-9. For text elements with backgrounds (hasBox: true), ensure text color contrasts with boxColor
-10. For text elements without backgrounds, ensure text color contrasts with the page backgroundColor
+RULES:
+1. NEVER break PIX payment functionality
+2. PRESERVE logos: If showLogo=true and logoUrl exists, keep them unchanged
+3. ENSURE text contrast: Light backgrounds use dark text, dark backgrounds use light text
+4. Return ONLY valid JSON, no explanations or markdown
+5. For urgency elements: Add countdown timers, limited offers, "Últimas unidades", scarcity messages
+6. Position elements: negative=header, 0-99=form, 100+=payment page
 
 Current template structure:
 - formData: Contains colors, texts, layout options, and configuration
 - customElements: Array of custom text/image elements with positions
-- Positions: negative numbers = header area, 0-99 = form area, 100+ = payment page area
+Text element: {id, type:"text", position, content, styles:{color, backgroundColor, isBold, hasBox, boxColor, fontSize, textAlign}}
+Image element: {id, type:"image", position, content, styles:{imageSize, borderRadius}}
 
-Available formData fields:
-- productName, productDescription, price
-- primaryColor, accentColor, backgroundColor, textColor
-- customTitle, customSubtitle, customButtonText, customInstructions
-- showLogo, logoUrl, logoPosition, logoSize, headerHeight
+${brandResearch ? `Brand: ${brandResearch}` : ""}
 
-COLOR CONTRAST GUIDELINES:
-- Light backgrounds (#F5F5F5, #FFFFFF, #F8F9FA): Use dark text (#000000, #333333, #212529)
-- Dark backgrounds (#000000, #333333, #8A05BE): Use light text (#FFFFFF, #F5F5F5)
-- Colored backgrounds: Choose contrasting text colors that ensure readability
-- For boxed text elements: Ensure text color contrasts with the box background color
-- Never use the same or similar colors for text and its background
-
-Custom elements structure:
-{
-  id: string,
-  type: "text" | "image",
-  position: number,
-  content: string,
-  styles: {
-    color?, backgroundColor?, isBold?, hasBox?, boxColor?,
-    imageSize?, borderRadius?, fontSize?, textAlign?
-  }
-}
-
-${brandResearch ? `\nBrand Research:\n${brandResearch}` : ""}
-
-Return ONLY a JSON object with the modified template. Do not include explanations.`;
+Return JSON only:`;
 
     const userPrompt = `Current template:
 ${JSON.stringify(currentTemplate, null, 2)}
@@ -116,7 +88,7 @@ Modify the template according to the command while preserving PIX payment functi
 
     const response = await anthropic.messages.create({
       model: "claude-sonnet-4-20250514",
-      max_tokens: 4000,
+      max_tokens: 2000,
       messages: [
         { role: "user", content: `${systemPrompt}\n\n${userPrompt}` }
       ],
@@ -125,10 +97,29 @@ Modify the template according to the command while preserving PIX payment functi
     const content = response.content[0];
     if (content.type === 'text') {
       try {
-        const result = JSON.parse(content.text);
+        // Clean the response to extract JSON
+        let jsonText = content.text.trim();
+        
+        // Remove markdown code blocks if present
+        if (jsonText.startsWith('```json')) {
+          jsonText = jsonText.replace(/^```json\s*/, '').replace(/\s*```$/, '');
+        } else if (jsonText.startsWith('```')) {
+          jsonText = jsonText.replace(/^```\s*/, '').replace(/\s*```$/, '');
+        }
+        
+        // Find JSON object boundaries
+        const jsonStart = jsonText.indexOf('{');
+        const jsonEnd = jsonText.lastIndexOf('}');
+        
+        if (jsonStart !== -1 && jsonEnd !== -1) {
+          jsonText = jsonText.substring(jsonStart, jsonEnd + 1);
+        }
+        
+        const result = JSON.parse(jsonText);
         return result;
       } catch (parseError) {
         console.error("Error parsing AI response:", parseError);
+        console.error("Raw response:", content.text);
         return currentTemplate;
       }
     }

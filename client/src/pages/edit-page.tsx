@@ -111,6 +111,7 @@ export default function EditPage() {
   const [editingText, setEditingText] = useState<string>("");
   const [aiCommand, setAiCommand] = useState<string>("");
   const [isAiProcessing, setIsAiProcessing] = useState<boolean>(false);
+  const [aiStatus, setAiStatus] = useState<string>("");
   const [templateSnapshot, setTemplateSnapshot] = useState<any>(null);
   const { toast } = useToast();
   const queryClient = useQueryClient();
