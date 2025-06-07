@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useParams, useLocation } from "wouter";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -41,7 +41,10 @@ import {
   Copy,
   Check,
   Info,
-  Clock
+  Clock,
+  Image,
+  Move,
+  X
 } from "lucide-react";
 
 const editPageSchema = z.object({
@@ -72,11 +75,32 @@ const editPageSchema = z.object({
 
 type EditPageForm = z.infer<typeof editPageSchema>;
 
+// Custom element types
+interface CustomElement {
+  id: string;
+  type: "text" | "image";
+  position: number;
+  content: string;
+  styles: {
+    color?: string;
+    backgroundColor?: string;
+    isBold?: boolean;
+    hasBox?: boolean;
+    boxColor?: string;
+    imageSize?: number;
+    borderRadius?: number;
+  };
+}
+
 export default function EditPage() {
   const params = useParams();
   const [, setLocation] = useLocation();
   const [activeStep, setActiveStep] = useState<"form" | "payment">("form");
   const [copied, setCopied] = useState(false);
+  const [isDragging, setIsDragging] = useState(false);
+  const [dragType, setDragType] = useState<"text" | "image" | null>(null);
+  const [customElements, setCustomElements] = useState<CustomElement[]>([]);
+  const [selectedElement, setSelectedElement] = useState<string | null>(null);
   const { toast } = useToast();
   const queryClient = useQueryClient();
   
@@ -108,7 +132,7 @@ export default function EditPage() {
     },
   });
 
-  // Load page data
+  // Load page data and custom elements
   useEffect(() => {
     if (page) {
       form.reset({
@@ -128,6 +152,15 @@ export default function EditPage() {
         logoPosition: (page.logoPosition as "left" | "center" | "right") || "center",
         customElements: page.customElements || "[]",
       });
+
+      // Load custom elements
+      try {
+        const elements = JSON.parse(page.customElements || "[]");
+        setCustomElements(elements);
+      } catch (error) {
+        console.error("Error parsing custom elements:", error);
+        setCustomElements([]);
+      }
     }
   }, [page, form]);
 
@@ -164,8 +197,69 @@ export default function EditPage() {
   });
 
   const onSubmit = (data: EditPageForm) => {
-    updatePageMutation.mutate(data);
+    // Update custom elements in form data
+    const updatedData = {
+      ...data,
+      customElements: JSON.stringify(customElements)
+    };
+    updatePageMutation.mutate(updatedData);
   };
+
+  // Element manipulation functions
+  const addElement = useCallback((type: "text" | "image") => {
+    const newElement: CustomElement = {
+      id: `element_${Date.now()}`,
+      type,
+      position: customElements.length,
+      content: type === "text" ? "Texto exemplo" : "https://via.placeholder.com/200x100",
+      styles: {
+        color: "#000000",
+        backgroundColor: type === "text" ? "#ffffff" : undefined,
+        isBold: false,
+        hasBox: false,
+        boxColor: "#f0f0f0",
+        imageSize: type === "image" ? 200 : undefined,
+        borderRadius: type === "image" ? 8 : undefined,
+      }
+    };
+    setCustomElements(prev => [...prev, newElement]);
+  }, [customElements]);
+
+  const updateElement = useCallback((id: string, updates: Partial<CustomElement>) => {
+    setCustomElements(prev => 
+      prev.map(el => el.id === id ? { ...el, ...updates } : el)
+    );
+  }, []);
+
+  const removeElement = useCallback((id: string) => {
+    setCustomElements(prev => prev.filter(el => el.id !== id));
+    setSelectedElement(null);
+  }, []);
+
+  const insertElementAtPosition = useCallback((type: "text" | "image", position: number) => {
+    const newElement: CustomElement = {
+      id: `element_${Date.now()}`,
+      type,
+      position,
+      content: type === "text" ? "Novo texto" : "https://via.placeholder.com/200x100",
+      styles: {
+        color: "#000000",
+        backgroundColor: type === "text" ? "#ffffff" : undefined,
+        isBold: false,
+        hasBox: false,
+        boxColor: "#f0f0f0",
+        imageSize: type === "image" ? 200 : undefined,
+        borderRadius: type === "image" ? 8 : undefined,
+      }
+    };
+
+    setCustomElements(prev => {
+      const updated = prev.map(el => 
+        el.position >= position ? { ...el, position: el.position + 1 } : el
+      );
+      return [...updated, newElement].sort((a, b) => a.position - b.position);
+    });
+  }, []);
 
   const handleCopyCode = async () => {
     try {
@@ -186,6 +280,104 @@ export default function EditPage() {
   };
 
   const formData = form.watch();
+
+  // Drag and drop handlers
+  const handleDragStart = (e: React.DragEvent, type: "text" | "image") => {
+    setIsDragging(true);
+    setDragType(type);
+    e.dataTransfer.setData("text/plain", type);
+  };
+
+  const handleDragEnd = () => {
+    setIsDragging(false);
+    setDragType(null);
+  };
+
+  const handleDragOver = (e: React.DragEvent) => {
+    e.preventDefault();
+  };
+
+  const handleDrop = (e: React.DragEvent, position: number) => {
+    e.preventDefault();
+    const type = e.dataTransfer.getData("text/plain") as "text" | "image";
+    if (type && (type === "text" || type === "image")) {
+      insertElementAtPosition(type, position);
+    }
+    setIsDragging(false);
+    setDragType(null);
+  };
+
+  const renderCustomElement = (element: CustomElement) => {
+    const isSelected = selectedElement === element.id;
+    
+    if (element.type === "text") {
+      return (
+        <div
+          key={element.id}
+          className={`relative mb-4 p-2 cursor-pointer ${isSelected ? 'ring-2 ring-primary' : ''}`}
+          onClick={() => setSelectedElement(element.id)}
+        >
+          <div
+            className={`p-3 ${element.styles.hasBox ? 'rounded' : ''}`}
+            style={{
+              color: element.styles.color,
+              backgroundColor: element.styles.hasBox ? element.styles.boxColor : 'transparent',
+              fontWeight: element.styles.isBold ? 'bold' : 'normal'
+            }}
+          >
+            {element.content}
+          </div>
+          {isSelected && (
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                removeElement(element.id);
+              }}
+              className="absolute top-0 right-0 w-6 h-6 bg-red-500 text-white rounded-full flex items-center justify-center text-xs"
+            >
+              <X className="w-3 h-3" />
+            </button>
+          )}
+        </div>
+      );
+    }
+
+    if (element.type === "image") {
+      return (
+        <div
+          key={element.id}
+          className={`relative mb-4 p-2 cursor-pointer ${isSelected ? 'ring-2 ring-primary' : ''}`}
+          onClick={() => setSelectedElement(element.id)}
+        >
+          <img
+            src={element.content}
+            alt="Custom element"
+            className="mx-auto"
+            style={{
+              width: element.styles.imageSize,
+              borderRadius: element.styles.borderRadius
+            }}
+            onError={(e) => {
+              e.currentTarget.src = "https://via.placeholder.com/200x100?text=Imagem+não+encontrada";
+            }}
+          />
+          {isSelected && (
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                removeElement(element.id);
+              }}
+              className="absolute top-0 right-0 w-6 h-6 bg-red-500 text-white rounded-full flex items-center justify-center text-xs"
+            >
+              <X className="w-3 h-3" />
+            </button>
+          )}
+        </div>
+      );
+    }
+
+    return null;
+  };
 
   const FormStepPreview = () => (
     <div 
@@ -221,6 +413,29 @@ export default function EditPage() {
         {/* Form */}
         <CardContent className="p-6">
           <h3 className="font-semibold text-neutral-800 mb-4">Dados para pagamento</h3>
+          
+          {/* Custom elements at the top */}
+          {customElements.filter(el => el.position < 5).map(element => (
+            <div key={element.id}>
+              {renderCustomElement(element)}
+            </div>
+          ))}
+
+          {/* Drop zone before form fields */}
+          <div
+            className={`h-8 mb-4 border-2 border-dashed rounded transition-colors ${
+              isDragging ? 'border-primary bg-primary/10' : 'border-transparent'
+            }`}
+            onDragOver={handleDragOver}
+            onDrop={(e) => handleDrop(e, 0)}
+          >
+            {isDragging && (
+              <div className="flex items-center justify-center h-full text-sm text-primary">
+                Solte aqui para adicionar
+              </div>
+            )}
+          </div>
+
           <div className="space-y-4">
             <div>
               <label className="block text-sm font-medium text-neutral-700 mb-1">Nome completo</label>
@@ -238,6 +453,29 @@ export default function EditPage() {
               <label className="block text-sm font-medium text-neutral-700 mb-1">Telefone</label>
               <div className="h-10 bg-neutral-100 rounded border"></div>
             </div>
+
+            {/* Custom elements in the middle */}
+            {customElements.filter(el => el.position >= 5 && el.position < 10).map(element => (
+              <div key={element.id}>
+                {renderCustomElement(element)}
+              </div>
+            ))}
+
+            {/* Drop zone before button */}
+            <div
+              className={`h-8 mb-4 border-2 border-dashed rounded transition-colors ${
+                isDragging ? 'border-primary bg-primary/10' : 'border-transparent'
+              }`}
+              onDragOver={handleDragOver}
+              onDrop={(e) => handleDrop(e, 8)}
+            >
+              {isDragging && (
+                <div className="flex items-center justify-center h-full text-sm text-primary">
+                  Solte aqui para adicionar
+                </div>
+              )}
+            </div>
+
             <Button 
               className="w-full text-white py-3 font-medium flex items-center justify-center space-x-2"
               style={{ backgroundColor: formData.accentColor }}
@@ -245,6 +483,28 @@ export default function EditPage() {
               <QrCode className="w-5 h-5" />
               <span>{formData.customButtonText}</span>
             </Button>
+
+            {/* Custom elements at the bottom */}
+            {customElements.filter(el => el.position >= 10).map(element => (
+              <div key={element.id}>
+                {renderCustomElement(element)}
+              </div>
+            ))}
+
+            {/* Drop zone at the end */}
+            <div
+              className={`h-8 border-2 border-dashed rounded transition-colors ${
+                isDragging ? 'border-primary bg-primary/10' : 'border-transparent'
+              }`}
+              onDragOver={handleDragOver}
+              onDrop={(e) => handleDrop(e, 15)}
+            >
+              {isDragging && (
+                <div className="flex items-center justify-center h-full text-sm text-primary">
+                  Solte aqui para adicionar
+                </div>
+              )}
+            </div>
           </div>
         </CardContent>
       </Card>
@@ -783,11 +1043,11 @@ export default function EditPage() {
                           <Button
                             type="button"
                             variant="outline"
-                            onClick={() => {
-                              // Add text element functionality
-                              console.log("Add text element");
-                            }}
-                            className="flex-1"
+                            draggable
+                            onDragStart={(e) => handleDragStart(e, "text")}
+                            onDragEnd={handleDragEnd}
+                            onClick={() => addElement("text")}
+                            className="flex-1 cursor-grab active:cursor-grabbing"
                           >
                             <Type className="w-4 h-4 mr-2" />
                             Adicionar Texto
@@ -795,19 +1055,20 @@ export default function EditPage() {
                           <Button
                             type="button"
                             variant="outline"
-                            onClick={() => {
-                              // Add image element functionality
-                              console.log("Add image element");
-                            }}
-                            className="flex-1"
+                            draggable
+                            onDragStart={(e) => handleDragStart(e, "image")}
+                            onDragEnd={handleDragEnd}
+                            onClick={() => addElement("image")}
+                            className="flex-1 cursor-grab active:cursor-grabbing"
                           >
-                            <ShoppingBag className="w-4 h-4 mr-2" />
+                            <Image className="w-4 h-4 mr-2" />
                             Adicionar Imagem
                           </Button>
                         </div>
                         
                         <div className="text-sm text-neutral-600 p-3 bg-neutral-50 rounded">
-                          <p>Funcionalidade de elementos arrastáveis será implementada nas próximas atualizações.</p>
+                          <p><strong>Como usar:</strong> Clique para adicionar ao final ou arraste para o preview para posicionar onde desejar.</p>
+                          <p className="mt-1">Total de elementos: {customElements.length}</p>
                         </div>
                       </div>
                     </CardContent>
