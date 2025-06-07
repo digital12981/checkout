@@ -63,10 +63,10 @@ TEMPLATE STRUCTURE:
 - customElements: [{id, type, position, content, styles}] - Include footer elements at positions 200+ with matching styling
 
 BRAND COLORS:
-- Nubank: primary #8A05BE, accent #FFFFFF, bg #F8FAFC, text #1F2937
-- PagBank: primary #00AA55, accent #FFFFFF, bg #F8FAFC, text #1F2937
-- Itau: primary #EC7000, accent #FFFFFF, bg #F8FAFC, text #1F2937
-- Default: primary #6366F1, accent #FFFFFF, bg #F8FAFC, text #1F2937
+- Nubank: primary #8A05BE, accent #8A05BE, bg #F8FAFC, text #1F2937
+- PagBank: primary #00AA55, accent #00AA55, bg #F8FAFC, text #1F2937
+- Itau: primary #EC7000, accent #EC7000, bg #F8FAFC, text #1F2937
+- Default: primary #6366F1, accent #6366F1, bg #F8FAFC, text #1F2937
 
 Return JSON:`;
 

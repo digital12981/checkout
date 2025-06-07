@@ -146,15 +146,15 @@ export default function EditPage() {
     },
   });
 
-  // Load page data and custom elements
+  // Load page data and custom elements - trigger when page data changes
   useEffect(() => {
     if (page) {
-      form.reset({
+      const formData = {
         productName: page.productName,
         productDescription: page.productDescription || "",
         price: page.price,
         primaryColor: page.primaryColor || "#3B82F6",
-        accentColor: page.accentColor || "#10B981",
+        accentColor: page.accentColor || "#10B981", 
         backgroundColor: page.backgroundColor || "#F8FAFC",
         textColor: page.textColor || "#1F2937",
         customTitle: page.customTitle || "",
@@ -167,6 +167,12 @@ export default function EditPage() {
         logoSize: page.logoSize || 64,
         headerHeight: page.headerHeight || 96,
         customElements: page.customElements || "[]",
+      };
+
+      // Force form update and trigger re-render
+      form.reset(formData);
+      Object.keys(formData).forEach(key => {
+        form.setValue(key as any, formData[key as keyof typeof formData]);
       });
 
       // Load custom elements

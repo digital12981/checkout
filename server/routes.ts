@@ -349,10 +349,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
           customElements: JSON.stringify(template.customElements || [])
         };
         
+        console.log("Updating page with AI template data:", JSON.stringify(updateData, null, 2));
+        
         const updatedPage = await storage.updatePaymentPage(pageId, updateData);
         
         if (updatedPage) {
-          res.json({ success: true, template });
+          console.log("Page updated successfully:", JSON.stringify(updatedPage, null, 2));
+          res.json({ success: true, template, updatedPage });
         } else {
           res.status(404).json({ message: "Payment page not found" });
         }

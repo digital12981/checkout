@@ -89,6 +89,7 @@ export default function CreatePageModal({ open, onOpenChange }: CreatePageModalP
           price: data.price
         }).then(() => {
           queryClient.invalidateQueries({ queryKey: ["/api/payment-pages"] });
+          queryClient.invalidateQueries({ queryKey: [`/api/payment-pages/${pageResult.id}`] });
           toast({
             title: "Template pronto!",
             description: "Sua página foi personalizada pela IA com sucesso.",
