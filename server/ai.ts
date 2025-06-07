@@ -60,7 +60,7 @@ CRITICAL RULES:
 
 TEMPLATE STRUCTURE:
 - formData: {productName, productDescription, price, primaryColor, accentColor, backgroundColor, textColor, customTitle, customSubtitle, customButtonText, customInstructions, showLogo: false, logoUrl: "", logoPosition: "center", logoSize: 64, headerHeight: 96}
-- customElements: [{id, type, position, content, styles}]
+- customElements: [{id, type, position, content, styles}] - Include footer elements at positions 200+ with matching styling
 
 BRAND COLORS:
 - Nubank: primary #8A05BE, accent #FFFFFF, bg #F8FAFC, text #1F2937
@@ -74,6 +74,13 @@ Return JSON:`;
 Product: "${productName}"
 Price: R$ ${price}
 Charge: "${chargeDescription}"
+
+Requirements:
+1. Set accentColor to match primaryColor for consistent button styling
+2. Add footer elements at positions 200+ with contact info and trust elements
+3. Footer should use same color as header (primaryColor)
+4. Include contextual footer text based on the charge description
+5. Ensure all buttons use the accentColor for proper visibility
 
 Create appropriate styling, colors, and elements based on the charge context.`;
 
@@ -114,7 +121,7 @@ Create appropriate styling, colors, and elements based on the charge context.`;
             productDescription: chargeDescription,
             price,
             primaryColor: "#6366F1",
-            accentColor: "#FFFFFF", 
+            accentColor: "#6366F1", // Match primary color for button visibility
             backgroundColor: "#F8FAFC",
             textColor: "#1F2937",
             customTitle: "",
@@ -127,7 +134,22 @@ Create appropriate styling, colors, and elements based on the charge context.`;
             logoSize: 64,
             headerHeight: 96
           },
-          customElements: []
+          customElements: [
+            {
+              id: `footer_text_${Date.now()}`,
+              type: "text",
+              position: 200,
+              content: "Pagamento 100% seguro e protegido",
+              styles: {
+                color: "#FFFFFF",
+                backgroundColor: "#6366F1",
+                textAlign: "center",
+                fontSize: 14,
+                hasBox: true,
+                boxColor: "#6366F1"
+              }
+            }
+          ]
         };
       }
     }

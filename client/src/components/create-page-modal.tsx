@@ -66,33 +66,42 @@ export default function CreatePageModal({ open, onOpenChange }: CreatePageModalP
         status: data.status
       };
       const response = await apiRequest("POST", "/api/payment-pages", pageData);
-      const pageResult = await response.json();
-      
-      // Auto-generate checkout template based on charge description
-      if (pageResult.id) {
-        try {
-          await apiRequest("POST", "/api/ai/generate-checkout", {
-            pageId: pageResult.id,
-            chargeDescription: data.chargeDescription,
-            productName: data.productName,
-            price: data.price
-          });
-        } catch (error) {
-          console.error("Failed to generate AI checkout template:", error);
-        }
-      }
-      
-      return pageResult;
+      return response.json();
     },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/payment-pages"] });
-      queryClient.invalidateQueries({ queryKey: ["/api/stats"] });
-      toast({
-        title: "Sucesso",
-        description: "Página de pagamento criada com template personalizado!",
-      });
+    onSuccess: (pageResult, data) => {
+      // Close modal immediately and show success
       form.reset();
       onOpenChange(false);
+      queryClient.invalidateQueries({ queryKey: ["/api/payment-pages"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/stats"] });
+      
+      toast({
+        title: "Página criada!",
+        description: "A IA está gerando o template personalizado em segundo plano...",
+      });
+      
+      // Continue AI generation in background
+      if (pageResult.id) {
+        apiRequest("POST", "/api/ai/generate-checkout", {
+          pageId: pageResult.id,
+          chargeDescription: data.chargeDescription,
+          productName: data.productName,
+          price: data.price
+        }).then(() => {
+          queryClient.invalidateQueries({ queryKey: ["/api/payment-pages"] });
+          toast({
+            title: "Template pronto!",
+            description: "Sua página foi personalizada pela IA com sucesso.",
+          });
+        }).catch((error) => {
+          console.error("Failed to generate AI checkout template:", error);
+          toast({
+            title: "Aviso",
+            description: "Página criada, mas houve um problema na personalização da IA.",
+            variant: "destructive",
+          });
+        });
+      }
     },
     onError: (error) => {
       toast({

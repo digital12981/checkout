@@ -989,25 +989,48 @@ export default function EditPage() {
           </div>
 
           {/* Payment page custom elements at the bottom */}
-          {customElements.filter(el => el.position >= 110).map(element => (
+          {customElements.filter(el => el.position >= 110 && el.position < 200).map(element => (
             <div key={element.id}>
               {renderCustomElement(element)}
             </div>
           ))}
+        </CardContent>
 
-          {/* Drop zone at the bottom - only visible when dragging */}
+        {/* Footer Section */}
+        <div 
+          className="p-4 text-center text-white"
+          style={{ backgroundColor: formData.primaryColor }}
+        >
+          {/* Footer custom elements */}
+          {customElements.filter(el => el.position >= 200).map(element => (
+            <div key={element.id} className="mb-2">
+              {renderCustomElement(element)}
+            </div>
+          ))}
+          
+          {/* Default footer if no custom elements */}
+          {customElements.filter(el => el.position >= 200).length === 0 && (
+            <div className="space-y-2">
+              <p className="text-sm font-medium">Pagamento 100% seguro</p>
+              <p className="text-xs opacity-90">Dados protegidos • Suporte 24h</p>
+            </div>
+          )}
+
+          {/* Drop zone for footer - only visible when dragging */}
           {isDragging && (
             <div
-              className="h-6 mt-3 border-2 border-dashed border-primary bg-primary/10 rounded transition-colors"
+              className="h-6 mt-3 border-2 border-dashed border-white/50 bg-white/10 rounded transition-colors"
               onDragOver={handleDragOver}
-              onDrop={(e) => handleDrop(e, 110)}
+              onDrop={(e) => handleDrop(e, 200)}
             >
-              <div className="flex items-center justify-center h-full text-xs text-primary">
-                Solte na página de pagamento
+              <div className="flex items-center justify-center h-full text-xs text-white">
+                Solte no rodapé
               </div>
             </div>
           )}
-        </CardContent>
+
+        </div>
+
       </Card>
     </div>
   );
