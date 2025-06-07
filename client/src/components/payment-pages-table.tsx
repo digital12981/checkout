@@ -33,7 +33,6 @@ import { Edit, Eye, Share, Trash2, MoreHorizontal, Filter, ShoppingBag, Book, Pl
 import { formatCurrency, formatDate } from "@/lib/utils";
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
-import EditPageModal from "./edit-page-modal";
 import type { PaymentPage } from "@shared/schema";
 
 const productIcons = [ShoppingBag, Book, Play];
@@ -41,7 +40,6 @@ const productIcons = [ShoppingBag, Book, Play];
 export default function PaymentPagesTable() {
   const [searchTerm, setSearchTerm] = useState("");
   const [deleteId, setDeleteId] = useState<number | null>(null);
-  const [editPage, setEditPage] = useState<PaymentPage | null>(null);
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
@@ -221,9 +219,11 @@ export default function PaymentPagesTable() {
                               </Button>
                             </DropdownMenuTrigger>
                             <DropdownMenuContent align="end">
-                              <DropdownMenuItem onClick={() => setEditPage(page)}>
-                                <Edit className="w-4 h-4 mr-2" />
-                                Editar
+                              <DropdownMenuItem asChild>
+                                <Link href={`/pages/edit/${page.id}`}>
+                                  <Edit className="w-4 h-4 mr-2" />
+                                  Editar
+                                </Link>
                               </DropdownMenuItem>
                               <DropdownMenuItem asChild>
                                 <Link href={`/checkout/${page.id}`}>
@@ -251,12 +251,6 @@ export default function PaymentPagesTable() {
           )}
         </CardContent>
       </Card>
-
-      <EditPageModal
-        page={editPage}
-        open={editPage !== null}
-        onOpenChange={(open) => !open && setEditPage(null)}
-      />
 
       <AlertDialog open={deleteId !== null} onOpenChange={() => setDeleteId(null)}>
         <AlertDialogContent>

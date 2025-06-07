@@ -311,22 +311,23 @@ export default function Checkout() {
               <label className="block text-sm font-medium text-neutral-700 mb-2">
                 Código PIX (Copia e Cola)
               </label>
-              <div className="flex">
+              <div className="space-y-3">
                 <Input
                   readOnly
                   value={pixPayment.pixCode || ""}
-                  className="flex-1 text-sm font-mono bg-white"
+                  className="text-sm font-mono bg-white"
                 />
                 <Button
                   onClick={handleCopyPixCode}
                   className={cn(
-                    "ml-2 px-4",
+                    "w-full py-3",
                     copied 
                       ? "bg-secondary text-white" 
                       : "bg-primary text-white hover:bg-primary/90"
                   )}
                 >
-                  {copied ? <Check className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
+                  {copied ? <Check className="w-4 h-4 mr-2" /> : <Copy className="w-4 h-4 mr-2" />}
+                  {copied ? "Código Copiado!" : "Copiar Código PIX"}
                 </Button>
               </div>
             </div>
