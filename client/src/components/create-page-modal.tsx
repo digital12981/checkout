@@ -40,29 +40,9 @@ interface CreatePageModalProps {
   onOpenChange: (open: boolean) => void;
 }
 
-const templates = [
-  {
-    id: "modern",
-    name: "Moderno",
-    description: "Design clean e profissional",
-    gradient: "from-primary to-accent",
-  },
-  {
-    id: "minimal",
-    name: "Minimalista",
-    description: "Foco no essencial",
-    gradient: "from-neutral-400 to-neutral-600",
-  },
-  {
-    id: "premium",
-    name: "Premium",
-    description: "Visual sofisticado",
-    gradient: "from-accent to-yellow-500",
-  },
-] as const;
+
 
 export default function CreatePageModal({ open, onOpenChange }: CreatePageModalProps) {
-  const [selectedTemplate, setSelectedTemplate] = useState<"modern" | "minimal" | "premium">("modern");
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
@@ -90,7 +70,6 @@ export default function CreatePageModal({ open, onOpenChange }: CreatePageModalP
         description: "Página de pagamento criada com sucesso!",
       });
       form.reset();
-      setSelectedTemplate("modern");
       onOpenChange(false);
     },
     onError: (error) => {
@@ -177,30 +156,12 @@ export default function CreatePageModal({ open, onOpenChange }: CreatePageModalP
               )}
             />
 
-            <div>
-              <FormLabel className="block text-sm font-medium text-neutral-700 mb-4">
-                Template da Página
-              </FormLabel>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                {templates.map((template) => (
-                  <Card
-                    key={template.id}
-                    className={cn(
-                      "p-4 cursor-pointer border-2 transition-colors hover:border-primary/50",
-                      selectedTemplate === template.id
-                        ? "border-primary bg-primary/5"
-                        : "border-neutral-300"
-                    )}
-                    onClick={() => setSelectedTemplate(template.id)}
-                  >
-                    <div
-                      className={`aspect-video bg-gradient-to-br ${template.gradient} rounded mb-3`}
-                    />
-                    <h4 className="font-medium text-neutral-800">{template.name}</h4>
-                    <p className="text-sm text-neutral-600">{template.description}</p>
-                  </Card>
-                ))}
-              </div>
+            <div className="bg-gradient-to-br from-accent to-yellow-500 rounded-lg p-6 text-white">
+              <h3 className="font-semibold mb-2">Template Premium</h3>
+              <p className="text-sm text-white/90">
+                Todas as páginas usam o template Premium com customização completa de cores, textos e elementos.
+                Use a funcionalidade de edição para personalizar sua página após a criação.
+              </p>
             </div>
 
             <div className="flex items-center justify-end space-x-3 pt-6 border-t border-neutral-200">
