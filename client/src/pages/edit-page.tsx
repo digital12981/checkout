@@ -68,6 +68,7 @@ const editPageSchema = z.object({
   showLogo: z.boolean(),
   logoUrl: z.string().optional(),
   logoPosition: z.enum(["left", "center", "right"]),
+  logoSize: z.number().min(32).max(128).default(64),
   headerHeight: z.number().min(60).max(200).default(96),
   
   // Custom elements
@@ -131,6 +132,7 @@ export default function EditPage() {
       showLogo: true,
       logoUrl: "",
       logoPosition: "center" as const,
+      logoSize: 64,
       headerHeight: 96,
       customElements: "[]",
     },
@@ -154,6 +156,7 @@ export default function EditPage() {
         showLogo: page.showLogo ?? true,
         logoUrl: page.logoUrl || "",
         logoPosition: (page.logoPosition as "left" | "center" | "right") || "center",
+        logoSize: page.logoSize || 64,
         headerHeight: page.headerHeight || 96,
         customElements: page.customElements || "[]",
       });
