@@ -13,7 +13,24 @@ export const paymentPages = pgTable("payment_pages", {
   productName: text("product_name").notNull(),
   productDescription: text("product_description"),
   price: decimal("price", { precision: 10, scale: 2 }).notNull(),
-  template: text("template").notNull().default("modern"),
+  template: text("template").notNull().default("premium"),
+  
+  // Customization fields for Premium template
+  primaryColor: text("primary_color").default("#3B82F6"),
+  accentColor: text("accent_color").default("#10B981"),
+  backgroundColor: text("background_color").default("#F8FAFC"),
+  textColor: text("text_color").default("#1F2937"),
+  
+  // Custom texts
+  customTitle: text("custom_title"),
+  customSubtitle: text("custom_subtitle"),
+  customButtonText: text("custom_button_text").default("Pagar com PIX"),
+  customInstructions: text("custom_instructions"),
+  
+  // Layout options
+  showProductImage: boolean("show_product_image").default(true),
+  showCompanyLogo: boolean("show_company_logo").default(true),
+  
   status: text("status").notNull().default("active"),
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().notNull(),

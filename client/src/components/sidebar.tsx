@@ -3,7 +3,6 @@ import { cn } from "@/lib/utils";
 import { 
   Home, 
   FileText, 
-  Palette, 
   BarChart3, 
   Settings, 
   CreditCard, 
@@ -13,7 +12,6 @@ import {
 const navigation = [
   { name: "Dashboard", href: "/", icon: Home },
   { name: "Páginas de Pagamento", href: "/pages", icon: FileText },
-  { name: "Templates", href: "/templates", icon: Palette },
   { name: "Configurações", href: "/settings", icon: Settings },
 ];
 
