@@ -40,8 +40,6 @@ interface CreatePageModalProps {
   onOpenChange: (open: boolean) => void;
 }
 
-
-
 export default function CreatePageModal({ open, onOpenChange }: CreatePageModalProps) {
   const { toast } = useToast();
   const queryClient = useQueryClient();
@@ -111,15 +109,10 @@ export default function CreatePageModal({ open, onOpenChange }: CreatePageModalP
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto" aria-describedby="create-page-description">
+      <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
-          <DialogTitle className="text-xl font-semibold text-neutral-800">
-            Nova Página de Pagamento
-          </DialogTitle>
+          <DialogTitle>Nova Página de Pagamento</DialogTitle>
         </DialogHeader>
-        <p id="create-page-description" className="sr-only">
-          Formulário para criar uma nova página de pagamento PIX com informações do produto e template.
-        </p>
 
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
@@ -183,44 +176,26 @@ export default function CreatePageModal({ open, onOpenChange }: CreatePageModalP
               />
             </div>
 
-            <FormField
-              control={form.control}
-              name="productDescription"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Descrição do Produto</FormLabel>
-                  <FormControl>
-                    <Textarea
-                      rows={3}
-                      placeholder="Descreva brevemente o produto..."
-                      {...field}
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
             <div className="bg-gradient-to-br from-accent to-yellow-500 rounded-lg p-6 text-white">
               <h3 className="font-semibold mb-2">Template Premium</h3>
               <p className="text-sm text-white/90">
-                Todas as páginas usam o template Premium com customização completa de cores, textos e elementos.
-                Use a funcionalidade de edição para personalizar sua página após a criação.
+                Checkout otimizado com IA, elementos customizáveis e conversão maximizada
               </p>
             </div>
 
-            <div className="flex items-center justify-end space-x-3 pt-6 border-t border-neutral-200">
+            <div className="flex justify-end space-x-3">
               <Button
                 type="button"
                 variant="outline"
                 onClick={() => onOpenChange(false)}
+                disabled={createPageMutation.isPending}
               >
                 Cancelar
               </Button>
               <Button
                 type="submit"
                 disabled={createPageMutation.isPending}
-                className="bg-primary text-white hover:bg-primary/90"
+                className="bg-gradient-to-r from-primary to-accent hover:from-primary/90 hover:to-accent/90"
               >
                 {createPageMutation.isPending ? "Criando..." : "Criar Página"}
               </Button>
