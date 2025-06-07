@@ -431,20 +431,18 @@ export default function EditPage() {
             </div>
           ))}
 
-          {/* Drop zone at top of header */}
-          <div
-            className={`h-8 mb-4 border-2 border-dashed rounded transition-colors ${
-              isDragging ? 'border-white/50 bg-white/10' : 'border-transparent'
-            }`}
-            onDragOver={handleDragOver}
-            onDrop={(e) => handleDrop(e, -15)}
-          >
-            {isDragging && (
-              <div className="flex items-center justify-center h-full text-sm text-white">
+          {/* Drop zone at top of header - only visible when dragging */}
+          {isDragging && (
+            <div
+              className="h-6 mb-3 border-2 border-dashed border-white/50 bg-white/10 rounded transition-colors"
+              onDragOver={handleDragOver}
+              onDrop={(e) => handleDrop(e, -15)}
+            >
+              <div className="flex items-center justify-center h-full text-xs text-white">
                 Solte no cabeçalho
               </div>
-            )}
-          </div>
+            </div>
+          )}
 
           {formData.showLogo && (
             <div className={`mb-4 flex ${formData.logoPosition === 'left' ? 'justify-start' : formData.logoPosition === 'right' ? 'justify-end' : 'justify-center'}`}>
@@ -472,20 +470,18 @@ export default function EditPage() {
             </div>
           ))}
 
-          {/* Drop zone at bottom of header */}
-          <div
-            className={`h-8 border-2 border-dashed rounded transition-colors ${
-              isDragging ? 'border-white/50 bg-white/10' : 'border-transparent'
-            }`}
-            onDragOver={handleDragOver}
-            onDrop={(e) => handleDrop(e, -5)}
-          >
-            {isDragging && (
-              <div className="flex items-center justify-center h-full text-sm text-white">
+          {/* Drop zone at bottom of header - only visible when dragging */}
+          {isDragging && (
+            <div
+              className="h-6 border-2 border-dashed border-white/50 bg-white/10 rounded transition-colors"
+              onDragOver={handleDragOver}
+              onDrop={(e) => handleDrop(e, -5)}
+            >
+              <div className="flex items-center justify-center h-full text-xs text-white">
                 Solte no cabeçalho
               </div>
-            )}
-          </div>
+            </div>
+          )}
         </div>
 
         {/* Form */}
@@ -497,42 +493,35 @@ export default function EditPage() {
             .sort((a, b) => a.position - b.position)
             .map((element, index) => (
               <div key={element.id}>
-                {/* Drop zone before each element */}
-                <div
-                  className={`h-4 mb-2 border-2 border-dashed rounded transition-colors ${
-                    isDragging ? 'border-primary bg-primary/10' : 'border-transparent'
-                  }`}
-                  onDragOver={handleDragOver}
-                  onDrop={(e) => handleDrop(e, index)}
-                >
-                  {isDragging && (
+                {/* Drop zone before each element - only visible when dragging */}
+                {isDragging && (
+                  <div
+                    className="h-4 mb-2 border-2 border-dashed border-primary bg-primary/10 rounded transition-colors"
+                    onDragOver={handleDragOver}
+                    onDrop={(e) => handleDrop(e, index)}
+                  >
                     <div className="flex items-center justify-center h-full text-xs text-primary">
                       Solte aqui
                     </div>
-                  )}
-                </div>
+                  </div>
+                )}
                 {renderCustomElement(element)}
               </div>
             ))}
 
-          {/* Drop zone at beginning if no elements */}
-          {customElements.filter(el => el.position >= 0).length === 0 && (
-            <div
-              className={`h-8 mb-4 border-2 border-dashed rounded transition-colors ${
-                isDragging ? 'border-primary bg-primary/10' : 'border-transparent'
-              }`}
-              onDragOver={handleDragOver}
-              onDrop={(e) => handleDrop(e, 0)}
-            >
-              {isDragging && (
+          <div className="space-y-4">
+            {/* Drop zone at beginning if no elements */}
+            {customElements.filter(el => el.position >= 0).length === 0 && isDragging && (
+              <div
+                className="h-8 mb-4 border-2 border-dashed border-primary bg-primary/10 rounded transition-colors"
+                onDragOver={handleDragOver}
+                onDrop={(e) => handleDrop(e, 0)}
+              >
                 <div className="flex items-center justify-center h-full text-sm text-primary">
                   Solte aqui para adicionar
                 </div>
-              )}
-            </div>
-          )}
-
-          <div className="space-y-4">
+              </div>
+            )}
             <div>
               <label className="block text-sm font-medium text-neutral-700 mb-1">Nome completo</label>
               <div className="h-10 bg-neutral-100 rounded border"></div>
@@ -558,20 +547,18 @@ export default function EditPage() {
               <span>{formData.customButtonText}</span>
             </Button>
 
-            {/* Drop zone at the end for more elements */}
-            <div
-              className={`h-8 border-2 border-dashed rounded transition-colors ${
-                isDragging ? 'border-primary bg-primary/10' : 'border-transparent'
-              }`}
-              onDragOver={handleDragOver}
-              onDrop={(e) => handleDrop(e, customElements.filter(el => el.position >= 0).length)}
-            >
-              {isDragging && (
+            {/* Drop zone at the end for more elements - only visible when dragging */}
+            {isDragging && (
+              <div
+                className="h-8 border-2 border-dashed border-primary bg-primary/10 rounded transition-colors"
+                onDragOver={handleDragOver}
+                onDrop={(e) => handleDrop(e, customElements.filter(el => el.position >= 0).length)}
+              >
                 <div className="flex items-center justify-center h-full text-sm text-primary">
                   Solte aqui para adicionar
                 </div>
-              )}
-            </div>
+              </div>
+            )}
           </div>
         </CardContent>
       </Card>
