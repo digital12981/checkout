@@ -68,6 +68,7 @@ const editPageSchema = z.object({
   showLogo: z.boolean(),
   logoUrl: z.string().optional(),
   logoPosition: z.enum(["left", "center", "right"]),
+  headerHeight: z.number().min(60).max(200).default(96),
   
   // Custom elements
   customElements: z.string().default("[]"),
@@ -130,6 +131,7 @@ export default function EditPage() {
       showLogo: true,
       logoUrl: "",
       logoPosition: "center" as const,
+      headerHeight: 96,
       customElements: "[]",
     },
   });
@@ -152,6 +154,7 @@ export default function EditPage() {
         showLogo: page.showLogo ?? true,
         logoUrl: page.logoUrl || "",
         logoPosition: (page.logoPosition as "left" | "center" | "right") || "center",
+        headerHeight: (page as any).headerHeight || 96,
         customElements: page.customElements || "[]",
       });
 
@@ -422,7 +425,10 @@ export default function EditPage() {
         {/* Header */}
         <div 
           className="p-6 rounded-t-lg text-white text-center"
-          style={{ backgroundColor: formData.primaryColor }}
+          style={{ 
+            backgroundColor: formData.primaryColor,
+            minHeight: `${formData.headerHeight}px`
+          }}
         >
           {/* Header custom elements (negative positions for header) */}
           {customElements.filter(el => el.position < -10).map(element => (
@@ -579,7 +585,10 @@ export default function EditPage() {
         {/* Header */}
         <div 
           className="p-6 rounded-t-lg text-white text-center"
-          style={{ backgroundColor: formData.primaryColor }}
+          style={{ 
+            backgroundColor: formData.primaryColor,
+            minHeight: `${formData.headerHeight}px`
+          }}
         >
           {formData.showLogo && (
             <div className={`mb-4 flex ${formData.logoPosition === 'left' ? 'justify-start' : formData.logoPosition === 'right' ? 'justify-end' : 'justify-center'}`}>
