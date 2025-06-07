@@ -1,14 +1,8 @@
 import Anthropic from '@anthropic-ai/sdk';
-import OpenAI from 'openai';
 
 // the newest Anthropic model is "claude-sonnet-4-20250514" which was released May 14, 2025. Use this by default unless user has already selected claude-3-7-sonnet-20250219
 const anthropic = new Anthropic({
   apiKey: process.env.ANTHROPIC_API_KEY,
-});
-
-// the newest OpenAI model is "gpt-4o" which was released May 13, 2024. do not change this unless explicitly requested by the user
-const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY,
 });
 
 interface TemplateData {
@@ -17,39 +11,51 @@ interface TemplateData {
   currentTab?: string;
 }
 
-export async function researchBrandGuidelines(brandName: string): Promise<string> {
-  try {
-    const response = await openai.chat.completions.create({
-      model: "gpt-4o",
-      messages: [
-        {
-          role: "system",
-          content: "You are a brand design expert. Provide accurate brand color palettes and design guidelines for companies. Return information in JSON format with keys: primaryColor, accentColor, backgroundColor, textColor, and designNotes."
-        },
-        {
-          role: "user",
-          content: `Provide the official brand colors and design guidelines for ${brandName}. Include hex color codes for primary color, accent color, background color, and text color commonly used in their payment interfaces.`
-        }
-      ],
-      response_format: { type: "json_object" },
-    });
-
-    return response.choices[0].message.content || "{}";
-  } catch (error) {
-    console.error("Error researching brand guidelines:", error);
-    return "{}";
-  }
+function getBrandColors(brandName: string): string {
+  const brandColors: Record<string, any> = {
+    'nubank': {
+      primaryColor: '#8A05BE',
+      accentColor: '#FFFFFF',
+      backgroundColor: '#F5F5F5',
+      textColor: '#000000',
+      designNotes: 'Purple primary with white accents and clean minimalist design'
+    },
+    'pagbank': {
+      primaryColor: '#00AA55',
+      accentColor: '#FFFFFF',
+      backgroundColor: '#F8F9FA',
+      textColor: '#212529',
+      designNotes: 'Green primary with white accents and modern interface'
+    },
+    'itau': {
+      primaryColor: '#EC7000',
+      accentColor: '#FFFFFF',
+      backgroundColor: '#F5F5F5',
+      textColor: '#333333',
+      designNotes: 'Orange primary with clean white backgrounds'
+    },
+    'bradesco': {
+      primaryColor: '#CC092F',
+      accentColor: '#FFFFFF',
+      backgroundColor: '#F8F9FA',
+      textColor: '#212529',
+      designNotes: 'Red primary with white accents and professional look'
+    }
+  };
+  
+  const brand = brandColors[brandName.toLowerCase()];
+  return brand ? JSON.stringify(brand) : '{}';
 }
 
 export async function processTemplateWithAI(command: string, currentTemplate: TemplateData): Promise<any> {
   try {
-    // First, check if the command mentions specific brands and research them
+    // Check if the command mentions specific brands and get their colors
     let brandResearch = "";
     const brandMatch = command.match(/\b(nubank|pagbank|pix|itau|bradesco|santander|banco do brasil|bb|caixa|inter|c6|picpay|stone|cielo|mercado pago|paypal)\b/i);
     
     if (brandMatch) {
       const brandName = brandMatch[1];
-      const research = await researchBrandGuidelines(brandName);
+      const research = getBrandColors(brandName);
       brandResearch = `Brand research for ${brandName}: ${research}`;
     }
 
@@ -60,8 +66,12 @@ CRITICAL RULES:
 2. Preserve all form fields necessary for payment processing
 3. Maintain QR code and PIX code display functionality
 4. Keep the checkout flow functional (form → payment page)
-5. When adding new elements, respect the currentTab context (form elements go to form preview, payment elements go to payment preview)
-6. Always return valid JSON with the exact structure provided
+5. PRESERVE EXISTING LOGOS: If showLogo is true and logoUrl exists, NEVER remove or change these values
+6. ENSURE COLOR CONTRAST: When adding text elements, always use colors that contrast well with backgrounds
+7. When adding new elements, respect the currentTab context (form elements go to form preview, payment elements go to payment preview)
+8. Always return valid JSON with the exact structure provided
+9. For text elements with backgrounds (hasBox: true), ensure text color contrasts with boxColor
+10. For text elements without backgrounds, ensure text color contrasts with the page backgroundColor
 
 Current template structure:
 - formData: Contains colors, texts, layout options, and configuration
@@ -73,6 +83,13 @@ Available formData fields:
 - primaryColor, accentColor, backgroundColor, textColor
 - customTitle, customSubtitle, customButtonText, customInstructions
 - showLogo, logoUrl, logoPosition, logoSize, headerHeight
+
+COLOR CONTRAST GUIDELINES:
+- Light backgrounds (#F5F5F5, #FFFFFF, #F8F9FA): Use dark text (#000000, #333333, #212529)
+- Dark backgrounds (#000000, #333333, #8A05BE): Use light text (#FFFFFF, #F5F5F5)
+- Colored backgrounds: Choose contrasting text colors that ensure readability
+- For boxed text elements: Ensure text color contrasts with the box background color
+- Never use the same or similar colors for text and its background
 
 Custom elements structure:
 {
