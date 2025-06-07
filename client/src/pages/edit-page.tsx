@@ -427,7 +427,7 @@ export default function EditPage() {
       <Card className="w-full max-w-md shadow-lg">
         {/* Header */}
         <div 
-          className="p-6 rounded-t-lg text-white text-center"
+          className="p-6 rounded-t-lg text-white text-center flex flex-col justify-center"
           style={{ 
             backgroundColor: formData.primaryColor,
             height: `${formData.headerHeight}px`
@@ -589,7 +589,7 @@ export default function EditPage() {
       <Card className="w-full max-w-md shadow-lg">
         {/* Header */}
         <div 
-          className="p-6 rounded-t-lg text-white text-center"
+          className="p-6 rounded-t-lg text-white text-center flex flex-col justify-center"
           style={{ 
             backgroundColor: formData.primaryColor,
             height: `${formData.headerHeight}px`
