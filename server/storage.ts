@@ -78,7 +78,10 @@ export class MemStorage implements IStorage {
     const id = this.currentPageId++;
     const now = new Date();
     const page: PaymentPage = { 
-      ...insertPage, 
+      ...insertPage,
+      productDescription: insertPage.productDescription || null,
+      template: insertPage.template || "modern",
+      status: insertPage.status || "active",
       id, 
       createdAt: now,
       updatedAt: now
@@ -124,7 +127,13 @@ export class MemStorage implements IStorage {
     const id = this.currentPaymentId++;
     const now = new Date();
     const payment: PixPayment = { 
-      ...insertPayment, 
+      ...insertPayment,
+      customerPhone: insertPayment.customerPhone || null,
+      pixCode: insertPayment.pixCode || null,
+      pixQrCode: insertPayment.pixQrCode || null,
+      transactionId: insertPayment.transactionId || null,
+      status: insertPayment.status || "pending",
+      expiresAt: insertPayment.expiresAt || null,
       id, 
       createdAt: now,
       updatedAt: now

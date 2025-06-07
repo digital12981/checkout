@@ -14,7 +14,6 @@ const navigation = [
   { name: "Dashboard", href: "/", icon: Home },
   { name: "Páginas de Pagamento", href: "/pages", icon: FileText },
   { name: "Templates", href: "/templates", icon: Palette },
-  { name: "Relatórios", href: "/analytics", icon: BarChart3 },
   { name: "Configurações", href: "/settings", icon: Settings },
 ];
 

@@ -111,12 +111,15 @@ export default function CreatePageModal({ open, onOpenChange }: CreatePageModalP
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto" aria-describedby="create-page-description">
         <DialogHeader>
           <DialogTitle className="text-xl font-semibold text-neutral-800">
             Nova Página de Pagamento
           </DialogTitle>
         </DialogHeader>
+        <p id="create-page-description" className="sr-only">
+          Formulário para criar uma nova página de pagamento PIX com informações do produto e template.
+        </p>
 
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">

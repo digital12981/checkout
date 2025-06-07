@@ -11,6 +11,9 @@ function Router() {
   return (
     <Switch>
       <Route path="/" component={Dashboard} />
+      <Route path="/pages" component={Dashboard} />
+      <Route path="/templates" component={Dashboard} />
+      <Route path="/settings" component={Dashboard} />
       <Route path="/checkout/:id" component={Checkout} />
       <Route component={NotFound} />
     </Switch>
