@@ -1,5 +1,6 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useLocation } from "wouter";
+import { useQueryClient } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Plus, Palette, Settings, Wrench } from "lucide-react";
@@ -7,6 +8,7 @@ import Sidebar from "@/components/sidebar";
 import StatsCards from "@/components/stats-cards";
 import PaymentPagesTable from "@/components/payment-pages-table";
 import CreatePageModal from "@/components/create-page-modal";
+import { useToast } from "@/hooks/use-toast";
 
 function TemplatesContent() {
   return (
@@ -54,6 +56,136 @@ function TemplatesContent() {
 }
 
 function SettingsContent() {
+  const [companyName, setCompanyName] = useState("CheckoutFy");
+  const [companyEmail, setCompanyEmail] = useState("contato@checkoutfy.com");
+  const [apiKey, setApiKey] = useState("");
+  const [isTestingConnection, setIsTestingConnection] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
+  const { toast } = useToast();
+  const queryClient = useQueryClient();
+
+  // Load settings on component mount
+  useEffect(() => {
+    const loadSettings = async () => {
+      try {
+        const response = await fetch("/api/settings");
+        if (response.ok) {
+          const settings = await response.json();
+          if (settings.company_name) setCompanyName(settings.company_name);
+          if (settings.company_email) setCompanyEmail(settings.company_email);
+          if (settings.for4payments_api_key) setApiKey(settings.for4payments_api_key);
+        }
+      } catch (error) {
+        console.error("Failed to load settings:", error);
+      }
+    };
+    loadSettings();
+  }, []);
+
+  const saveGeneralSettings = async () => {
+    setIsSaving(true);
+    try {
+      await Promise.all([
+        fetch("/api/settings", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ key: "company_name", value: companyName })
+        }),
+        fetch("/api/settings", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ key: "company_email", value: companyEmail })
+        })
+      ]);
+
+      toast({
+        title: "Sucesso",
+        description: "Configurações salvas com sucesso!"
+      });
+    } catch (error) {
+      toast({
+        title: "Erro",
+        description: "Falha ao salvar configurações",
+        variant: "destructive"
+      });
+    }
+    setIsSaving(false);
+  };
+
+  const saveApiKey = async () => {
+    if (!apiKey.trim()) {
+      toast({
+        title: "Erro",
+        description: "Chave da API é obrigatória",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    try {
+      await fetch("/api/settings", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ key: "for4payments_api_key", value: apiKey })
+      });
+
+      toast({
+        title: "Sucesso",
+        description: "Chave da API salva com sucesso!"
+      });
+    } catch (error) {
+      toast({
+        title: "Erro",
+        description: "Falha ao salvar chave da API",
+        variant: "destructive"
+      });
+    }
+  };
+
+  const testConnection = async () => {
+    if (!apiKey.trim()) {
+      toast({
+        title: "Erro",
+        description: "Insira a chave da API antes de testar",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    setIsTestingConnection(true);
+    try {
+      const response = await fetch("/api/settings/test-for4payments", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ apiKey })
+      });
+
+      const result = await response.json();
+      
+      if (result.success) {
+        toast({
+          title: "Sucesso",
+          description: result.message
+        });
+        // Save the API key if test is successful
+        await saveApiKey();
+      } else {
+        toast({
+          title: "Erro",
+          description: result.message,
+          variant: "destructive"
+        });
+      }
+    } catch (error) {
+      toast({
+        title: "Erro",
+        description: "Erro ao testar conexão",
+        variant: "destructive"
+      });
+    }
+    setIsTestingConnection(false);
+  };
+
   return (
     <div className="space-y-6">
       <Card>
@@ -71,7 +203,8 @@ function SettingsContent() {
             <input 
               type="text" 
               className="w-full px-3 py-2 border border-neutral-300 rounded-md" 
-              defaultValue="CheckoutFy"
+              value={companyName}
+              onChange={(e) => setCompanyName(e.target.value)}
             />
           </div>
           <div>
@@ -81,11 +214,16 @@ function SettingsContent() {
             <input 
               type="email" 
               className="w-full px-3 py-2 border border-neutral-300 rounded-md" 
-              defaultValue="contato@checkoutfy.com"
+              value={companyEmail}
+              onChange={(e) => setCompanyEmail(e.target.value)}
             />
           </div>
-          <Button className="bg-primary text-white hover:bg-primary/90">
-            Salvar Configurações
+          <Button 
+            onClick={saveGeneralSettings}
+            disabled={isSaving}
+            className="bg-primary text-white hover:bg-primary/90"
+          >
+            {isSaving ? "Salvando..." : "Salvar Configurações"}
           </Button>
         </CardContent>
       </Card>
@@ -106,11 +244,25 @@ function SettingsContent() {
               type="password" 
               className="w-full px-3 py-2 border border-neutral-300 rounded-md" 
               placeholder="Insira sua chave da API For4Payments"
+              value={apiKey}
+              onChange={(e) => setApiKey(e.target.value)}
             />
           </div>
-          <Button className="bg-secondary text-white hover:bg-secondary/90">
-            Testar Conexão
-          </Button>
+          <div className="flex space-x-3">
+            <Button 
+              onClick={testConnection}
+              disabled={isTestingConnection}
+              className="bg-secondary text-white hover:bg-secondary/90"
+            >
+              {isTestingConnection ? "Testando..." : "Testar Conexão"}
+            </Button>
+            <Button 
+              onClick={saveApiKey}
+              variant="outline"
+            >
+              Salvar Chave
+            </Button>
+          </div>
         </CardContent>
       </Card>
     </div>

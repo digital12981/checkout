@@ -98,7 +98,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       // Create For4Payments client and process payment
-      const for4payments = createFor4PaymentsClient();
+      const for4payments = await createFor4PaymentsClient();
       const pixResponse = await for4payments.createPixPayment({
         name: requestData.customerName,
         email: requestData.customerEmail,
