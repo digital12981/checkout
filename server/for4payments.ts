@@ -168,13 +168,16 @@ export class For4PaymentsAPI {
 export async function createFor4PaymentsClient(): Promise<For4PaymentsAPI> {
   // First try environment variable
   let secretKey = process.env.FOR4PAYMENTS_API_KEY || process.env.FOR4PAYMENTS_SECRET_KEY || "";
+  console.log("Environment API key found:", secretKey ? "Yes" : "No");
   
   // If not found in env, try to get from database settings
   if (!secretKey) {
     try {
+      console.log("Fetching API key from database...");
       const { storage } = await import("./storage");
       const setting = await storage.getSetting("for4payments_api_key");
       secretKey = setting?.value || "";
+      console.log("Database API key found:", secretKey ? `Yes (${secretKey.substring(0, 8)}...)` : "No");
     } catch (error) {
       console.log("Could not fetch API key from database:", error);
     }
@@ -184,5 +187,6 @@ export async function createFor4PaymentsClient(): Promise<For4PaymentsAPI> {
     throw new Error("For4Payments API key not found. Please configure it in settings.");
   }
   
+  console.log("Using API key:", secretKey.substring(0, 8) + "...");
   return new For4PaymentsAPI(secretKey);
 }

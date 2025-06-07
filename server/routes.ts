@@ -98,7 +98,27 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       // Create For4Payments client and process payment
-      const for4payments = await createFor4PaymentsClient();
+      console.log("Creating For4Payments client...");
+      
+      // Get API key from database first
+      let apiKey = process.env.FOR4PAYMENTS_API_KEY || "";
+      if (!apiKey) {
+        console.log("Fetching API key from database...");
+        const setting = await storage.getSetting("for4payments_api_key");
+        apiKey = setting?.value || "";
+        console.log("Database API key found:", apiKey ? `Yes (${apiKey.substring(0, 8)}...)` : "No");
+      }
+      
+      if (!apiKey) {
+        return res.status(400).json({ 
+          message: "For4Payments API key not configured. Please configure it in settings." 
+        });
+      }
+      
+      const { For4PaymentsAPI } = await import("./for4payments");
+      const for4payments = new For4PaymentsAPI(apiKey);
+      console.log("For4Payments client created successfully with key:", apiKey.substring(0, 8) + "...");
+      
       const pixResponse = await for4payments.createPixPayment({
         name: requestData.customerName,
         email: requestData.customerEmail,
