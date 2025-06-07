@@ -31,6 +31,7 @@ export const paymentPages = pgTable("payment_pages", {
   showLogo: boolean("show_logo").default(true),
   logoUrl: text("logo_url"),
   logoPosition: text("logo_position").default("center"), // left, center, right
+  headerHeight: integer("header_height").default(96),
   
   // Custom elements (JSON array of draggable elements)
   customElements: text("custom_elements").default("[]"),

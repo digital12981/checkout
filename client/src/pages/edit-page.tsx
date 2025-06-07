@@ -154,7 +154,7 @@ export default function EditPage() {
         showLogo: page.showLogo ?? true,
         logoUrl: page.logoUrl || "",
         logoPosition: (page.logoPosition as "left" | "center" | "right") || "center",
-        headerHeight: (page as any).headerHeight || 96,
+        headerHeight: page.headerHeight || 96,
         customElements: page.customElements || "[]",
       });
 
@@ -1093,6 +1093,39 @@ export default function EditPage() {
                                 >
                                   Direita
                                 </Button>
+                              </div>
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+
+                      <FormField
+                        control={form.control}
+                        name="headerHeight"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Altura do Cabeçalho (px)</FormLabel>
+                            <FormControl>
+                              <div className="space-y-2">
+                                <Input 
+                                  type="number"
+                                  min="60"
+                                  max="200"
+                                  value={field.value}
+                                  onChange={(e) => field.onChange(parseInt(e.target.value) || 96)}
+                                  className="w-full"
+                                />
+                                <div className="flex items-center space-x-2 text-sm text-neutral-500">
+                                  <span>60px</span>
+                                  <div className="flex-1 h-2 bg-neutral-200 rounded">
+                                    <div 
+                                      className="h-full bg-primary rounded"
+                                      style={{ width: `${((field.value - 60) / (200 - 60)) * 100}%` }}
+                                    />
+                                  </div>
+                                  <span>200px</span>
+                                </div>
                               </div>
                             </FormControl>
                             <FormMessage />
