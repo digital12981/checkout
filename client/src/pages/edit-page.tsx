@@ -198,9 +198,22 @@ export default function EditPage() {
           className="p-6 rounded-t-lg text-white text-center"
           style={{ backgroundColor: formData.primaryColor }}
         >
-          {formData.showProductImage && (
-            <div className="w-16 h-16 bg-white/20 rounded-full flex items-center justify-center mx-auto mb-4">
-              <ShoppingBag className="w-8 h-8" />
+          {formData.showLogo && (
+            <div className={`mb-4 flex ${formData.logoPosition === 'left' ? 'justify-start' : formData.logoPosition === 'right' ? 'justify-end' : 'justify-center'}`}>
+              {formData.logoUrl ? (
+                <img 
+                  src={formData.logoUrl} 
+                  alt="Logo" 
+                  className="w-16 h-16 object-contain rounded"
+                  onError={(e) => {
+                    e.currentTarget.style.display = 'none';
+                  }}
+                />
+              ) : (
+                <div className="w-16 h-16 bg-white/20 rounded-full flex items-center justify-center">
+                  <ShoppingBag className="w-8 h-8" />
+                </div>
+              )}
             </div>
           )}
           <h1 className="text-xl font-bold mb-2">
@@ -211,19 +224,6 @@ export default function EditPage() {
               {formData.customSubtitle || formData.productDescription}
             </p>
           )}
-        </div>
-
-        {/* Price */}
-        <div className="px-6 py-4 bg-neutral-50 border-b border-neutral-200">
-          <div className="text-center">
-            <span className="text-sm text-neutral-600">Valor único</span>
-            <div 
-              className="text-3xl font-bold mt-1"
-              style={{ color: formData.textColor }}
-            >
-              {formatCurrency(formData.price)}
-            </div>
-          </div>
         </div>
 
         {/* Form */}
@@ -270,9 +270,22 @@ export default function EditPage() {
           className="p-6 rounded-t-lg text-white text-center"
           style={{ backgroundColor: formData.primaryColor }}
         >
-          {formData.showProductImage && (
-            <div className="w-16 h-16 bg-white/20 rounded-full flex items-center justify-center mx-auto mb-4">
-              <ShoppingBag className="w-8 h-8" />
+          {formData.showLogo && (
+            <div className={`mb-4 flex ${formData.logoPosition === 'left' ? 'justify-start' : formData.logoPosition === 'right' ? 'justify-end' : 'justify-center'}`}>
+              {formData.logoUrl ? (
+                <img 
+                  src={formData.logoUrl} 
+                  alt="Logo" 
+                  className="w-16 h-16 object-contain rounded"
+                  onError={(e) => {
+                    e.currentTarget.style.display = 'none';
+                  }}
+                />
+              ) : (
+                <div className="w-16 h-16 bg-white/20 rounded-full flex items-center justify-center">
+                  <ShoppingBag className="w-8 h-8" />
+                </div>
+              )}
             </div>
           )}
           <h1 className="text-xl font-bold mb-2">
@@ -283,19 +296,6 @@ export default function EditPage() {
               {formData.customSubtitle || formData.productDescription}
             </p>
           )}
-        </div>
-
-        {/* Price */}
-        <div className="px-6 py-4 bg-neutral-50 border-b border-neutral-200">
-          <div className="text-center">
-            <span className="text-sm text-neutral-600">Valor único</span>
-            <div 
-              className="text-3xl font-bold mt-1"
-              style={{ color: formData.textColor }}
-            >
-              {formatCurrency(formData.price)}
-            </div>
-          </div>
         </div>
 
         {/* PIX Payment Section */}
@@ -713,13 +713,13 @@ export default function EditPage() {
                     <CardContent className="space-y-4">
                       <FormField
                         control={form.control}
-                        name="showProductImage"
+                        name="showLogo"
                         render={({ field }) => (
                           <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
                             <div className="space-y-0.5">
-                              <FormLabel className="text-base">Mostrar Imagem do Produto</FormLabel>
+                              <FormLabel className="text-base">Mostrar Logo</FormLabel>
                               <p className="text-sm text-neutral-500">
-                                Exibir ícone/imagem no header da página
+                                Exibir logo no header da página
                               </p>
                             </div>
                             <FormControl>
@@ -734,24 +734,98 @@ export default function EditPage() {
 
                       <FormField
                         control={form.control}
-                        name="showCompanyLogo"
+                        name="logoUrl"
                         render={({ field }) => (
-                          <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
-                            <div className="space-y-0.5">
-                              <FormLabel className="text-base">Mostrar Logo da Empresa</FormLabel>
-                              <p className="text-sm text-neutral-500">
-                                Exibir logo/marca da empresa na página
-                              </p>
-                            </div>
+                          <FormItem>
+                            <FormLabel>URL da Logo</FormLabel>
                             <FormControl>
-                              <Switch
-                                checked={field.value}
-                                onCheckedChange={field.onChange}
+                              <Input 
+                                placeholder="https://exemplo.com/logo.png" 
+                                {...field} 
                               />
                             </FormControl>
+                            <FormMessage />
                           </FormItem>
                         )}
                       />
+
+                      <FormField
+                        control={form.control}
+                        name="logoPosition"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Posicionamento da Logo</FormLabel>
+                            <FormControl>
+                              <div className="flex space-x-2">
+                                <Button
+                                  type="button"
+                                  variant={field.value === "left" ? "default" : "outline"}
+                                  onClick={() => field.onChange("left")}
+                                  className="flex-1"
+                                >
+                                  Esquerda
+                                </Button>
+                                <Button
+                                  type="button"
+                                  variant={field.value === "center" ? "default" : "outline"}
+                                  onClick={() => field.onChange("center")}
+                                  className="flex-1"
+                                >
+                                  Centro
+                                </Button>
+                                <Button
+                                  type="button"
+                                  variant={field.value === "right" ? "default" : "outline"}
+                                  onClick={() => field.onChange("right")}
+                                  className="flex-1"
+                                >
+                                  Direita
+                                </Button>
+                              </div>
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+
+                      <Separator />
+
+                      <div>
+                        <h4 className="text-base font-medium mb-2">Elementos Personalizados</h4>
+                        <p className="text-sm text-neutral-500 mb-4">
+                          Adicione textos e imagens arrastáveis no checkout
+                        </p>
+                        <div className="flex space-x-2 mb-4">
+                          <Button
+                            type="button"
+                            variant="outline"
+                            onClick={() => {
+                              // Add text element functionality
+                              console.log("Add text element");
+                            }}
+                            className="flex-1"
+                          >
+                            <Type className="w-4 h-4 mr-2" />
+                            Adicionar Texto
+                          </Button>
+                          <Button
+                            type="button"
+                            variant="outline"
+                            onClick={() => {
+                              // Add image element functionality
+                              console.log("Add image element");
+                            }}
+                            className="flex-1"
+                          >
+                            <ShoppingBag className="w-4 h-4 mr-2" />
+                            Adicionar Imagem
+                          </Button>
+                        </div>
+                        
+                        <div className="text-sm text-neutral-600 p-3 bg-neutral-50 rounded">
+                          <p>Funcionalidade de elementos arrastáveis será implementada nas próximas atualizações.</p>
+                        </div>
+                      </div>
                     </CardContent>
                   </Card>
                 </TabsContent>
