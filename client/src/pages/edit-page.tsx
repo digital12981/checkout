@@ -44,7 +44,9 @@ import {
   Clock,
   Image,
   Move,
-  X
+  X,
+  Edit,
+  Bold
 } from "lucide-react";
 
 const editPageSchema = z.object({
@@ -376,10 +378,14 @@ export default function EditPage() {
     }
   };
 
-  const updateElementStyle = (elementId: string, styleUpdates: Partial<CustomElement['styles']>) => {
+  const updateElementStyle = (elementId: string, updates: Partial<CustomElement['styles']> & { content?: string }) => {
     const updatedElements = customElements.map(el => 
       el.id === elementId 
-        ? { ...el, styles: { ...el.styles, ...styleUpdates } }
+        ? { 
+            ...el, 
+            content: updates.content !== undefined ? updates.content : el.content,
+            styles: { ...el.styles, ...updates } 
+          }
         : el
     );
     setCustomElements(updatedElements);
@@ -389,36 +395,121 @@ export default function EditPage() {
 
   const renderCustomElement = (element: CustomElement) => {
     const isSelected = selectedElement === element.id;
+    const isEditing = editingElementId === element.id;
     
     if (element.type === "text") {
       return (
         <div
           key={element.id}
-          className={`relative mb-4 p-2 cursor-pointer ${isSelected ? 'ring-2 ring-primary' : ''}`}
+          className={`relative mb-4 ${isSelected ? 'ring-2 ring-primary' : ''}`}
           onClick={() => setSelectedElement(element.id)}
         >
-          <div
-            className={`p-3 ${element.styles.hasBox ? 'rounded' : ''}`}
-            style={{
-              color: element.styles.color,
-              backgroundColor: element.styles.hasBox ? element.styles.boxColor : 'transparent',
-              fontWeight: element.styles.isBold ? 'bold' : 'normal',
-              fontSize: element.styles.fontSize ? `${element.styles.fontSize}px` : '16px',
-              textAlign: element.styles.textAlign || 'left'
-            }}
-          >
-            {element.content}
-          </div>
-          {isSelected && (
-            <button
-              onClick={(e) => {
-                e.stopPropagation();
-                removeElement(element.id);
+          {/* Floating configuration menu */}
+          {isSelected && !isEditing && (
+            <div className="absolute -top-12 left-0 bg-white border rounded-lg shadow-lg p-2 flex items-center space-x-2 z-10">
+              <Button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  startEditingText(element.id, element.content);
+                }}
+                size="sm"
+                variant="outline"
+                className="h-8 w-8 p-0"
+              >
+                <Edit className="w-3 h-3" />
+              </Button>
+              <Button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  updateElementStyle(element.id, { isBold: !element.styles.isBold });
+                }}
+                size="sm"
+                variant={element.styles.isBold ? "default" : "outline"}
+                className="h-8 w-8 p-0"
+              >
+                <Bold className="w-3 h-3" />
+              </Button>
+              <input
+                type="color"
+                value={element.styles.color || "#000000"}
+                onChange={(e) => updateElementStyle(element.id, { color: e.target.value })}
+                className="w-8 h-8 rounded border"
+                title="Cor do texto"
+              />
+              <Button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  removeElement(element.id);
+                }}
+                size="sm"
+                variant="destructive"
+                className="h-8 w-8 p-0"
+              >
+                <X className="w-3 h-3" />
+              </Button>
+            </div>
+          )}
+
+          {/* Inline text editor */}
+          {isEditing ? (
+            <div className="relative">
+              <div className="absolute -top-12 left-0 bg-white border rounded-lg shadow-lg p-2 flex items-center space-x-2 z-10">
+                <Button
+                  onClick={toggleBold}
+                  size="sm"
+                  variant={element.styles.isBold ? "default" : "outline"}
+                  className="h-8 w-8 p-0"
+                >
+                  <Bold className="w-3 h-3" />
+                </Button>
+                <Button
+                  onClick={saveTextEdit}
+                  size="sm"
+                  className="h-8 px-2"
+                >
+                  <Check className="w-3 h-3" />
+                </Button>
+                <Button
+                  onClick={cancelTextEdit}
+                  size="sm"
+                  variant="outline"
+                  className="h-8 w-8 p-0"
+                >
+                  <X className="w-3 h-3" />
+                </Button>
+              </div>
+              <textarea
+                value={editingText}
+                onChange={(e) => setEditingText(e.target.value)}
+                className="w-full p-2 border rounded resize-none"
+                style={{
+                  color: element.styles.color || "#000000",
+                  backgroundColor: element.styles.hasBox ? element.styles.boxColor || "#ffffff" : "transparent",
+                  fontWeight: element.styles.isBold ? "bold" : "normal",
+                  fontSize: `${element.styles.fontSize || 16}px`,
+                  textAlign: element.styles.textAlign || "left",
+                  borderRadius: `${element.styles.borderRadius || 4}px`
+                }}
+                rows={2}
+                autoFocus
+              />
+            </div>
+          ) : (
+            <div
+              className={`p-2 rounded cursor-pointer ${element.styles.hasBox ? 'border' : ''}`}
+              style={{
+                color: element.styles.color || "#000000",
+                backgroundColor: element.styles.hasBox ? element.styles.boxColor || "#ffffff" : "transparent",
+                borderColor: element.styles.hasBox ? element.styles.boxColor || "#e5e7eb" : "transparent",
+                fontWeight: element.styles.isBold ? "bold" : "normal",
+                fontSize: `${element.styles.fontSize || 16}px`,
+                textAlign: element.styles.textAlign || "left",
+                borderRadius: `${element.styles.borderRadius || 4}px`
               }}
-              className="absolute top-0 right-0 w-6 h-6 bg-red-500 text-white rounded-full flex items-center justify-center text-xs"
+              onDoubleClick={() => startEditingText(element.id, element.content)}
             >
-              <X className="w-3 h-3" />
-            </button>
+              {element.content}
+            </div>
           )}
         </div>
       );
@@ -428,32 +519,55 @@ export default function EditPage() {
       return (
         <div
           key={element.id}
-          className={`relative mb-4 p-2 cursor-pointer ${isSelected ? 'ring-2 ring-primary' : ''}`}
+          className={`relative mb-4 ${isSelected ? 'ring-2 ring-primary' : ''}`}
           onClick={() => setSelectedElement(element.id)}
         >
+          {/* Floating configuration menu for images */}
+          {isSelected && (
+            <div className="absolute -top-12 left-0 bg-white border rounded-lg shadow-lg p-2 flex items-center space-x-2 z-10">
+              <input
+                type="url"
+                placeholder="URL da imagem"
+                value={element.content}
+                onChange={(e) => updateElementStyle(element.id, { content: e.target.value })}
+                className="px-2 py-1 border rounded text-sm w-48"
+                onClick={(e) => e.stopPropagation()}
+              />
+              <input
+                type="range"
+                min="100"
+                max="400"
+                value={element.styles.imageSize || 200}
+                onChange={(e) => updateElementStyle(element.id, { imageSize: parseInt(e.target.value) })}
+                className="w-16"
+                title="Tamanho"
+              />
+              <Button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  removeElement(element.id);
+                }}
+                size="sm"
+                variant="destructive"
+                className="h-8 w-8 p-0"
+              >
+                <X className="w-3 h-3" />
+              </Button>
+            </div>
+          )}
+
           <img
             src={element.content}
             alt="Custom element"
-            className="mx-auto"
+            className="mx-auto cursor-pointer"
             style={{
-              width: element.styles.imageSize,
-              borderRadius: element.styles.borderRadius
+              width: element.styles.imageSize || 200,
+              borderRadius: element.styles.borderRadius || 8
             }}
             onError={(e) => {
               e.currentTarget.src = "https://via.placeholder.com/200x100?text=Imagem+não+encontrada";
             }}
           />
-          {isSelected && (
-            <button
-              onClick={(e) => {
-                e.stopPropagation();
-                removeElement(element.id);
-              }}
-              className="absolute top-0 right-0 w-6 h-6 bg-red-500 text-white rounded-full flex items-center justify-center text-xs"
-            >
-              <X className="w-3 h-3" />
-            </button>
-          )}
         </div>
       );
     }
