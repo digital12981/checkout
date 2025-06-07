@@ -64,20 +64,32 @@ export async function processTemplateWithAI(command: string, currentTemplate: Te
 CRITICAL RULES:
 1. NEVER break PIX payment functionality
 2. If showLogo=true, KEEP logoUrl exactly as is - DO NOT modify base64 data
-3. For text contrast: light backgrounds (#F8FAFC) use dark text (#1F2937), dark backgrounds use light text
-4. Return ONLY valid JSON without explanations
-5. For urgency: add text elements with "Últimas unidades!", "Oferta limitada!", countdown messages
-6. Element positions: negative=header, 0-99=form area, 100+=payment area
+3. RESPECT ELEMENT POSITIONING:
+   - Header area (positions -10 to -1): Only small text elements that don't interfere with logo
+   - Form area (positions 0-99): Customer form elements
+   - Payment area (positions 100+): Payment confirmation elements
+4. COLOR CONTRAST: Never use same colors for text and background
+   - Light backgrounds: use dark text (#1F2937, #000000)
+   - Dark backgrounds: use light text (#FFFFFF, #F8FAFC)
+   - Red backgrounds: use white text
+5. For countdown/urgency elements: place at positions 15-20 (below form fields)
+6. Return ONLY valid JSON without explanations
 
-Current template structure:
-- formData: Contains colors, texts, layout options, and configuration
-- customElements: Array of custom text/image elements with positions
-Text element: {id, type:"text", position, content, styles:{color, backgroundColor, isBold, hasBox, boxColor, fontSize, textAlign}}
-Image element: {id, type:"image", position, content, styles:{imageSize, borderRadius}}
+POSITIONING GUIDE:
+- Header (-10 to -1): Small text only, don't interfere with logo space
+- Form area (0-99): Customer input fields and related elements
+- Payment area (100+): PIX QR codes and payment confirmation
 
-${brandResearch ? `Brand: ${brandResearch}` : ""}
+STYLE INHERITANCE: Use existing template colors and maintain visual consistency.
 
-Return JSON only:`;
+EXAMPLES:
+- Countdown timer: position 15, red background (#EF4444) with white text (#FFFFFF)
+- Urgency text: position 20, orange background (#F97316) with white text
+- Below logo elements: positions 0-10
+
+${brandResearch ? "Brand: " + brandResearch : ""}
+
+Return JSON:`;
 
     // Simplify the template data to reduce token count
     const simplifiedTemplate = {
