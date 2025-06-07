@@ -237,11 +237,26 @@ export default function EditPage() {
 
   const removeElement = useCallback((id: string) => {
     setCustomElements(prev => {
+      const elementToRemove = prev.find(el => el.id === id);
+      if (!elementToRemove) return prev;
+      
       const filtered = prev.filter(el => el.id !== id);
-      // Reorder positions to fill gaps
-      return filtered
+      
+      // Separate header elements (negative positions) from body elements (positive positions)
+      const headerElements = filtered.filter(el => el.position < 0);
+      const bodyElements = filtered.filter(el => el.position >= 0);
+      
+      // Reorder header elements (keep negative, but sequential)
+      const reorderedHeader = headerElements
+        .sort((a, b) => a.position - b.position)
+        .map((el, index) => ({ ...el, position: -15 + index }));
+      
+      // Reorder body elements (starting from 0)
+      const reorderedBody = bodyElements
         .sort((a, b) => a.position - b.position)
         .map((el, index) => ({ ...el, position: index }));
+      
+      return [...reorderedHeader, ...reorderedBody];
     });
     setSelectedElement(null);
   }, []);
@@ -409,6 +424,28 @@ export default function EditPage() {
           className="p-6 rounded-t-lg text-white text-center"
           style={{ backgroundColor: formData.primaryColor }}
         >
+          {/* Header custom elements (negative positions for header) */}
+          {customElements.filter(el => el.position < -10).map(element => (
+            <div key={element.id}>
+              {renderCustomElement(element)}
+            </div>
+          ))}
+
+          {/* Drop zone at top of header */}
+          <div
+            className={`h-8 mb-4 border-2 border-dashed rounded transition-colors ${
+              isDragging ? 'border-white/50 bg-white/10' : 'border-transparent'
+            }`}
+            onDragOver={handleDragOver}
+            onDrop={(e) => handleDrop(e, -15)}
+          >
+            {isDragging && (
+              <div className="flex items-center justify-center h-full text-sm text-white">
+                Solte no cabeçalho
+              </div>
+            )}
+          </div>
+
           {formData.showLogo && (
             <div className={`mb-4 flex ${formData.logoPosition === 'left' ? 'justify-start' : formData.logoPosition === 'right' ? 'justify-end' : 'justify-center'}`}>
               {formData.logoUrl ? (
@@ -427,32 +464,73 @@ export default function EditPage() {
               )}
             </div>
           )}
-        </div>
 
-        {/* Form */}
-        <CardContent className="p-6">
-          
-          {/* Custom elements at the top */}
-          {customElements.filter(el => el.position < 5).map(element => (
+          {/* Header custom elements after logo */}
+          {customElements.filter(el => el.position >= -10 && el.position < 0).map(element => (
             <div key={element.id}>
               {renderCustomElement(element)}
             </div>
           ))}
 
-          {/* Drop zone before form fields */}
+          {/* Drop zone at bottom of header */}
           <div
-            className={`h-8 mb-4 border-2 border-dashed rounded transition-colors ${
-              isDragging ? 'border-primary bg-primary/10' : 'border-transparent'
+            className={`h-8 border-2 border-dashed rounded transition-colors ${
+              isDragging ? 'border-white/50 bg-white/10' : 'border-transparent'
             }`}
             onDragOver={handleDragOver}
-            onDrop={(e) => handleDrop(e, 0)}
+            onDrop={(e) => handleDrop(e, -5)}
           >
             {isDragging && (
-              <div className="flex items-center justify-center h-full text-sm text-primary">
-                Solte aqui para adicionar
+              <div className="flex items-center justify-center h-full text-sm text-white">
+                Solte no cabeçalho
               </div>
             )}
           </div>
+        </div>
+
+        {/* Form */}
+        <CardContent className="p-6">
+          
+          {/* Render body elements in order */}
+          {customElements
+            .filter(el => el.position >= 0)
+            .sort((a, b) => a.position - b.position)
+            .map((element, index) => (
+              <div key={element.id}>
+                {/* Drop zone before each element */}
+                <div
+                  className={`h-4 mb-2 border-2 border-dashed rounded transition-colors ${
+                    isDragging ? 'border-primary bg-primary/10' : 'border-transparent'
+                  }`}
+                  onDragOver={handleDragOver}
+                  onDrop={(e) => handleDrop(e, index)}
+                >
+                  {isDragging && (
+                    <div className="flex items-center justify-center h-full text-xs text-primary">
+                      Solte aqui
+                    </div>
+                  )}
+                </div>
+                {renderCustomElement(element)}
+              </div>
+            ))}
+
+          {/* Drop zone at beginning if no elements */}
+          {customElements.filter(el => el.position >= 0).length === 0 && (
+            <div
+              className={`h-8 mb-4 border-2 border-dashed rounded transition-colors ${
+                isDragging ? 'border-primary bg-primary/10' : 'border-transparent'
+              }`}
+              onDragOver={handleDragOver}
+              onDrop={(e) => handleDrop(e, 0)}
+            >
+              {isDragging && (
+                <div className="flex items-center justify-center h-full text-sm text-primary">
+                  Solte aqui para adicionar
+                </div>
+              )}
+            </div>
+          )}
 
           <div className="space-y-4">
             <div>
@@ -472,28 +550,6 @@ export default function EditPage() {
               <div className="h-10 bg-neutral-100 rounded border"></div>
             </div>
 
-            {/* Custom elements in the middle */}
-            {customElements.filter(el => el.position >= 5 && el.position < 10).map(element => (
-              <div key={element.id}>
-                {renderCustomElement(element)}
-              </div>
-            ))}
-
-            {/* Drop zone before button */}
-            <div
-              className={`h-8 mb-4 border-2 border-dashed rounded transition-colors ${
-                isDragging ? 'border-primary bg-primary/10' : 'border-transparent'
-              }`}
-              onDragOver={handleDragOver}
-              onDrop={(e) => handleDrop(e, 8)}
-            >
-              {isDragging && (
-                <div className="flex items-center justify-center h-full text-sm text-primary">
-                  Solte aqui para adicionar
-                </div>
-              )}
-            </div>
-
             <Button 
               className="w-full text-white py-3 font-medium flex items-center justify-center space-x-2"
               style={{ backgroundColor: formData.accentColor }}
@@ -502,20 +558,13 @@ export default function EditPage() {
               <span>{formData.customButtonText}</span>
             </Button>
 
-            {/* Custom elements at the bottom */}
-            {customElements.filter(el => el.position >= 10).map(element => (
-              <div key={element.id}>
-                {renderCustomElement(element)}
-              </div>
-            ))}
-
-            {/* Drop zone at the end */}
+            {/* Drop zone at the end for more elements */}
             <div
               className={`h-8 border-2 border-dashed rounded transition-colors ${
                 isDragging ? 'border-primary bg-primary/10' : 'border-transparent'
               }`}
               onDragOver={handleDragOver}
-              onDrop={(e) => handleDrop(e, 15)}
+              onDrop={(e) => handleDrop(e, customElements.filter(el => el.position >= 0).length)}
             >
               {isDragging && (
                 <div className="flex items-center justify-center h-full text-sm text-primary">

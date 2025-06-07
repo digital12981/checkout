@@ -187,20 +187,12 @@ export default function Checkout() {
           )}
         </div>
 
-        {/* Price */}
-        <div className="px-6 py-4 bg-neutral-50 border-b border-neutral-200">
-          <div className="text-center">
-            <span className="text-sm text-neutral-600">Valor único</span>
-            <div className="text-3xl font-bold text-neutral-800 mt-1">
-              {formatCurrency(page.price)}
-            </div>
-          </div>
-        </div>
+
 
         {/* Customer Form */}
         {!pixPayment && (
           <CardContent className="p-6">
-            <h3 className="font-semibold text-neutral-800 mb-4">Dados para pagamento</h3>
+
             <Form {...form}>
               <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
                 <FormField
