@@ -619,6 +619,26 @@ export default function EditPage() {
             Pagamento PIX
           </h3>
 
+          {/* Payment page custom elements at the top */}
+          {customElements.filter(el => el.position >= 100 && el.position < 105).map(element => (
+            <div key={element.id}>
+              {renderCustomElement(element)}
+            </div>
+          ))}
+
+          {/* Drop zone before QR Code - only visible when dragging */}
+          {isDragging && (
+            <div
+              className="h-6 mb-3 border-2 border-dashed border-primary bg-primary/10 rounded transition-colors"
+              onDragOver={handleDragOver}
+              onDrop={(e) => handleDrop(e, 100)}
+            >
+              <div className="flex items-center justify-center h-full text-xs text-primary">
+                Solte na página de pagamento
+              </div>
+            </div>
+          )}
+
           {/* QR Code */}
           <div className="text-center mb-6">
             <div className="w-48 h-48 bg-white border-2 border-neutral-200 rounded-lg mx-auto flex items-center justify-center mb-4">
@@ -654,6 +674,26 @@ export default function EditPage() {
               </Button>
             </div>
           </div>
+
+          {/* Payment page custom elements after PIX code */}
+          {customElements.filter(el => el.position >= 105 && el.position < 110).map(element => (
+            <div key={element.id}>
+              {renderCustomElement(element)}
+            </div>
+          ))}
+
+          {/* Drop zone after PIX Code - only visible when dragging */}
+          {isDragging && (
+            <div
+              className="h-6 mb-3 border-2 border-dashed border-primary bg-primary/10 rounded transition-colors"
+              onDragOver={handleDragOver}
+              onDrop={(e) => handleDrop(e, 105)}
+            >
+              <div className="flex items-center justify-center h-full text-xs text-primary">
+                Solte na página de pagamento
+              </div>
+            </div>
+          )}
 
           {/* Instructions */}
           <div className="mb-4 p-4 bg-blue-50 rounded-lg">
@@ -1096,6 +1136,39 @@ export default function EditPage() {
                                 >
                                   Direita
                                 </Button>
+                              </div>
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+
+                      <FormField
+                        control={form.control}
+                        name="logoSize"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Tamanho da Logo (px)</FormLabel>
+                            <FormControl>
+                              <div className="space-y-2">
+                                <Input 
+                                  type="number"
+                                  min="32"
+                                  max="128"
+                                  value={field.value}
+                                  onChange={(e) => field.onChange(parseInt(e.target.value) || 64)}
+                                  className="w-full"
+                                />
+                                <div className="flex items-center space-x-2 text-sm text-neutral-500">
+                                  <span>32px</span>
+                                  <div className="flex-1 h-2 bg-neutral-200 rounded">
+                                    <div 
+                                      className="h-full bg-primary rounded"
+                                      style={{ width: `${((field.value - 32) / (128 - 32)) * 100}%` }}
+                                    />
+                                  </div>
+                                  <span>128px</span>
+                                </div>
                               </div>
                             </FormControl>
                             <FormMessage />
