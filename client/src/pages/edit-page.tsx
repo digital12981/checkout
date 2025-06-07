@@ -89,6 +89,8 @@ interface CustomElement {
     boxColor?: string;
     imageSize?: number;
     borderRadius?: number;
+    fontSize?: number;
+    textAlign?: "left" | "center" | "right";
   };
 }
 
@@ -220,6 +222,8 @@ export default function EditPage() {
         boxColor: "#f0f0f0",
         imageSize: type === "image" ? 200 : undefined,
         borderRadius: type === "image" ? 8 : undefined,
+        fontSize: type === "text" ? 16 : undefined,
+        textAlign: type === "text" ? "left" : undefined,
       }
     };
     setCustomElements(prev => [...prev, newElement]);
@@ -232,7 +236,13 @@ export default function EditPage() {
   }, []);
 
   const removeElement = useCallback((id: string) => {
-    setCustomElements(prev => prev.filter(el => el.id !== id));
+    setCustomElements(prev => {
+      const filtered = prev.filter(el => el.id !== id);
+      // Reorder positions to fill gaps
+      return filtered
+        .sort((a, b) => a.position - b.position)
+        .map((el, index) => ({ ...el, position: index }));
+    });
     setSelectedElement(null);
   }, []);
 
@@ -250,6 +260,8 @@ export default function EditPage() {
         boxColor: "#f0f0f0",
         imageSize: type === "image" ? 200 : undefined,
         borderRadius: type === "image" ? 8 : undefined,
+        fontSize: type === "text" ? 16 : undefined,
+        textAlign: type === "text" ? "left" : undefined,
       }
     };
 
@@ -322,7 +334,9 @@ export default function EditPage() {
             style={{
               color: element.styles.color,
               backgroundColor: element.styles.hasBox ? element.styles.boxColor : 'transparent',
-              fontWeight: element.styles.isBold ? 'bold' : 'normal'
+              fontWeight: element.styles.isBold ? 'bold' : 'normal',
+              fontSize: element.styles.fontSize ? `${element.styles.fontSize}px` : '16px',
+              textAlign: element.styles.textAlign || 'left'
             }}
           >
             {element.content}
@@ -417,7 +431,6 @@ export default function EditPage() {
 
         {/* Form */}
         <CardContent className="p-6">
-          <h3 className="font-semibold text-neutral-800 mb-4">Dados para pagamento</h3>
           
           {/* Custom elements at the top */}
           {customElements.filter(el => el.position < 5).map(element => (
@@ -1101,7 +1114,7 @@ export default function EditPage() {
                                         rows={2}
                                       />
                                     </div>
-                                    <div className="grid grid-cols-2 gap-3">
+                                    <div className="grid grid-cols-3 gap-3">
                                       <div>
                                         <label className="block text-sm font-medium mb-1">Cor do texto</label>
                                         <input
@@ -1111,6 +1124,19 @@ export default function EditPage() {
                                             styles: { ...element.styles, color: e.target.value } 
                                           })}
                                           className="w-full h-8 border rounded"
+                                        />
+                                      </div>
+                                      <div>
+                                        <label className="block text-sm font-medium mb-1">Tamanho</label>
+                                        <input
+                                          type="number"
+                                          value={element.styles.fontSize || 16}
+                                          onChange={(e) => updateElement(element.id, { 
+                                            styles: { ...element.styles, fontSize: parseInt(e.target.value) || 16 } 
+                                          })}
+                                          className="w-full p-1 border rounded text-sm"
+                                          min="10"
+                                          max="48"
                                         />
                                       </div>
                                       <div className="flex items-end">
@@ -1126,6 +1152,20 @@ export default function EditPage() {
                                           Negrito
                                         </label>
                                       </div>
+                                    </div>
+                                    <div>
+                                      <label className="block text-sm font-medium mb-1">Alinhamento</label>
+                                      <select
+                                        value={element.styles.textAlign || "left"}
+                                        onChange={(e) => updateElement(element.id, { 
+                                          styles: { ...element.styles, textAlign: e.target.value as "left" | "center" | "right" } 
+                                        })}
+                                        className="w-full p-2 border rounded text-sm"
+                                      >
+                                        <option value="left">Esquerda</option>
+                                        <option value="center">Centro</option>
+                                        <option value="right">Direita</option>
+                                      </select>
                                     </div>
                                     <div>
                                       <label className="flex items-center text-sm">
