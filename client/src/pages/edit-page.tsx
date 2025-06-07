@@ -1399,7 +1399,7 @@ export default function EditPage() {
                       <div>
                         <h4 className="text-base font-medium mb-2">Elementos Personalizados</h4>
                         <p className="text-sm text-neutral-500 mb-4">
-                          Adicione textos e imagens arrastáveis no checkout
+                          Arraste elementos para o preview ou clique para adicionar ao final
                         </p>
                         <div className="flex space-x-2 mb-4">
                           <Button
@@ -1429,7 +1429,7 @@ export default function EditPage() {
                         </div>
                         
                         <div className="text-sm text-neutral-600 p-3 bg-neutral-50 rounded">
-                          <p><strong>Como usar:</strong> Clique para adicionar ao final ou arraste para o preview para posicionar onde desejar.</p>
+                          <p><strong>Como editar:</strong> Clique no elemento no preview para ver as opções ou duplo-clique no texto para editar diretamente.</p>
                           <p className="mt-1">Total de elementos: {customElements.length}</p>
                         </div>
 
