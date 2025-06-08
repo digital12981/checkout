@@ -23,16 +23,19 @@ const customerFormSchema = z.object({
 type CustomerForm = z.infer<typeof customerFormSchema>;
 
 export default function Checkout() {
-  const { pageId } = useParams();
+  const params = useParams();
+  const pageId = params.id;
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const [pixPayment, setPixPayment] = useState<PixPayment | null>(null);
   const [isGeneratingPayment, setIsGeneratingPayment] = useState(false);
 
-  const { data: page, isLoading: pageLoading } = useQuery<PaymentPage>({
+  const { data: page, isLoading: pageLoading, error } = useQuery<PaymentPage>({
     queryKey: [`/api/payment-pages/${pageId}`],
     enabled: !!pageId,
   });
+
+
 
   const form = useForm<CustomerForm>({
     resolver: zodResolver(customerFormSchema),
