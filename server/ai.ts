@@ -326,57 +326,58 @@ Use suggestedColors for new elements. Return modified JSON:`;
         
         // Try to extract partial data or return original template
         try {
-          // Attempt to fix common JSON issues and try again
           let fixedText = content.text;
           
           // Remove markdown code blocks
           fixedText = fixedText.replace(/```json/g, '').replace(/```/g, '').trim();
           
-          // Remove any truncated base64 data that might be causing issues
-          fixedText = fixedText.replace(/"logoUrl"\s*:\s*"data:image\/[^"]*$/g, '"logoUrl": "PRESERVED"');
+          // Find the first complete JSON object
+          const jsonStart = fixedText.indexOf('{');
+          if (jsonStart === -1) throw new Error('No JSON found');
           
-          // Fix unterminated strings and arrays
-          // Find the last complete JSON structure
-          let lastValidEnd = fixedText.length;
+          // Try to find the matching closing brace
+          let braceCount = 0;
+          let jsonEnd = -1;
           
-          // Look for unterminated strings
-          const openQuoteMatches = (fixedText.match(/"/g) || []).length;
-          if (openQuoteMatches % 2 !== 0) {
-            // Odd number of quotes means unterminated string
-            const lastCompleteQuote = fixedText.lastIndexOf('"}');
-            const lastCompleteArray = fixedText.lastIndexOf('}]');
-            lastValidEnd = Math.max(lastCompleteQuote + 2, lastCompleteArray + 2);
-          }
-          
-          // Look for unterminated arrays and close them properly
-          if (fixedText.includes('[') && !fixedText.includes(']')) {
-            // Find array start and try to close it properly
-            const arrayPattern = /"customElements"\s*:\s*\[(.*?)$/;
-            const arrayMatch = fixedText.match(arrayPattern);
-            if (arrayMatch && arrayMatch.index !== undefined) {
-              // Remove the incomplete array and close the object properly
-              const beforeArray = fixedText.substring(0, arrayMatch.index + arrayMatch[0].indexOf('['));
-              fixedText = beforeArray.replace(/,\s*$/, '') + ']';
+          for (let i = jsonStart; i < fixedText.length; i++) {
+            if (fixedText[i] === '{') braceCount++;
+            if (fixedText[i] === '}') {
+              braceCount--;
+              if (braceCount === 0) {
+                jsonEnd = i;
+                break;
+              }
             }
           }
           
-          if (lastValidEnd < fixedText.length) {
-            fixedText = fixedText.substring(0, lastValidEnd);
+          if (jsonEnd === -1) {
+            // JSON is incomplete, try to extract just formData
+            const formDataStart = fixedText.indexOf('"formData"');
+            if (formDataStart > -1) {
+              const beforeFormData = fixedText.substring(0, formDataStart);
+              const simpleJson = beforeFormData + '"formData": {}}';
+              const minimalResult = JSON.parse(simpleJson);
+              
+              // Try to extract individual properties
+              const colorMatch = fixedText.match(/"primaryColor"\s*:\s*"([^"]+)"/);
+              const accentMatch = fixedText.match(/"accentColor"\s*:\s*"([^"]+)"/);
+              
+              if (colorMatch || accentMatch) {
+                minimalResult.formData = {};
+                if (colorMatch) minimalResult.formData.primaryColor = colorMatch[1];
+                if (accentMatch) minimalResult.formData.accentColor = accentMatch[1];
+              }
+              
+              return {
+                formData: minimalResult.formData || {},
+                customElements: currentTemplate.customElements || []
+              };
+            }
+            throw new Error('Could not find complete JSON');
           }
           
-          // Remove trailing commas
-          fixedText = fixedText.replace(/,\s*$/g, '');
-          
-          // Ensure proper closing braces
-          const openBraces = (fixedText.match(/\{/g) || []).length;
-          const closeBraces = (fixedText.match(/\}/g) || []).length;
-          const missingBraces = openBraces - closeBraces;
-          
-          if (missingBraces > 0) {
-            fixedText += '}'.repeat(missingBraces);
-          }
-          
-          const fixedResult = JSON.parse(fixedText);
+          const validJson = fixedText.substring(jsonStart, jsonEnd + 1);
+          const fixedResult = JSON.parse(validJson);
           
           // Restore original logo if it was marked as PRESERVED
           if (fixedResult.formData && fixedResult.formData.logoUrl === "PRESERVED") {
