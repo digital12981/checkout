@@ -249,6 +249,8 @@ export default function Checkout() {
           lineHeight: elementStyles.lineHeight || "1.5",
           borderTop: elementStyles.borderTop,
           boxShadow: elementStyles.boxShadow,
+          minHeight: "20px", // Ensure visibility
+          display: "block", // Force display
         }}
         dangerouslySetInnerHTML={{ __html: element.content.replace(/\n/g, '<br/>') }}
       />
@@ -260,6 +262,13 @@ export default function Checkout() {
       className="min-h-screen w-full"
       style={{ backgroundColor: customStyles.backgroundColor }}
     >
+      {/* Custom elements positioned at top */}
+      {customElements.filter((el: any) => el.position === "top").map((element: any) => (
+        <div key={element.id} className="w-full">
+          {renderCustomElement(element)}
+        </div>
+      ))}
+
       {/* Header */}
       <div 
         className="w-full text-white text-center flex flex-col justify-center"
@@ -269,13 +278,6 @@ export default function Checkout() {
           padding: "24px"
         }}
       >
-        {/* Header custom elements (position "top" or negative numbers) */}
-        {customElements.filter((el: any) => el.position === "top" || el.position < -10).map((element: any) => (
-          <div key={element.id}>
-            {renderCustomElement(element)}
-          </div>
-        ))}
-
         {page.showLogo !== false && (
           <div className={`mb-4 flex ${page.logoPosition === 'left' ? 'justify-start' : page.logoPosition === 'right' ? 'justify-end' : 'justify-center'}`}>
             {page.logoUrl ? (
@@ -320,11 +322,18 @@ export default function Checkout() {
         </div>
       </div>
 
+      {/* Custom elements positioned at middle */}
+      {customElements.filter((el: any) => el.position === "middle").map((element: any) => (
+        <div key={element.id} className="w-full max-w-2xl mx-auto p-6">
+          {renderCustomElement(element)}
+        </div>
+      ))}
+
       {/* Custom elements in form/content area (positions 0-99) */}
       <div className="w-full max-w-2xl mx-auto p-6">
         {/* Custom elements before form */}
         {customElements
-          .filter((el: any) => el.position === "middle" || (el.position >= 0 && el.position < 50))
+          .filter((el: any) => el.position >= 0 && el.position < 50 && el.position !== "top" && el.position !== "middle" && el.position !== "bottom")
           .sort((a: any, b: any) => a.position - b.position)
           .map((element: any) => renderCustomElement(element))}
 
