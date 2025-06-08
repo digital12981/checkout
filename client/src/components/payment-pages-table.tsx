@@ -103,20 +103,11 @@ export default function PaymentPagesTable() {
   };
 
   const handleShare = (pageId: number) => {
-    const page = pages.find(p => p.id === pageId);
-    let url = `${window.location.origin}/checkout/${pageId}`;
-    
-    // Se a página tem "Pular Formulário" habilitado, adicione parâmetros de exemplo
-    if (page?.skipForm) {
-      url += `?nome=Nome%20do%20Cliente&cpf=12345678901&email=cliente@email.com&telefone=11999999999`;
-    }
-    
+    const url = `${window.location.origin}/checkout/${pageId}`;
     navigator.clipboard.writeText(url).then(() => {
       toast({
         title: "Link copiado!",
-        description: page?.skipForm 
-          ? "Link copiado com parâmetros de exemplo. Substitua pelos dados reais do cliente."
-          : "O link da página foi copiado para a área de transferência.",
+        description: "O link da página foi copiado para a área de transferência.",
       });
     });
   };
