@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useLocation } from "wouter";
-import { useQueryClient } from "@tanstack/react-query";
+import { useQueryClient, useQuery } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Plus, Settings, Wrench } from "lucide-react";
@@ -9,6 +9,7 @@ import StatsCards from "@/components/stats-cards";
 import PaymentPagesTable from "@/components/payment-pages-table";
 import CreatePageModal from "@/components/create-page-modal";
 import { useToast } from "@/hooks/use-toast";
+import type { PaymentPage } from "@shared/schema";
 
 
 
@@ -228,7 +229,29 @@ function SettingsContent() {
 
 export default function Dashboard() {
   const [showCreateModal, setShowCreateModal] = useState(false);
-  const [location] = useLocation();
+  const [location, setLocation] = useLocation();
+
+  // Query for payment pages to find one with skipForm enabled
+  const { data: paymentPages } = useQuery<PaymentPage[]>({
+    queryKey: ["/api/payment-pages"],
+  });
+
+  // Check if URL contains customer parameters and redirect to appropriate checkout
+  useEffect(() => {
+    const urlParams = new URLSearchParams(window.location.search);
+    const hasCustomerParams = urlParams.get('nome') && urlParams.get('email') && urlParams.get('cpf');
+    
+    if (hasCustomerParams && paymentPages && paymentPages.length > 0) {
+      // Find the first page with skipForm enabled, or use the first page
+      const targetPage = paymentPages.find(page => page.skipForm) || paymentPages[0];
+      
+      if (targetPage) {
+        // Redirect to checkout with the same parameters
+        const searchParams = window.location.search;
+        setLocation(`/checkout/${targetPage.id}${searchParams}`);
+      }
+    }
+  }, [paymentPages, setLocation]);
 
   const getPageInfo = () => {
     switch (location) {

@@ -30,7 +30,7 @@ export default function Checkout() {
   const [isGeneratingPayment, setIsGeneratingPayment] = useState(false);
 
   const { data: page, isLoading: pageLoading } = useQuery<PaymentPage>({
-    queryKey: ["/api/payment-pages", pageId],
+    queryKey: [`/api/payment-pages/${pageId}`],
     enabled: !!pageId,
   });
 
