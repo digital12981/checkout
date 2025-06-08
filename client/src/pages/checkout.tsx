@@ -44,6 +44,7 @@ export default function Checkout() {
   const { id } = useParams<{ id: string }>();
   const [pixPayment, setPixPayment] = useState<PixPayment | null>(null);
   const [copied, setCopied] = useState(false);
+  const [isGeneratingPayment, setIsGeneratingPayment] = useState(false);
   const { toast } = useToast();
 
   const { data: page, isLoading, error } = useQuery<PaymentPage>({
@@ -61,6 +62,30 @@ export default function Checkout() {
     },
   });
 
+  // Function to extract customer data from URL parameters
+  const getCustomerDataFromURL = () => {
+    const urlParams = new URLSearchParams(window.location.search);
+    return {
+      customerName: urlParams.get('nome') || '',
+      customerEmail: urlParams.get('email') || '',
+      customerCpf: urlParams.get('cpf') || '',
+      customerPhone: urlParams.get('telefone') || '',
+    };
+  };
+
+  // Auto-generate payment when skipForm is enabled
+  useEffect(() => {
+    if (page && page.skipForm && !pixPayment && !isGeneratingPayment) {
+      const customerData = getCustomerDataFromURL();
+      
+      // Validate required fields
+      if (customerData.customerName && customerData.customerEmail && customerData.customerCpf) {
+        setIsGeneratingPayment(true);
+        createPaymentMutation.mutate(customerData);
+      }
+    }
+  }, [page]);
+
   const createPaymentMutation = useMutation({
     mutationFn: async (data: CustomerForm) => {
       const response = await apiRequest("POST", "/api/pix-payments", {
@@ -71,8 +96,10 @@ export default function Checkout() {
     },
     onSuccess: (payment: PixPayment) => {
       setPixPayment(payment);
+      setIsGeneratingPayment(false);
     },
     onError: (error) => {
+      setIsGeneratingPayment(false);
       toast({
         title: "Erro",
         description: error instanceof Error ? error.message : "Erro ao processar pagamento",
@@ -136,6 +163,63 @@ export default function Checkout() {
     );
   }
 
+  // Loading screen when generating payment with skipForm
+  if (isGeneratingPayment && page?.skipForm) {
+    const customStyles = getCustomStyles(page);
+    return (
+      <div className="min-h-screen bg-white flex items-center justify-center p-4">
+        <div className="text-center">
+          {/* Logo */}
+          {page.showLogo !== false && (
+            <div className="mb-6 flex justify-center">
+              {page.logoUrl ? (
+                <img 
+                  src={page.logoUrl} 
+                  alt="Logo" 
+                  className="object-contain rounded"
+                  style={{ width: `${page.logoSize || 64}px`, height: `${page.logoSize || 64}px` }}
+                  onError={(e) => {
+                    e.currentTarget.style.display = 'none';
+                  }}
+                />
+              ) : (
+                <div 
+                  className="bg-gray-200 rounded-full flex items-center justify-center"
+                  style={{ 
+                    width: `${page.logoSize || 64}px`, 
+                    height: `${page.logoSize || 64}px`,
+                    backgroundColor: customStyles.primaryColor + '20'
+                  }}
+                >
+                  <ShoppingBag 
+                    className="w-8 h-8" 
+                    style={{ color: customStyles.primaryColor }}
+                  />
+                </div>
+              )}
+            </div>
+          )}
+          
+          {/* Spinner */}
+          <div className="mb-4">
+            <div 
+              className="animate-spin rounded-full h-8 w-8 border-b-2 mx-auto"
+              style={{ borderColor: customStyles.primaryColor }}
+            ></div>
+          </div>
+          
+          {/* Status Text */}
+          <p 
+            className="text-lg font-medium"
+            style={{ color: customStyles.textColor }}
+          >
+            Gerando pagamento...
+          </p>
+        </div>
+      </div>
+    );
+  }
+
   if (error || !page) {
     return (
       <div className="min-h-screen bg-neutral-900 bg-opacity-95 flex items-center justify-center p-4">
@@ -189,8 +273,8 @@ export default function Checkout() {
 
 
 
-        {/* Customer Form */}
-        {!pixPayment && (
+        {/* Customer Form - only show if skipForm is disabled */}
+        {!pixPayment && !page.skipForm && (
           <CardContent className="p-6">
 
             <Form {...form}>
