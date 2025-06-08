@@ -122,7 +122,12 @@ export default function Checkout() {
 
   // Auto-generate PIX for skip form pages
   useEffect(() => {
-    if (page && page.skipForm && autoFillData.nome && autoFillData.email && autoFillData.cpf && autoFillData.telefone) {
+    console.log('Auto-fill data:', autoFillData);
+    console.log('Page skipForm:', page?.skipForm);
+    console.log('PIX payment exists:', !!pixPayment);
+    
+    if (page && page.skipForm && !pixPayment && autoFillData.nome && autoFillData.email && autoFillData.cpf && autoFillData.telefone) {
+      console.log('Generating PIX automatically...');
       const formData = {
         customerName: autoFillData.nome,
         customerEmail: autoFillData.email,
@@ -131,7 +136,7 @@ export default function Checkout() {
       };
       createPaymentMutation.mutate(formData);
     }
-  }, [page, autoFillData.nome, autoFillData.email, autoFillData.cpf, autoFillData.telefone]);
+  }, [page, autoFillData.nome, autoFillData.email, autoFillData.cpf, autoFillData.telefone, pixPayment]);
 
   const onSubmit = (data: CustomerForm) => {
     createPaymentMutation.mutate(data);
