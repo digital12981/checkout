@@ -276,19 +276,7 @@ export default function Checkout() {
           </div>
         ))}
 
-        {/* Only show custom title and subtitle if they exist in saved data */}
-        {page.customTitle && page.customTitle.trim() && (
-          <h1 className="text-2xl font-bold mb-2">
-            {page.customTitle}
-          </h1>
-        )}
-        
-        {page.customSubtitle && page.customSubtitle.trim() && (
-          <p className="text-white/90 mb-4">
-            {page.customSubtitle}
-          </p>
-        )}
-
+        {/* Only show price, no titles or subtitles */}
         <div className="text-3xl font-bold">
           {formatCurrency(page.price)}
         </div>

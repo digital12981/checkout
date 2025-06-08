@@ -232,9 +232,11 @@ export default function EditPage() {
   });
 
   const onSubmit = (data: EditPageForm) => {
-    // Update custom elements in form data
+    // Update custom elements in form data and clear titles/subtitles if empty
     const updatedData = {
       ...data,
+      customTitle: data.customTitle?.trim() || "",
+      customSubtitle: data.customSubtitle?.trim() || "",
       customElements: JSON.stringify(customElements)
     };
     updatePageMutation.mutate(updatedData);
