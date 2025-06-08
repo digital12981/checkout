@@ -470,7 +470,8 @@ export default function EditPage() {
       }
       if (result.customElements) {
         setAiStatus("Adicionando elementos...");
-        setCustomElements(result.customElements);
+        // Merge new elements with existing ones instead of replacing
+        setCustomElements(prev => [...prev, ...result.customElements]);
       }
 
       // Force preview re-render
