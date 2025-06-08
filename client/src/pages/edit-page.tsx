@@ -618,8 +618,8 @@ export default function EditPage() {
             </div>
           ) : (
             <div
-              className={`rounded cursor-pointer ${element.styles.hasBox ? 'border' : ''} ${
-                element.type?.includes('footer') || element.position >= 100 ? 'w-full mt-8 -mx-6 px-6' : ''
+              className={`cursor-pointer ${element.styles.hasBox ? 'border' : ''} ${
+                element.type?.includes('footer') || element.position >= 100 ? 'w-full -mx-6 px-6 rounded-none' : 'rounded'
               }`}
               style={{
                 color: element.styles.color || "#000000",
@@ -628,13 +628,17 @@ export default function EditPage() {
                 fontWeight: element.styles.fontWeight || (element.styles.isBold ? "bold" : "normal"),
                 fontSize: element.styles.fontSize || "16px",
                 textAlign: element.type?.includes('footer') || element.position >= 100 ? "center" : (element.styles.textAlign || "left"),
-                borderRadius: `${element.styles.borderRadius || 4}px`,
+                borderRadius: element.type?.includes('footer') || element.position >= 100 ? "0" : `${element.styles.borderRadius || 4}px`,
                 padding: element.styles.padding || "8px",
                 border: element.styles.border,
                 marginBottom: element.styles.marginBottom,
                 marginTop: element.type?.includes('footer') || element.position >= 100 ? "32px" : element.styles.marginTop,
                 lineHeight: element.styles.lineHeight,
-                borderTop: element.styles.borderTop
+                borderTop: element.styles.borderTop,
+                width: element.type?.includes('footer') || element.position >= 100 ? "100vw" : "auto",
+                marginLeft: element.type?.includes('footer') || element.position >= 100 ? "-50vw" : "0",
+                left: element.type?.includes('footer') || element.position >= 100 ? "50%" : "auto",
+                position: element.type?.includes('footer') || element.position >= 100 ? "relative" : "static"
               }}
               onDoubleClick={() => startEditingText(element.id, element.content)}
               dangerouslySetInnerHTML={{ __html: element.content.replace(/\n/g, '<br/>') }}
@@ -862,17 +866,30 @@ export default function EditPage() {
             )}
           </div>
         </CardContent>
-        
-        {/* Footer elements (position 100+) rendered after the card content */}
-        {customElements
-          .filter(el => el.position >= 100)
-          .sort((a, b) => a.position - b.position)
-          .map(element => (
-            <div key={element.id} className="mt-4">
-              {renderCustomElement(element)}
-            </div>
-          ))}
       </Card>
+      
+      {/* Footer elements (position 100+) rendered outside card for full width */}
+      {customElements
+        .filter(el => el.position >= 100)
+        .sort((a, b) => a.position - b.position)
+        .map(element => (
+          <div 
+            key={element.id} 
+            className="w-full mt-6"
+            style={{
+              backgroundColor: element.styles?.backgroundColor || formData.primaryColor,
+              color: element.styles?.color || "#ffffff",
+              textAlign: "center",
+              padding: element.styles?.padding || "20px",
+              fontSize: element.styles?.fontSize || "14px",
+              borderTop: element.styles?.borderTop || `1px solid ${formData.primaryColor}`,
+              marginLeft: "-16px",
+              marginRight: "-16px"
+            }}
+          >
+            <div dangerouslySetInnerHTML={{ __html: element.content.replace(/\n/g, '<br/>') }} />
+          </div>
+        ))}
     </div>
   );
 

@@ -321,15 +321,19 @@ Keep under 400 chars. Use suggestedColors.`;
               
             let elementStyles = element.styles || element.style || {};
             
-            // Enhance footer styling
+            // Enhance footer styling with primary color
             if (isFooter) {
+              const primaryColor = currentTemplate.formData.primaryColor || '#3B82F6';
               elementStyles = {
                 ...elementStyles,
                 width: '100%',
                 textAlign: 'center',
-                padding: elementStyles.padding || '16px',
+                padding: elementStyles.padding || '20px',
+                backgroundColor: elementStyles.backgroundColor || primaryColor,
+                color: elementStyles.color || '#ffffff',
+                fontSize: elementStyles.fontSize || '14px',
                 marginTop: elementStyles.marginTop || '32px',
-                borderTop: elementStyles.borderTop || '1px solid #e5e7eb'
+                borderTop: elementStyles.borderTop || `1px solid ${primaryColor}`
               };
             }
               
@@ -422,15 +426,19 @@ Keep under 400 chars. Use suggestedColors.`;
                 
               let elementStyles = element.styles || element.style || {};
               
-              // Enhance footer styling
+              // Enhance footer styling with primary color
               if (isFooter) {
+                const primaryColor = currentTemplate.formData.primaryColor || '#3B82F6';
                 elementStyles = {
                   ...elementStyles,
                   width: '100%',
                   textAlign: 'center',
-                  padding: elementStyles.padding || '16px',
+                  padding: elementStyles.padding || '20px',
+                  backgroundColor: elementStyles.backgroundColor || primaryColor,
+                  color: elementStyles.color || '#ffffff',
+                  fontSize: elementStyles.fontSize || '14px',
                   marginTop: elementStyles.marginTop || '32px',
-                  borderTop: elementStyles.borderTop || '1px solid #e5e7eb'
+                  borderTop: elementStyles.borderTop || `1px solid ${primaryColor}`
                 };
               }
                 
