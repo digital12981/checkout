@@ -334,6 +334,35 @@ Use suggestedColors for new elements. Return modified JSON:`;
           
           // Remove any truncated base64 data that might be causing issues
           fixedText = fixedText.replace(/"logoUrl"\s*:\s*"data:image\/[^"]*$/g, '"logoUrl": "PRESERVED"');
+          
+          // Fix unterminated strings and arrays
+          // Find the last complete JSON structure
+          let lastValidEnd = fixedText.length;
+          
+          // Look for unterminated strings
+          const openQuoteMatches = (fixedText.match(/"/g) || []).length;
+          if (openQuoteMatches % 2 !== 0) {
+            // Odd number of quotes means unterminated string
+            const lastCompleteQuote = fixedText.lastIndexOf('"}');
+            const lastCompleteArray = fixedText.lastIndexOf('}]');
+            lastValidEnd = Math.max(lastCompleteQuote + 2, lastCompleteArray + 2);
+          }
+          
+          // Look for unterminated arrays
+          if (fixedText.includes('[') && !fixedText.includes(']')) {
+            const lastArrayStart = fixedText.lastIndexOf('[');
+            const beforeArray = fixedText.substring(0, lastArrayStart);
+            const lastCompleteProperty = beforeArray.lastIndexOf('"}');
+            if (lastCompleteProperty > 0) {
+              lastValidEnd = lastCompleteProperty + 2;
+            }
+          }
+          
+          if (lastValidEnd < fixedText.length) {
+            fixedText = fixedText.substring(0, lastValidEnd);
+          }
+          
+          // Remove trailing commas
           fixedText = fixedText.replace(/,\s*$/g, '');
           
           // Ensure proper closing braces
@@ -342,7 +371,7 @@ Use suggestedColors for new elements. Return modified JSON:`;
           const missingBraces = openBraces - closeBraces;
           
           if (missingBraces > 0) {
-            fixedText += '}}'.repeat(missingBraces);
+            fixedText += '}'.repeat(missingBraces);
           }
           
           const fixedResult = JSON.parse(fixedText);
@@ -356,6 +385,22 @@ Use suggestedColors for new elements. Return modified JSON:`;
           return fixedResult;
         } catch (secondError) {
           console.error("Failed to fix JSON response:", secondError);
+          
+          // As a last resort, try to extract just the formData portion
+          try {
+            const formDataMatch = content.text.match(/"formData"\s*:\s*\{([^}]+)\}/);
+            if (formDataMatch) {
+              const formDataStr = `{"formData":{${formDataMatch[1]}}}`;
+              const partialResult = JSON.parse(formDataStr);
+              return {
+                formData: partialResult.formData,
+                customElements: currentTemplate.customElements || []
+              };
+            }
+          } catch (thirdError) {
+            console.error("Failed to extract partial data:", thirdError);
+          }
+          
           return currentTemplate;
         }
       }

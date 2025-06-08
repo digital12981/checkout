@@ -464,6 +464,9 @@ export default function EditPage() {
         Object.entries(result.formData).forEach(([key, value]) => {
           form.setValue(key as any, value, { shouldDirty: true, shouldTouch: true, shouldValidate: true });
         });
+        
+        // Trigger form validation to update all dependent states
+        form.trigger();
       }
       if (result.customElements) {
         setAiStatus("Adicionando elementos...");
