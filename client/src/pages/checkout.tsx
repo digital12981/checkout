@@ -64,7 +64,25 @@ export default function Checkout() {
 
   // Function to extract customer data from URL parameters
   const getCustomerDataFromURL = () => {
-    const urlParams = new URLSearchParams(window.location.search);
+    let searchParams = window.location.search;
+    
+    // Handle encoded URLs where %3F is used instead of ?
+    if (!searchParams && window.location.pathname.includes('%3F')) {
+      const pathParts = window.location.pathname.split('%3F');
+      if (pathParts.length > 1) {
+        searchParams = '?' + decodeURIComponent(pathParts[1]);
+      }
+    }
+    
+    // Also handle the case where the full URL is encoded
+    if (!searchParams && window.location.href.includes('%3F')) {
+      const urlParts = window.location.href.split('%3F');
+      if (urlParts.length > 1) {
+        searchParams = '?' + decodeURIComponent(urlParts[1]);
+      }
+    }
+    
+    const urlParams = new URLSearchParams(searchParams);
     return {
       customerName: urlParams.get('nome') || '',
       customerEmail: urlParams.get('email') || '',
