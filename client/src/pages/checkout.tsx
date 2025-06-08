@@ -238,53 +238,276 @@ export default function Checkout() {
     );
   };
 
-  return (
-    <div 
-      className="min-h-screen w-full"
-      style={{ backgroundColor: customStyles.backgroundColor }}
-    >
-      {/* Header - exact same structure as edit page */}
+  // Use saved template structure if available, otherwise use current page data
+  const renderCheckoutPage = () => {
+    if (page.templateStructure) {
+      try {
+        const template = JSON.parse(page.templateStructure);
+        return renderFromTemplate(template);
+      } catch (error) {
+        console.error("Error parsing template structure:", error);
+        return renderFallbackLayout();
+      }
+    }
+    return renderFallbackLayout();
+  };
+
+  const renderFromTemplate = (template: any) => {
+    const { formData, customElements: templateElements, renderSettings } = template;
+    
+    return (
       <div 
-        className="w-full p-6 text-white text-center flex flex-col justify-center"
-        style={{ 
-          backgroundColor: customStyles.primaryColor,
-          height: `${page.headerHeight}px`
-        }}
+        className="min-h-screen w-full"
+        style={{ backgroundColor: renderSettings.backgroundColor }}
       >
-        {/* Header custom elements (negative positions for header) */}
-        {customElements.filter((el: any) => el.position < -10).map((element: any) => (
-          <div key={element.id}>
-            {renderCustomElement(element)}
-          </div>
-        ))}
+        {/* Header with exact template structure */}
+        <div 
+          className="w-full p-6 text-white text-center flex flex-col justify-center"
+          style={{ 
+            backgroundColor: renderSettings.primaryColor,
+            height: `${renderSettings.headerHeight}px`
+          }}
+        >
+          {/* Render header custom elements in exact saved positions */}
+          {templateElements
+            .filter((el: any) => el.position < 0)
+            .sort((a: any, b: any) => a.position - b.position)
+            .map((element: any, index: number) => (
+            <div key={element.id || index}>
+              {renderCustomElement(element)}
+            </div>
+          ))}
 
-        {page.showLogo && page.logoUrl && (
-          <div className={`mb-4 flex ${page.logoPosition === 'left' ? 'justify-start' : page.logoPosition === 'right' ? 'justify-end' : 'justify-center'}`}>
-            <img 
-              src={page.logoUrl} 
-              alt="Logo" 
-              className="object-contain rounded"
-              style={{ width: `${page.logoSize}px`, height: `${page.logoSize}px` }}
-            />
-          </div>
-        )}
+          {/* Show logo if configured in template */}
+          {renderSettings.showLogo && renderSettings.logoUrl && (
+            <div className={`mb-4 flex ${renderSettings.logoPosition === 'left' ? 'justify-start' : renderSettings.logoPosition === 'right' ? 'justify-end' : 'justify-center'}`}>
+              <img 
+                src={renderSettings.logoUrl} 
+                alt="Logo" 
+                className="object-contain rounded"
+                style={{ width: `${renderSettings.logoSize}px`, height: `${renderSettings.logoSize}px` }}
+              />
+            </div>
+          )}
 
-        {/* Header custom elements after logo */}
-        {customElements.filter((el: any) => el.position >= -10 && el.position < 0).map((element: any) => (
-          <div key={element.id}>
-            {renderCustomElement(element)}
-          </div>
-        ))}
+          {/* Show custom title if exists in template */}
+          {formData.customTitle && formData.customTitle.trim() && (
+            <h1 className="text-2xl font-bold mb-2">
+              {formData.customTitle}
+            </h1>
+          )}
+          
+          {/* Show custom subtitle if exists in template */}
+          {formData.customSubtitle && formData.customSubtitle.trim() && (
+            <p className="text-white/90 mb-4">
+              {formData.customSubtitle}
+            </p>
+          )}
 
-        {/* Only show price, no titles or subtitles */}
-        <div className="text-3xl font-bold">
-          {formatCurrency(page.price)}
+          {/* Always show price */}
+          <div className="text-3xl font-bold">
+            {formatCurrency(page.price)}
+          </div>
+        </div>
+
+        {/* Form area with template elements */}
+        <div className="w-full p-6 bg-white flex justify-center">
+          <div className="w-full max-w-md">
+            {/* Render body elements in order */}
+            {templateElements
+              .filter((el: any) => el.position >= 0 && el.position < 100)
+              .sort((a: any, b: any) => a.position - b.position)
+              .map((element: any, index: number) => (
+                <div key={element.id || index}>
+                  {renderCustomElement(element)}
+                </div>
+              ))}
+
+            {/* Customer Form - only show if skipForm is disabled */}
+            {!pixPayment && !page.skipForm && (
+              <Form {...form}>
+                <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+                  <FormField
+                    control={form.control}
+                    name="customerName"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Nome completo</FormLabel>
+                        <FormControl>
+                          <Input {...field} defaultValue={autoFillData.nome || ""} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  <FormField
+                    control={form.control}
+                    name="customerEmail"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>E-mail</FormLabel>
+                        <FormControl>
+                          <Input type="email" {...field} defaultValue={autoFillData.email || ""} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  <FormField
+                    control={form.control}
+                    name="customerCpf"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>CPF</FormLabel>
+                        <FormControl>
+                          <Input {...field} defaultValue={autoFillData.cpf || ""} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  <FormField
+                    control={form.control}
+                    name="customerPhone"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Telefone</FormLabel>
+                        <FormControl>
+                          <Input {...field} defaultValue={autoFillData.telefone || ""} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  <Button 
+                    type="submit"
+                    className="w-full text-white py-3 font-medium flex items-center justify-center space-x-2"
+                    style={{ backgroundColor: renderSettings.accentColor }}
+                    disabled={createPaymentMutation.isPending}
+                  >
+                    <QrCode className="w-5 h-5" />
+                    <span>{createPaymentMutation.isPending ? "Gerando PIX..." : (formData.customButtonText || "Pagar com PIX")}</span>
+                  </Button>
+                </form>
+              </Form>
+            )}
+
+            {/* PIX Payment Display */}
+            {pixPayment && (
+              <div className="space-y-4">
+                <h3 className="font-semibold text-neutral-800 mb-4 text-center">
+                  Pagamento PIX
+                </h3>
+
+                <div className="text-center mb-6">
+                  <div className="w-48 h-48 bg-white border-2 border-neutral-200 rounded-lg mx-auto flex items-center justify-center mb-4">
+                    {pixPayment.pixQrCode ? (
+                      <img 
+                        src={pixPayment.pixQrCode} 
+                        alt="QR Code PIX" 
+                        className="w-40 h-40 object-contain"
+                      />
+                    ) : (
+                      <div className="w-40 h-40 bg-black/10 rounded flex items-center justify-center">
+                        <QrCode className="w-16 h-16 text-neutral-400" />
+                      </div>
+                    )}
+                  </div>
+                  <p className="text-sm text-neutral-600">
+                    Escaneie o QR Code com seu app do banco
+                  </p>
+                </div>
+
+                <div className="bg-neutral-50 p-4 rounded-lg">
+                  <p className="text-sm text-neutral-600 mb-2">Ou copie o código PIX:</p>
+                  <div className="bg-white p-3 rounded border text-xs font-mono break-all mb-3">
+                    {pixPayment.pixCode}
+                  </div>
+                  <button
+                    onClick={copyPixCode}
+                    className="w-full px-4 py-2 rounded text-white font-medium"
+                    style={{ backgroundColor: '#10B981' }}
+                  >
+                    Copiar código PIX
+                  </button>
+                </div>
+              </div>
+            )}
+
+            {/* Footer elements */}
+            {templateElements
+              .filter((el: any) => el.position >= 100)
+              .sort((a: any, b: any) => a.position - b.position)
+              .map((element: any, index: number) => (
+                <div key={element.id || index}>
+                  {renderCustomElement(element)}
+                </div>
+              ))}
+
+            {/* Custom instructions */}
+            {formData.customInstructions && (
+              <div className="mt-6 text-sm text-gray-600 text-center">
+                {formData.customInstructions}
+              </div>
+            )}
+          </div>
         </div>
       </div>
+    );
+  };
 
-      {/* Form area - exact same structure as edit page */}
-      <div className="w-full p-6 bg-white flex justify-center">
-        <div className="w-full max-w-md">
+  const renderFallbackLayout = () => {
+    return (
+      <div 
+        className="min-h-screen w-full"
+        style={{ backgroundColor: customStyles.backgroundColor }}
+      >
+        {/* Header - exact same structure as edit page */}
+        <div 
+          className="w-full p-6 text-white text-center flex flex-col justify-center"
+          style={{ 
+            backgroundColor: customStyles.primaryColor,
+            height: `${page.headerHeight}px`
+          }}
+        >
+          {/* Header custom elements (negative positions for header) */}
+          {customElements.filter((el: any) => el.position < -10).map((element: any) => (
+            <div key={element.id}>
+              {renderCustomElement(element)}
+            </div>
+          ))}
+
+          {page.showLogo && page.logoUrl && (
+            <div className={`mb-4 flex ${page.logoPosition === 'left' ? 'justify-start' : page.logoPosition === 'right' ? 'justify-end' : 'justify-center'}`}>
+              <img 
+                src={page.logoUrl} 
+                alt="Logo" 
+                className="object-contain rounded"
+                style={{ width: `${page.logoSize}px`, height: `${page.logoSize}px` }}
+              />
+            </div>
+          )}
+
+          {/* Header custom elements after logo */}
+          {customElements.filter((el: any) => el.position >= -10 && el.position < 0).map((element: any) => (
+            <div key={element.id}>
+              {renderCustomElement(element)}
+            </div>
+          ))}
+
+          {/* Only show price, no titles or subtitles */}
+          <div className="text-3xl font-bold">
+            {formatCurrency(page.price)}
+          </div>
+        </div>
+
+        {/* Form area - exact same structure as edit page */}
+        <div className="w-full p-6 bg-white flex justify-center">
+          <div className="w-full max-w-md">
           {/* Render body elements in order (excluding footers) - exact same filter as edit page */}
           {customElements
             .filter((el: any) => el.position >= 0 && el.position < 100)
@@ -410,7 +633,11 @@ export default function Checkout() {
               <div dangerouslySetInnerHTML={{ __html: element.content.replace(/\n/g, '<br/>') }} />
             </div>
           ))}
+          </div>
+        </div>
       </div>
-    </div>
-  );
+    );
+  };
+
+  return renderCheckoutPage();
 }

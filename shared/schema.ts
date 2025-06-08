@@ -37,6 +37,9 @@ export const paymentPages = pgTable("payment_pages", {
   // Custom elements (JSON array of draggable elements)
   customElements: text("custom_elements").default("[]"),
   
+  // Rendered template structure (saved HTML structure)
+  templateStructure: text("template_structure"),
+  
   // Skip form option
   skipForm: boolean("skip_form").default(false),
   

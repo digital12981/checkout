@@ -232,12 +232,37 @@ export default function EditPage() {
   });
 
   const onSubmit = (data: EditPageForm) => {
-    // Update custom elements in form data and clear titles/subtitles if empty
+    // Capture the current template structure from the preview
+    const captureTemplateStructure = () => {
+      return {
+        formData: {
+          ...data,
+          customTitle: data.customTitle?.trim() || "",
+          customSubtitle: data.customSubtitle?.trim() || "",
+        },
+        customElements: customElements,
+        renderSettings: {
+          showLogo: data.showLogo,
+          logoUrl: data.logoUrl,
+          logoPosition: data.logoPosition,
+          logoSize: data.logoSize,
+          headerHeight: data.headerHeight,
+          primaryColor: data.primaryColor,
+          accentColor: data.accentColor,
+          backgroundColor: data.backgroundColor,
+          textColor: data.textColor,
+        }
+      };
+    };
+
+    // Update custom elements in form data and save template structure
+    const templateStructure = captureTemplateStructure();
     const updatedData = {
       ...data,
       customTitle: data.customTitle?.trim() || "",
       customSubtitle: data.customSubtitle?.trim() || "",
-      customElements: JSON.stringify(customElements)
+      customElements: JSON.stringify(customElements),
+      templateStructure: JSON.stringify(templateStructure)
     };
     updatePageMutation.mutate(updatedData);
   };
