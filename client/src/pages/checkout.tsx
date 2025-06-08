@@ -179,7 +179,15 @@ export default function Checkout() {
     return null;
   }
 
-  const getCustomStyles = (page: PaymentPage) => {
+  const getCustomStyles = (page: PaymentPage, templateData: any) => {
+    if (templateData?.renderSettings) {
+      return {
+        primaryColor: templateData.renderSettings.primaryColor || "#1f2937",
+        accentColor: templateData.renderSettings.accentColor || "#3b82f6",
+        backgroundColor: templateData.renderSettings.backgroundColor || "#f9fafb",
+        textColor: templateData.renderSettings.textColor || "#1f2937",
+      };
+    }
     return {
       primaryColor: page.primaryColor || "#1f2937",
       accentColor: page.accentColor || "#3b82f6",
@@ -188,15 +196,13 @@ export default function Checkout() {
     };
   };
 
-  const customStyles = getCustomStyles(page);
-
   // Parse template structure if available
   let templateData = null;
   let customElements = [];
   
-  if (page.templateStructure) {
+  if ((page as any).templateStructure) {
     try {
-      templateData = JSON.parse(page.templateStructure);
+      templateData = JSON.parse((page as any).templateStructure);
       customElements = templateData.customElements || [];
     } catch (error) {
       console.error('Error parsing template structure:', error);
@@ -212,6 +218,8 @@ export default function Checkout() {
       customElements = [];
     }
   }
+
+  const customStyles = getCustomStyles(page, templateData);
 
   const renderCustomElement = (element: any) => {
     if (element.type === "image") {
@@ -499,10 +507,20 @@ export default function Checkout() {
               </div>
             </div>
           )}
+
+          {/* Bottom custom elements */}
+          {customElements
+            .filter((el: any) => el.position === "bottom" || (el.position >= 100 && el.position < 1000))
+            .sort((a: any, b: any) => a.position - b.position)
+            .map((element: any) => (
+              <div key={element.id} className="mt-4">
+                {renderCustomElement(element)}
+              </div>
+            ))}
         </div>
       </div>
 
-      {/* Footer elements (position 100+) rendered outside card for full width */}
+      {/* Footer elements (position 1000+) rendered outside card for full width */}
       <div className="w-full mt-6">
         {customElements
           .filter((el: any) => el.position >= 100)
