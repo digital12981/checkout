@@ -22,7 +22,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
-import { Card, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
@@ -710,7 +710,7 @@ export default function EditPage() {
 
   const FormStepPreview = () => (
     <div 
-      className="min-h-screen flex items-center justify-center p-4"
+      className="min-h-screen w-full"
       style={{ backgroundColor: formData.backgroundColor }}
       onClick={(e) => {
         if (e.target === e.currentTarget) {
@@ -789,7 +789,8 @@ export default function EditPage() {
         </div>
 
         {/* Form */}
-        <div className="w-full p-6 bg-white">
+        <div className="w-full p-6 bg-white flex justify-center">
+          <div className="w-full max-w-md">
           
           {/* Render body elements in order (excluding footers) */}
           {customElements
@@ -863,6 +864,7 @@ export default function EditPage() {
                 </div>
               </div>
             )}
+          </div>
           </div>
         </div>
       
@@ -1212,7 +1214,7 @@ export default function EditPage() {
                     <CardHeader>
                       <CardTitle className="text-lg">Informações do Produto</CardTitle>
                     </CardHeader>
-                    <CardContent className="space-y-4">
+                    <div className="p-6 space-y-4">
                       <FormField
                         control={form.control}
                         name="productName"
@@ -1264,7 +1266,7 @@ export default function EditPage() {
                           </FormItem>
                         )}
                       />
-                    </CardContent>
+                    </div>
                   </Card>
                 </TabsContent>
 
@@ -1276,7 +1278,7 @@ export default function EditPage() {
                         Esquema de Cores
                       </CardTitle>
                     </CardHeader>
-                    <CardContent className="space-y-4">
+                    <div className="p-6 space-y-4">
                       <FormField
                         control={form.control}
                         name="primaryColor"
@@ -1344,7 +1346,7 @@ export default function EditPage() {
                           </FormItem>
                         )}
                       />
-                    </CardContent>
+                    </div>
                   </Card>
                 </TabsContent>
 
@@ -1356,7 +1358,7 @@ export default function EditPage() {
                         Textos Personalizados
                       </CardTitle>
                     </CardHeader>
-                    <CardContent className="space-y-4">
+                    <div className="p-6 space-y-4">
                       <FormField
                         control={form.control}
                         name="customTitle"
@@ -1423,7 +1425,7 @@ export default function EditPage() {
                           </FormItem>
                         )}
                       />
-                    </CardContent>
+                    </div>
                   </Card>
                 </TabsContent>
 
@@ -1435,7 +1437,7 @@ export default function EditPage() {
                         Opções de Layout
                       </CardTitle>
                     </CardHeader>
-                    <CardContent className="space-y-4">
+                    <div className="p-6 space-y-4">
                       <FormField
                         control={form.control}
                         name="showLogo"
@@ -1849,7 +1851,7 @@ export default function EditPage() {
                           </div>
                         )}
                       </div>
-                    </CardContent>
+                    </div>
                   </Card>
                 </TabsContent>
               </Tabs>
