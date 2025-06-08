@@ -194,7 +194,7 @@ RULES:
 - For footers: include company/institution name from description
 - For text blocks: match the product/service theme
 - customElements must have: id, type, position, content, styles
-- Position footers at 150+
+- Position footers at 90 (to show in both previews)
 - Return ONLY JSON changes
 - Keep response under 300 characters
 
@@ -313,7 +313,7 @@ Keep under 400 chars. Use suggestedColors.`;
           result.customElements = result.customElements.map((element: any, index: number) => ({
             id: element.id || `ai-element-${Date.now()}-${index}`,
             type: element.type || 'text',
-            position: element.position || (element.type === 'footer' ? 150 : 50),
+            position: (element.type === 'footer' || (element.content && element.content.includes('©'))) ? 90 : (element.position || 50),
             content: element.content || '',
             styles: element.styles || element.style || {}
           }));
@@ -390,7 +390,7 @@ Keep under 400 chars. Use suggestedColors.`;
             fixedResult.customElements = fixedResult.customElements.map((element: any, index: number) => ({
               id: element.id || `ai-element-${Date.now()}-${index}`,
               type: element.type || 'text',
-              position: element.position || (element.type === 'footer' ? 150 : 50),
+              position: (element.type === 'footer' || (element.content && element.content.includes('©'))) ? 90 : (element.position || 50),
               content: element.content || '',
               styles: element.styles || element.style || {}
             }));

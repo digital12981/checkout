@@ -769,7 +769,7 @@ export default function EditPage() {
           
           {/* Render body elements in order */}
           {customElements
-            .filter(el => el.position >= 0)
+            .filter(el => el.position >= 0 && el.position < 100)
             .sort((a, b) => a.position - b.position)
             .map((element, index) => (
               <div key={element.id}>
