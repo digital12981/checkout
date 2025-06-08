@@ -935,7 +935,8 @@ export default function EditPage() {
         </div>
 
         {/* PIX Payment Section */}
-        <div className="w-full p-6 bg-white">
+        <div className="w-full p-6 bg-white flex justify-center">
+          <div className="w-full max-w-md">
           <h3 className="font-semibold text-neutral-800 mb-4 text-center">
             Pagamento PIX
           </h3>
@@ -1058,6 +1059,7 @@ export default function EditPage() {
               {renderCustomElement(element)}
             </div>
           ))}
+          </div>
         </div>
 
         {/* Footer Section */}
@@ -1095,15 +1097,28 @@ export default function EditPage() {
 
         </div>
 
-        {/* Footer elements (position 100+) rendered after the card content */}
-        {customElements
-          .filter(el => el.position >= 100)
-          .sort((a, b) => a.position - b.position)
-          .map(element => (
-            <div key={element.id} className="mt-4">
-              {renderCustomElement(element)}
-            </div>
-          ))}
+        {/* Footer elements (position 100+) rendered full width */}
+        <div className="w-full mt-6">
+          {customElements
+            .filter(el => el.position >= 100)
+            .sort((a, b) => a.position - b.position)
+            .map(element => (
+              <div 
+                key={element.id} 
+                className="w-full"
+                style={{
+                  backgroundColor: formData.primaryColor,
+                  color: "#ffffff",
+                  textAlign: "center",
+                  padding: "20px",
+                  fontSize: "14px",
+                  borderTop: `1px solid ${formData.primaryColor}`
+                }}
+              >
+                <div dangerouslySetInnerHTML={{ __html: element.content.replace(/\n/g, '<br/>') }} />
+              </div>
+            ))}
+        </div>
     </div>
   );
 
