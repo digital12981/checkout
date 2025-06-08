@@ -73,51 +73,19 @@ export default function Checkout() {
     };
   };
 
-  // Initialize URL params tracking and reset payment state when URL parameters change
+  // Auto-generate payment when skipForm is enabled and we have URL parameters
   useEffect(() => {
-    const currentUrlParams = window.location.search;
+    // Only proceed if we have a page loaded and skipForm is enabled
+    if (!page || !page.skipForm) return;
     
-    // Initialize on first load
-    if (!lastUrlParams) {
-      setLastUrlParams(currentUrlParams);
-      return;
-    }
+    // Check if we have customer data in URL parameters
+    const customerData = getCustomerDataFromURL();
+    const hasRequiredData = customerData.customerName && customerData.customerEmail && customerData.customerCpf;
     
-    // Reset if URL params changed and we have new params
-    if (currentUrlParams !== lastUrlParams && currentUrlParams) {
-      console.log('URL parameters changed, resetting payment state');
-      setPixPayment(null);
-      setIsGeneratingPayment(false);
-      setLastUrlParams(currentUrlParams);
-    }
-  }, [lastUrlParams]);
-
-  // Auto-generate payment when skipForm is enabled
-  useEffect(() => {
-    console.log('Checkout useEffect triggered', {
-      page: page?.id,
-      skipForm: page?.skipForm,
-      pixPayment: !!pixPayment,
-      isGeneratingPayment,
-      urlParams: window.location.search
-    });
-
-    if (page && page.skipForm && !pixPayment && !isGeneratingPayment) {
-      const customerData = getCustomerDataFromURL();
-      console.log('Customer data from URL:', customerData);
-      
-      // Validate required fields
-      if (customerData.customerName && customerData.customerEmail && customerData.customerCpf) {
-        console.log('Valid customer data found, generating payment...');
-        setIsGeneratingPayment(true);
-        createPaymentMutation.mutate(customerData);
-      } else {
-        console.log('Missing required customer data:', {
-          name: !!customerData.customerName,
-          email: !!customerData.customerEmail,
-          cpf: !!customerData.customerCpf
-        });
-      }
+    // Generate payment if we have required data and haven't generated one yet
+    if (hasRequiredData && !pixPayment && !isGeneratingPayment) {
+      setIsGeneratingPayment(true);
+      createPaymentMutation.mutate(customerData);
     }
   }, [page, pixPayment, isGeneratingPayment]);
 
