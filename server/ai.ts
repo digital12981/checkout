@@ -187,16 +187,19 @@ export async function processTemplateWithAI(command: string, currentTemplate: Te
       brandResearch = `Brand research for ${brandName}: ${research}`;
     }
 
-    const systemPrompt = `Designer specialist. Modify template as requested.
+    const systemPrompt = `Designer specialist. Create contextual elements based on product description.
 
 RULES:
+- Use product context to create relevant content
+- For footers: include company/institution name from description
+- For text blocks: match the product/service theme
+- customElements must have: id, type, position, content, styles
+- Position footers at 150+
 - Return ONLY JSON changes
-- customElements must be ARRAY format
 - Keep response under 300 characters
-- Use suggestedColors for styling
 
 JSON format:
-{"formData": {}, "customElements": []}`;
+{"formData": {}, "customElements": [{"id":"","type":"","position":0,"content":"","styles":{}}]}`;
 
     // Generate color palette based on existing primary color
     const generateColorPalette = (primaryColor: string) => {
@@ -225,17 +228,19 @@ JSON format:
       suggestedColors: colorPalette
     };
 
-    const userPrompt = `Current template: ${JSON.stringify(simplifiedTemplate)}
+    const userPrompt = `Template: ${JSON.stringify(simplifiedTemplate)}
+
+Product context: "${currentTemplate.formData.productDescription || currentTemplate.formData.productName}"
 
 Command: "${command}"
 
-Return ONLY changes as JSON:
+Create elements based on the product context above. Return JSON:
 {
   "formData": { /* only modified fields */ },
-  "customElements": [ /* array of new elements, max 1 */ ]
+  "customElements": [ /* contextual elements, max 1 */ ]
 }
 
-Keep response under 400 characters. Use suggestedColors for styling.`;
+Keep under 400 chars. Use suggestedColors.`;
 
     const response = await anthropic.messages.create({
       model: "claude-sonnet-4-20250514",
@@ -301,6 +306,17 @@ Keep response under 400 characters. Use suggestedColors for styling.`;
         } else if (currentTemplate.formData.logoUrl && result.formData && !result.formData.logoUrl) {
           result.formData.logoUrl = currentTemplate.formData.logoUrl;
           result.formData.showLogo = currentTemplate.formData.showLogo;
+        }
+        
+        // Ensure customElements have required fields
+        if (result.customElements) {
+          result.customElements = result.customElements.map((element: any, index: number) => ({
+            id: element.id || `ai-element-${Date.now()}-${index}`,
+            type: element.type || 'text',
+            position: element.position || (element.type === 'footer' ? 150 : 50),
+            content: element.content || '',
+            styles: element.styles || element.style || {}
+          }));
         }
         
         return result;
@@ -369,6 +385,17 @@ Keep response under 400 characters. Use suggestedColors for styling.`;
             fixedResult.formData.showLogo = currentTemplate.formData.showLogo;
           }
           
+          // Ensure customElements have required fields
+          if (fixedResult.customElements) {
+            fixedResult.customElements = fixedResult.customElements.map((element: any, index: number) => ({
+              id: element.id || `ai-element-${Date.now()}-${index}`,
+              type: element.type || 'text',
+              position: element.position || (element.type === 'footer' ? 150 : 50),
+              content: element.content || '',
+              styles: element.styles || element.style || {}
+            }));
+          }
+
           return fixedResult;
         } catch (secondError) {
           console.error("Failed to fix JSON response:", secondError);
