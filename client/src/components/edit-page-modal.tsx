@@ -165,63 +165,58 @@ export default function EditPageModal({ page, open, onOpenChange }: EditPageModa
 
   const PreviewComponent = () => (
     <div 
-      className="min-h-screen flex items-center justify-center p-4"
+      className="min-h-screen w-full"
       style={{ backgroundColor: formData.backgroundColor }}
     >
-      <Card className="w-full max-w-md shadow-lg">
-        {/* Header */}
+      {/* Header */}
+      <div 
+        className="w-full p-6 text-white text-center"
+        style={{ backgroundColor: formData.primaryColor }}
+      >
+        <div className="w-16 h-16 bg-white/20 rounded-full flex items-center justify-center mx-auto mb-4">
+          <div className="w-8 h-8 bg-white/30 rounded"></div>
+        </div>
+        <h1 className="text-xl font-bold mb-2">
+          {formData.customTitle || formData.productName}
+        </h1>
+        {formData.customSubtitle && (
+          <p className="text-white/90 text-sm mb-2">
+            {formData.customSubtitle}
+          </p>
+        )}
+        {formData.productDescription && (
+          <p className="text-white/80 text-sm mb-4">
+            {formData.productDescription}
+          </p>
+        )}
         <div 
-          className="p-6 rounded-t-lg"
-          style={{ backgroundColor: formData.primaryColor }}
+          className="text-3xl font-bold"
         >
-          <div className="text-center text-white">
-            <div className="w-16 h-16 bg-white/20 rounded-full flex items-center justify-center mx-auto mb-4">
-              <div className="w-8 h-8 bg-white/30 rounded"></div>
-            </div>
-            <h1 className="text-xl font-bold mb-2">
-              {formData.customTitle || formData.productName}
-            </h1>
-            <p className="text-white/90 text-sm">
-              {formData.customSubtitle || formData.productDescription}
-            </p>
-          </div>
+          {formatCurrency(formData.price)}
         </div>
+      </div>
 
-        {/* Price */}
-        <div className="px-6 py-4 bg-neutral-50 border-b border-neutral-200">
-          <div className="text-center">
-            <span className="text-sm text-neutral-600">Valor único</span>
-            <div 
-              className="text-3xl font-bold mt-1"
-              style={{ color: formData.textColor }}
-            >
-              {formatCurrency(formData.price)}
-            </div>
-          </div>
-        </div>
-
-        {/* Content */}
-        <CardContent className="p-6">
-          <Button 
-            className="w-full mb-4"
-            style={{ 
-              backgroundColor: formData.accentColor,
-              borderColor: formData.accentColor 
-            }}
+      {/* Content */}
+      <div className="w-full max-w-2xl mx-auto p-6">
+        <Button 
+          className="w-full mb-4 text-white"
+          style={{ 
+            backgroundColor: formData.accentColor,
+            borderColor: formData.accentColor 
+          }}
+        >
+          {formData.customButtonText || "Pagar com PIX"}
+        </Button>
+        
+        {formData.customInstructions && (
+          <p 
+            className="text-sm text-center"
+            style={{ color: formData.textColor }}
           >
-            {formData.customButtonText}
-          </Button>
-          
-          {formData.customInstructions && (
-            <p 
-              className="text-sm text-center"
-              style={{ color: formData.textColor }}
-            >
-              {formData.customInstructions}
-            </p>
-          )}
-        </CardContent>
-      </Card>
+            {formData.customInstructions}
+          </p>
+        )}
+      </div>
     </div>
   );
 

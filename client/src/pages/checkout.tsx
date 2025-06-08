@@ -95,7 +95,7 @@ export default function Checkout() {
         paymentPageId: Number(pageId),
         ...data,
       });
-      return response;
+      return response.json ? await response.json() : response;
     },
     onSuccess: (payment: PixPayment) => {
       setPixPayment(payment);
