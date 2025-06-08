@@ -201,13 +201,6 @@ export default function Checkout() {
   let customElements = [];
   try {
     customElements = page.customElements ? JSON.parse(page.customElements) : [];
-    console.log('Custom elements loaded:', customElements);
-    console.log('Page data:', { 
-      customTitle: page.customTitle, 
-      customSubtitle: page.customSubtitle,
-      productName: page.productName,
-      customElements: page.customElements
-    });
   } catch (error) {
     console.error('Error parsing custom elements:', error);
     customElements = [];
@@ -277,17 +270,11 @@ export default function Checkout() {
         }}
       >
         {/* Header custom elements (position "top" or negative numbers) */}
-        {customElements.filter((el: any) => {
-          console.log('Checking element for header:', el.id, el.position);
-          return el.position === "top" || el.position < -10;
-        }).map((element: any) => {
-          console.log('Rendering header element:', element.id);
-          return (
-            <div key={element.id}>
-              {renderCustomElement(element)}
-            </div>
-          );
-        })}
+        {customElements.filter((el: any) => el.position === "top" || el.position < -10).map((element: any) => (
+          <div key={element.id}>
+            {renderCustomElement(element)}
+          </div>
+        ))}
 
         {page.showLogo !== false && (
           <div className={`mb-4 flex ${page.logoPosition === 'left' ? 'justify-start' : page.logoPosition === 'right' ? 'justify-end' : 'justify-center'}`}>
@@ -337,15 +324,9 @@ export default function Checkout() {
       <div className="w-full max-w-2xl mx-auto p-6">
         {/* Custom elements before form */}
         {customElements
-          .filter((el: any) => {
-            console.log('Checking element for middle:', el.id, el.position);
-            return el.position === "middle" || (el.position >= 0 && el.position < 50);
-          })
+          .filter((el: any) => el.position === "middle" || (el.position >= 0 && el.position < 50))
           .sort((a: any, b: any) => a.position - b.position)
-          .map((element: any) => {
-            console.log('Rendering middle element:', element.id);
-            return renderCustomElement(element);
-          })}
+          .map((element: any) => renderCustomElement(element))}
 
         {/* Customer Form - only show if skipForm is disabled */}
         {!pixPayment && !page.skipForm && (
@@ -557,15 +538,9 @@ export default function Checkout() {
       {/* Footer elements (position 100+ or "bottom") rendered outside container for full width */}
       <div className="w-full">
         {customElements
-          .filter((el: any) => {
-            console.log('Checking element for footer:', el.id, el.position);
-            return el.position === "bottom" || el.position >= 100;
-          })
+          .filter((el: any) => el.position === "bottom" || el.position >= 100)
           .sort((a: any, b: any) => a.position - b.position)
-          .map((element: any) => {
-            console.log('Rendering footer element:', element.id);
-            return renderCustomElement(element);
-          })}
+          .map((element: any) => renderCustomElement(element))}
       </div>
     </div>
   );
