@@ -22,7 +22,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
@@ -893,7 +893,8 @@ export default function EditPage() {
 
   const PaymentStepPreview = () => (
     <div 
-      className="min-h-screen flex items-center justify-center p-4"
+      key={`payment-${previewKey}`}
+      className="min-h-screen w-full"
       style={{ backgroundColor: formData.backgroundColor }}
       onClick={(e) => {
         if (e.target === e.currentTarget) {
@@ -901,15 +902,14 @@ export default function EditPage() {
         }
       }}
     >
-      <Card key={`payment-${previewKey}`} className="w-full max-w-md shadow-lg">
-        {/* Header */}
-        <div 
-          className="p-6 rounded-t-lg text-white text-center flex flex-col justify-center"
-          style={{ 
-            backgroundColor: formData.primaryColor,
-            height: `${formData.headerHeight}px`
-          }}
-        >
+      {/* Header */}
+      <div 
+        className="w-full p-6 text-white text-center flex flex-col justify-center"
+        style={{ 
+          backgroundColor: formData.primaryColor,
+          height: `${formData.headerHeight}px`
+        }}
+      >
           {formData.showLogo && (
             <div className={`mb-4 flex ${formData.logoPosition === 'left' ? 'justify-start' : formData.logoPosition === 'right' ? 'justify-end' : 'justify-center'}`}>
               {formData.logoUrl ? (
@@ -933,7 +933,7 @@ export default function EditPage() {
         </div>
 
         {/* PIX Payment Section */}
-        <CardContent className="p-6">
+        <div className="w-full p-6 bg-white">
           <h3 className="font-semibold text-neutral-800 mb-4 text-center">
             Pagamento PIX
           </h3>
@@ -1056,7 +1056,7 @@ export default function EditPage() {
               {renderCustomElement(element)}
             </div>
           ))}
-        </CardContent>
+        </div>
 
         {/* Footer Section */}
         <div 
@@ -1102,7 +1102,6 @@ export default function EditPage() {
               {renderCustomElement(element)}
             </div>
           ))}
-      </Card>
     </div>
   );
 
