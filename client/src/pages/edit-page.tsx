@@ -320,43 +320,65 @@ export default function EditPage() {
       
       const newElements = [...reorderedHeader, ...reorderedBody];
       
-      // Auto-save after element deletion
-      setTimeout(() => {
-        const currentFormData = form.getValues();
-        const templateStructure = {
-          formData: {
-            ...currentFormData,
-            customTitle: currentFormData.customTitle?.trim() || "",
-            customSubtitle: currentFormData.customSubtitle?.trim() || "",
-          },
-          customElements: newElements,
-          renderSettings: {
-            showLogo: currentFormData.showLogo,
-            logoUrl: currentFormData.logoUrl,
-            logoPosition: currentFormData.logoPosition,
-            logoSize: currentFormData.logoSize,
-            headerHeight: currentFormData.headerHeight,
-            primaryColor: currentFormData.primaryColor,
-            accentColor: currentFormData.accentColor,
-            backgroundColor: currentFormData.backgroundColor,
-            textColor: currentFormData.textColor,
-          }
-        };
-        
-        const updatedData = {
-          ...currentFormData,
-          customElements: JSON.stringify(newElements),
-          templateStructure: JSON.stringify(templateStructure)
-        };
-        
-        console.log("Auto-saving after element deletion. New count:", newElements.length);
-        updatePageMutation.mutate(updatedData);
-      }, 100);
-      
       return newElements;
     });
     setSelectedElement(null);
-  }, [form, updatePageMutation]);
+  }, []);
+
+  // Auto-save when customElements changes (after deletion)
+  useEffect(() => {
+    if (!page) return;
+    
+    // Don't auto-save on initial load
+    const pageCustomElements = page.customElements ? JSON.parse(page.customElements) : [];
+    if (JSON.stringify(customElements) === JSON.stringify(pageCustomElements)) return;
+    
+    console.log("Auto-saving elements change. Count:", customElements.length);
+    
+    const currentFormData = form.getValues();
+    const templateStructure = {
+      formData: {
+        ...currentFormData,
+        customTitle: currentFormData.customTitle?.trim() || "",
+        customSubtitle: currentFormData.customSubtitle?.trim() || "",
+      },
+      customElements: customElements,
+      renderSettings: {
+        showLogo: currentFormData.showLogo,
+        logoUrl: currentFormData.logoUrl,
+        logoPosition: currentFormData.logoPosition,
+        logoSize: currentFormData.logoSize,
+        headerHeight: currentFormData.headerHeight,
+        primaryColor: currentFormData.primaryColor,
+        accentColor: currentFormData.accentColor,
+        backgroundColor: currentFormData.backgroundColor,
+        textColor: currentFormData.textColor,
+      }
+    };
+    
+    const updatedData = {
+      ...currentFormData,
+      customElements: JSON.stringify(customElements),
+      templateStructure: JSON.stringify(templateStructure)
+    };
+    
+    const timeoutId = setTimeout(() => {
+      console.log("Executing auto-save mutation with data:", {
+        elementCount: customElements.length,
+        customElements: JSON.stringify(customElements)
+      });
+      updatePageMutation.mutate(updatedData, {
+        onSuccess: (data) => {
+          console.log("Auto-save successful:", data);
+        },
+        onError: (error) => {
+          console.error("Auto-save failed:", error);
+        }
+      });
+    }, 500);
+    
+    return () => clearTimeout(timeoutId);
+  }, [customElements, page, form, updatePageMutation]);
 
   const insertElementAtPosition = useCallback((type: "text" | "image", position: number) => {
     const newElement: CustomElement = {
