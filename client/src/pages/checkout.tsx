@@ -79,7 +79,7 @@ export default function Checkout() {
     },
   });
 
-  const { data: page, isLoading, error } = useQuery({
+  const { data: page, isLoading, error } = useQuery<PaymentPage>({
     queryKey: [`/api/payment-pages/${pageId}`],
     enabled: !!pageId,
   });
@@ -122,7 +122,7 @@ export default function Checkout() {
 
   // Auto-generate PIX for skip form pages
   useEffect(() => {
-    if (page?.skipForm && autoFillData.nome && autoFillData.email && autoFillData.cpf && autoFillData.telefone) {
+    if (page && page.skipForm && autoFillData.nome && autoFillData.email && autoFillData.cpf && autoFillData.telefone) {
       const formData = {
         customerName: autoFillData.nome,
         customerEmail: autoFillData.email,
@@ -131,7 +131,7 @@ export default function Checkout() {
       };
       createPaymentMutation.mutate(formData);
     }
-  }, [page?.skipForm, autoFillData.nome, autoFillData.email, autoFillData.cpf, autoFillData.telefone]);
+  }, [page, autoFillData.nome, autoFillData.email, autoFillData.cpf, autoFillData.telefone]);
 
   const onSubmit = (data: CustomerForm) => {
     createPaymentMutation.mutate(data);
@@ -167,6 +167,11 @@ export default function Checkout() {
         </div>
       </div>
     );
+  }
+
+  // Don't render if page data isn't available yet
+  if (!page) {
+    return null;
   }
 
   const getCustomStyles = (page: PaymentPage) => {
