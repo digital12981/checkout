@@ -61,7 +61,7 @@ export default function Checkout() {
   const [pixPayment, setPixPayment] = useState<PixPayment | null>(null);
 
   // Extract URL parameters for auto-fill
-  const urlParams = new URLSearchParams(location.split('?')[1] || '');
+  const urlParams = new URLSearchParams(window.location.search);
   const autoFillData = {
     nome: urlParams.get('nome') || '',
     email: urlParams.get('email') || '',
