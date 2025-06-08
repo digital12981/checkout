@@ -788,9 +788,9 @@ export default function EditPage() {
         {/* Form */}
         <CardContent className="p-6">
           
-          {/* Render body elements in order */}
+          {/* Render body elements in order (excluding footers) */}
           {customElements
-            .filter(el => el.position >= 0)
+            .filter(el => el.position >= 0 && el.position < 100)
             .sort((a, b) => a.position - b.position)
             .map((element, index) => (
               <div key={element.id}>
