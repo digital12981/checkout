@@ -73,6 +73,9 @@ const editPageSchema = z.object({
   logoSize: z.number().min(32).max(128).default(64),
   headerHeight: z.number().min(60).max(200).default(96),
   
+  // Form options
+  skipForm: z.boolean().default(false),
+  
   // Custom elements
   customElements: z.string().default("[]"),
 });
@@ -150,6 +153,7 @@ export default function EditPage() {
       logoPosition: "center" as const,
       logoSize: 64,
       headerHeight: 96,
+      skipForm: false,
       customElements: "[]",
     },
   });
@@ -174,6 +178,7 @@ export default function EditPage() {
         logoPosition: (page.logoPosition as "left" | "center" | "right") || "center",
         logoSize: page.logoSize || 64,
         headerHeight: page.headerHeight || 96,
+        skipForm: page.skipForm ?? false,
         customElements: page.customElements || "[]",
       };
 
@@ -1278,6 +1283,29 @@ export default function EditPage() {
                               />
                             </FormControl>
                             <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+
+                      <FormField
+                        control={form.control}
+                        name="skipForm"
+                        render={({ field }) => (
+                          <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
+                            <div className="space-y-0.5">
+                              <FormLabel className="text-base">
+                                Pular Formulário
+                              </FormLabel>
+                              <div className="text-sm text-muted-foreground">
+                                Ao ativar, os dados do cliente serão capturados pela URL e o PIX será gerado automaticamente
+                              </div>
+                            </div>
+                            <FormControl>
+                              <Switch
+                                checked={field.value}
+                                onCheckedChange={field.onChange}
+                              />
+                            </FormControl>
                           </FormItem>
                         )}
                       />
