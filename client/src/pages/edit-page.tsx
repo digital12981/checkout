@@ -618,20 +618,25 @@ export default function EditPage() {
             </div>
           ) : (
             <div
-              className={`p-2 rounded cursor-pointer ${element.styles.hasBox ? 'border' : ''}`}
+              className={`rounded cursor-pointer ${element.styles.hasBox ? 'border' : ''}`}
               style={{
                 color: element.styles.color || "#000000",
-                backgroundColor: element.styles.hasBox ? element.styles.boxColor || "#ffffff" : "transparent",
+                backgroundColor: element.styles.backgroundColor || (element.styles.hasBox ? element.styles.boxColor || "#ffffff" : "transparent"),
                 borderColor: element.styles.hasBox ? element.styles.boxColor || "#e5e7eb" : "transparent",
-                fontWeight: element.styles.isBold ? "bold" : "normal",
-                fontSize: `${element.styles.fontSize || 16}px`,
+                fontWeight: element.styles.fontWeight || (element.styles.isBold ? "bold" : "normal"),
+                fontSize: element.styles.fontSize || "16px",
                 textAlign: element.styles.textAlign || "left",
-                borderRadius: `${element.styles.borderRadius || 4}px`
+                borderRadius: `${element.styles.borderRadius || 4}px`,
+                padding: element.styles.padding || "8px",
+                border: element.styles.border,
+                marginBottom: element.styles.marginBottom,
+                marginTop: element.styles.marginTop,
+                lineHeight: element.styles.lineHeight,
+                borderTop: element.styles.borderTop
               }}
               onDoubleClick={() => startEditingText(element.id, element.content)}
-            >
-              {element.content}
-            </div>
+              dangerouslySetInnerHTML={{ __html: element.content.replace(/\n/g, '<br/>') }}
+            />
           )}
         </div>
       );
