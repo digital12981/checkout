@@ -187,40 +187,16 @@ export async function processTemplateWithAI(command: string, currentTemplate: Te
       brandResearch = `Brand research for ${brandName}: ${research}`;
     }
 
-    const systemPrompt = `You are a UI/UX designer. Modify payment templates while preserving PIX functionality.
+    const systemPrompt = `Designer specialist. Modify template as requested.
 
-CRITICAL RULES:
-1. NEVER break PIX payment functionality
-2. If showLogo=true, KEEP logoUrl exactly as is - DO NOT modify base64 data
-3. RESPECT ELEMENT POSITIONING:
-   - Header area (positions -10 to -1): Only small text elements that don't interfere with logo
-   - Form area (positions 0-99): Customer form elements
-   - Payment area (positions 100+): Payment confirmation elements
-4. COLOR CONTRAST: Never use same colors for text and background
-   - Light backgrounds: use dark text (#1F2937, #000000)
-   - Dark backgrounds: use light text (#FFFFFF, #F8FAFC)
-   - Red backgrounds: use white text
-5. For countdown/urgency elements: place at positions 15-20 (below form fields)
-6. Return ONLY valid JSON without explanations
+RULES:
+- Return ONLY JSON changes
+- customElements must be ARRAY format
+- Keep response under 300 characters
+- Use suggestedColors for styling
 
-POSITIONING GUIDE:
-- Header (-10 to -1): Small text only, don't interfere with logo space
-- Form area (0-99): Customer input fields and related elements
-- Payment area (100+): PIX QR codes and payment confirmation
-
-STYLE INHERITANCE: Generate elements using existing template colors in lighter/darker tones.
-- Use primaryColor as base: create lighter background versions (add opacity or lighten)
-- Text should be darker version of primaryColor or high contrast color
-- Maintain visual harmony with existing design
-
-EXAMPLES:
-- If primaryColor is #8615D3 (purple): use #F3E8FF (light purple bg) with #4C1D95 (dark purple text)
-- If primaryColor is #0EA5E9 (blue): use #DBEAFE (light blue bg) with #1E40AF (dark blue text)
-- Position countdown/urgency: 15-20 (below form fields)
-
-${brandResearch ? "Brand: " + brandResearch : ""}
-
-Return JSON:`;
+JSON format:
+{"formData": {}, "customElements": []}`;
 
     // Generate color palette based on existing primary color
     const generateColorPalette = (primaryColor: string) => {
@@ -249,13 +225,21 @@ Return JSON:`;
       suggestedColors: colorPalette
     };
 
-    const userPrompt = `Template: ${JSON.stringify(simplifiedTemplate)}
+    const userPrompt = `Current template: ${JSON.stringify(simplifiedTemplate)}
+
 Command: "${command}"
-Use suggestedColors for new elements. Return modified JSON:`;
+
+Return ONLY changes as JSON:
+{
+  "formData": { /* only modified fields */ },
+  "customElements": [ /* array of new elements, max 1 */ ]
+}
+
+Keep response under 400 characters. Use suggestedColors for styling.`;
 
     const response = await anthropic.messages.create({
       model: "claude-sonnet-4-20250514",
-      max_tokens: 1200,
+      max_tokens: 600,
       messages: [
         { role: "user", content: `${systemPrompt}\n\n${userPrompt}` }
       ],
