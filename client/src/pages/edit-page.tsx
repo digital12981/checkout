@@ -690,7 +690,7 @@ export default function EditPage() {
         }
       }}
     >
-      <Card className="w-full max-w-md shadow-lg">
+      <Card key={`form-${previewKey}`} className="w-full max-w-md shadow-lg">
         {/* Header */}
         <div 
           className="p-6 rounded-t-lg text-white text-center flex flex-col justify-center"
@@ -852,7 +852,7 @@ export default function EditPage() {
         }
       }}
     >
-      <Card className="w-full max-w-md shadow-lg">
+      <Card key={`payment-${previewKey}`} className="w-full max-w-md shadow-lg">
         {/* Header */}
         <div 
           className="p-6 rounded-t-lg text-white text-center flex flex-col justify-center"

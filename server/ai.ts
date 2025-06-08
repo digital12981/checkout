@@ -329,6 +329,9 @@ Use suggestedColors for new elements. Return modified JSON:`;
           // Attempt to fix common JSON issues and try again
           let fixedText = content.text;
           
+          // Remove markdown code blocks
+          fixedText = fixedText.replace(/```json/g, '').replace(/```/g, '').trim();
+          
           // Remove any truncated base64 data that might be causing issues
           fixedText = fixedText.replace(/"logoUrl"\s*:\s*"data:image\/[^"]*$/g, '"logoUrl": "PRESERVED"');
           fixedText = fixedText.replace(/,\s*$/g, '');
