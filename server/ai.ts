@@ -255,7 +255,7 @@ Use suggestedColors for new elements. Return modified JSON:`;
 
     const response = await anthropic.messages.create({
       model: "claude-sonnet-4-20250514",
-      max_tokens: 2000,
+      max_tokens: 1200,
       messages: [
         { role: "user", content: `${systemPrompt}\n\n${userPrompt}` }
       ],
@@ -348,13 +348,15 @@ Use suggestedColors for new elements. Return modified JSON:`;
             lastValidEnd = Math.max(lastCompleteQuote + 2, lastCompleteArray + 2);
           }
           
-          // Look for unterminated arrays
+          // Look for unterminated arrays and close them properly
           if (fixedText.includes('[') && !fixedText.includes(']')) {
-            const lastArrayStart = fixedText.lastIndexOf('[');
-            const beforeArray = fixedText.substring(0, lastArrayStart);
-            const lastCompleteProperty = beforeArray.lastIndexOf('"}');
-            if (lastCompleteProperty > 0) {
-              lastValidEnd = lastCompleteProperty + 2;
+            // Find array start and try to close it properly
+            const arrayPattern = /"customElements"\s*:\s*\[(.*?)$/;
+            const arrayMatch = fixedText.match(arrayPattern);
+            if (arrayMatch && arrayMatch.index !== undefined) {
+              // Remove the incomplete array and close the object properly
+              const beforeArray = fixedText.substring(0, arrayMatch.index + arrayMatch[0].indexOf('['));
+              fixedText = beforeArray.replace(/,\s*$/, '') + ']';
             }
           }
           
@@ -388,12 +390,31 @@ Use suggestedColors for new elements. Return modified JSON:`;
           
           // As a last resort, try to extract just the formData portion
           try {
-            const formDataMatch = content.text.match(/"formData"\s*:\s*\{([^}]+)\}/);
+            // Try to find complete formData object
+            const formDataPattern = /"formData"\s*:\s*\{([^{}]*(?:\{[^{}]*\}[^{}]*)*)\}/;
+            const formDataMatch = content.text.match(formDataPattern);
             if (formDataMatch) {
               const formDataStr = `{"formData":{${formDataMatch[1]}}}`;
               const partialResult = JSON.parse(formDataStr);
               return {
                 formData: partialResult.formData,
+                customElements: currentTemplate.customElements || []
+              };
+            }
+            
+            // Try to extract individual properties from formData
+            const properties = [];
+            const propertyPattern = /"(\w+)"\s*:\s*"([^"]+)"/g;
+            let match;
+            while ((match = propertyPattern.exec(content.text)) !== null) {
+              properties.push(`"${match[1]}":"${match[2]}"`);
+            }
+            
+            if (properties.length > 0) {
+              const formDataStr = `{"formData":{${properties.join(',')}}}`;
+              const partialResult = JSON.parse(formDataStr);
+              return {
+                formData: { ...currentTemplate.formData, ...partialResult.formData },
                 customElements: currentTemplate.customElements || []
               };
             }
