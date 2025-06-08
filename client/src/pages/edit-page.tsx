@@ -718,15 +718,14 @@ export default function EditPage() {
         }
       }}
     >
-      <Card key={`form-${previewKey}`} className="w-full max-w-md shadow-lg">
-        {/* Header */}
-        <div 
-          className="p-6 rounded-t-lg text-white text-center flex flex-col justify-center"
-          style={{ 
-            backgroundColor: formData.primaryColor,
-            height: `${formData.headerHeight}px`
-          }}
-        >
+      {/* Header */}
+      <div 
+        className="w-full p-6 text-white text-center flex flex-col justify-center"
+        style={{ 
+          backgroundColor: formData.primaryColor,
+          height: `${formData.headerHeight}px`
+        }}
+      >
           {/* Header custom elements (negative positions for header) */}
           {customElements.filter(el => el.position < -10).map(element => (
             <div key={element.id}>
@@ -790,7 +789,7 @@ export default function EditPage() {
         </div>
 
         {/* Form */}
-        <CardContent className="p-6">
+        <div className="w-full p-6 bg-white">
           
           {/* Render body elements in order (excluding footers) */}
           {customElements
@@ -865,31 +864,30 @@ export default function EditPage() {
               </div>
             )}
           </div>
-        </CardContent>
-      </Card>
+        </div>
       
       {/* Footer elements (position 100+) rendered outside card for full width */}
-      {customElements
-        .filter(el => el.position >= 100)
-        .sort((a, b) => a.position - b.position)
-        .map(element => (
-          <div 
-            key={element.id} 
-            className="w-full mt-6"
-            style={{
-              backgroundColor: element.styles?.backgroundColor || formData.primaryColor,
-              color: element.styles?.color || "#ffffff",
-              textAlign: "center",
-              padding: element.styles?.padding || "20px",
-              fontSize: element.styles?.fontSize || "14px",
-              borderTop: element.styles?.borderTop || `1px solid ${formData.primaryColor}`,
-              marginLeft: "-16px",
-              marginRight: "-16px"
-            }}
-          >
-            <div dangerouslySetInnerHTML={{ __html: element.content.replace(/\n/g, '<br/>') }} />
-          </div>
-        ))}
+      <div className="w-full mt-6">
+        {customElements
+          .filter(el => el.position >= 100)
+          .sort((a, b) => a.position - b.position)
+          .map(element => (
+            <div 
+              key={element.id} 
+              className="w-full"
+              style={{
+                backgroundColor: formData.primaryColor,
+                color: "#ffffff",
+                textAlign: "center",
+                padding: "20px",
+                fontSize: "14px",
+                borderTop: `1px solid ${formData.primaryColor}`
+              }}
+            >
+              <div dangerouslySetInnerHTML={{ __html: element.content.replace(/\n/g, '<br/>') }} />
+            </div>
+          ))}
+      </div>
     </div>
   );
 

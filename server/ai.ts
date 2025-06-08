@@ -426,19 +426,18 @@ Keep under 400 chars. Use suggestedColors.`;
                 
               let elementStyles = element.styles || element.style || {};
               
-              // Enhance footer styling with primary color
+              // Enhance footer styling with primary color (force override)
               if (isFooter) {
                 const primaryColor = currentTemplate.formData.primaryColor || '#3B82F6';
                 elementStyles = {
-                  ...elementStyles,
                   width: '100%',
                   textAlign: 'center',
-                  padding: elementStyles.padding || '20px',
-                  backgroundColor: elementStyles.backgroundColor || primaryColor,
-                  color: elementStyles.color || '#ffffff',
-                  fontSize: elementStyles.fontSize || '14px',
-                  marginTop: elementStyles.marginTop || '32px',
-                  borderTop: elementStyles.borderTop || `1px solid ${primaryColor}`
+                  padding: '20px',
+                  backgroundColor: primaryColor,
+                  color: '#ffffff',
+                  fontSize: '14px',
+                  marginTop: '32px',
+                  borderTop: `1px solid ${primaryColor}`
                 };
               }
                 
