@@ -311,21 +311,34 @@ Keep under 400 chars. Use suggestedColors.`;
         // Ensure customElements have required fields
         if (result.customElements) {
           result.customElements = result.customElements.map((element: any, index: number) => {
-            // Force footer elements to position 95 to appear after form content
+            // Force footer elements to position 100+ to appear at bottom
             const isFooter = element.type?.includes('footer') || 
               element.content?.includes('©') ||
               element.content?.includes('seguro') ||
               element.content?.includes('Suporte') ||
               element.content?.includes('CNPJ') ||
-              element.content?.includes('Dados protegidos') ||
-              (element.position && element.position >= 100);
+              element.content?.includes('Dados protegidos');
+              
+            let elementStyles = element.styles || element.style || {};
+            
+            // Enhance footer styling
+            if (isFooter) {
+              elementStyles = {
+                ...elementStyles,
+                width: '100%',
+                textAlign: 'center',
+                padding: elementStyles.padding || '16px',
+                marginTop: elementStyles.marginTop || '32px',
+                borderTop: elementStyles.borderTop || '1px solid #e5e7eb'
+              };
+            }
               
             return {
               id: element.id || `ai-element-${Date.now()}-${index}`,
               type: element.type || 'text',
-              position: isFooter ? 95 : (element.position || 50),
+              position: isFooter ? 100 : (element.position || 50),
               content: element.content || '',
-              styles: element.styles || element.style || {}
+              styles: elementStyles
             };
           });
         }
@@ -399,21 +412,34 @@ Keep under 400 chars. Use suggestedColors.`;
           // Ensure customElements have required fields
           if (fixedResult.customElements) {
             fixedResult.customElements = fixedResult.customElements.map((element: any, index: number) => {
-              // Force footer elements to position 85 for both preview modes
+              // Force footer elements to position 100+ to appear at bottom
               const isFooter = element.type?.includes('footer') || 
                 element.content?.includes('©') ||
                 element.content?.includes('seguro') ||
                 element.content?.includes('Suporte') ||
                 element.content?.includes('CNPJ') ||
-                element.content?.includes('Dados protegidos') ||
-                (element.position && element.position >= 100);
+                element.content?.includes('Dados protegidos');
+                
+              let elementStyles = element.styles || element.style || {};
+              
+              // Enhance footer styling
+              if (isFooter) {
+                elementStyles = {
+                  ...elementStyles,
+                  width: '100%',
+                  textAlign: 'center',
+                  padding: elementStyles.padding || '16px',
+                  marginTop: elementStyles.marginTop || '32px',
+                  borderTop: elementStyles.borderTop || '1px solid #e5e7eb'
+                };
+              }
                 
               return {
                 id: element.id || `ai-element-${Date.now()}-${index}`,
                 type: element.type || 'text',
-                position: isFooter ? 85 : (element.position || 50),
+                position: isFooter ? 100 : (element.position || 50),
                 content: element.content || '',
-                styles: element.styles || element.style || {}
+                styles: elementStyles
               };
             });
           }
