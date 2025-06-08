@@ -198,7 +198,13 @@ export default function Checkout() {
   const customStyles = getCustomStyles(page);
 
   // Parse custom elements
-  const customElements = page.customElements ? JSON.parse(page.customElements) : [];
+  let customElements = [];
+  try {
+    customElements = page.customElements ? JSON.parse(page.customElements) : [];
+  } catch (error) {
+    console.error('Error parsing custom elements:', error);
+    customElements = [];
+  }
 
   const renderCustomElement = (element: any) => {
     if (element.type === "image") {
@@ -260,8 +266,8 @@ export default function Checkout() {
           padding: "24px"
         }}
       >
-        {/* Header custom elements (negative positions for header) */}
-        {customElements.filter((el: any) => el.position < -10).map((element: any) => (
+        {/* Header custom elements (position "top" or negative numbers) */}
+        {customElements.filter((el: any) => el.position === "top" || el.position < -10).map((element: any) => (
           <div key={element.id}>
             {renderCustomElement(element)}
           </div>
@@ -288,9 +294,11 @@ export default function Checkout() {
           </div>
         )}
         
-        <h1 className="text-2xl font-bold mb-2">
-          {page.customTitle || page.productName}
-        </h1>
+        {(page.customTitle || (!page.customTitle && page.productName)) && (
+          <h1 className="text-2xl font-bold mb-2">
+            {page.customTitle || page.productName}
+          </h1>
+        )}
         
         {page.customSubtitle && (
           <p className="text-white/90 mb-2">
@@ -298,7 +306,7 @@ export default function Checkout() {
           </p>
         )}
         
-        {page.productDescription && (
+        {(!page.customTitle && !page.customSubtitle && page.productDescription) && (
           <p className="text-white/80 text-sm mb-4">
             {page.productDescription}
           </p>
@@ -313,7 +321,7 @@ export default function Checkout() {
       <div className="w-full max-w-2xl mx-auto p-6">
         {/* Custom elements before form */}
         {customElements
-          .filter((el: any) => el.position >= 0 && el.position < 50)
+          .filter((el: any) => el.position === "middle" || (el.position >= 0 && el.position < 50))
           .sort((a: any, b: any) => a.position - b.position)
           .map((element: any) => renderCustomElement(element))}
 
