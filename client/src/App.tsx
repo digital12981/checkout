@@ -16,6 +16,7 @@ function Router() {
       <Route path="/settings" component={Dashboard} />
       <Route path="/pages/edit/:id" component={EditPage} />
       <Route path="/checkout/:id" component={Checkout} />
+      <Route path="/pagamento/:id" component={Checkout} />
       <Route component={NotFound} />
     </Switch>
   );
