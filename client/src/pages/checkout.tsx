@@ -270,18 +270,6 @@ export default function Checkout() {
           </div>
         )}
 
-        {page.customTitle && (
-          <h1 className="text-2xl font-bold mb-2">
-            {page.customTitle}
-          </h1>
-        )}
-        
-        {page.customSubtitle && (
-          <p className="text-white/90 mb-4">
-            {page.customSubtitle}
-          </p>
-        )}
-        
         <div className="text-3xl font-bold">
           {formatCurrency(page.price)}
         </div>
