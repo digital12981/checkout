@@ -215,8 +215,8 @@ export default function Checkout() {
             alt="Custom element"
             className="mx-auto"
             style={{
-              width: element.styles.imageSize || 200,
-              borderRadius: element.styles.borderRadius || 8
+              width: element.styles?.imageSize || 200,
+              borderRadius: element.styles?.borderRadius || 8
             }}
             onError={(e) => {
               e.currentTarget.src = "https://via.placeholder.com/200x100?text=Imagem+não+encontrada";
@@ -226,26 +226,29 @@ export default function Checkout() {
       );
     }
 
+    // Build style object from element.styles
+    const elementStyles = element.styles || {};
+    const isFooterElement = element.type?.includes('footer') || element.position === "bottom" || element.position >= 100;
+    
     return (
       <div
         key={element.id}
-        className={`mb-4 ${element.styles.hasBox ? 'border' : ''} ${
-          element.type?.includes('footer') || element.position >= 100 ? 'w-full text-center' : ''
-        }`}
+        className={`${elementStyles.hasBox ? 'border' : ''} ${isFooterElement ? 'w-full' : ''}`}
         style={{
-          color: element.styles.color || "#000000",
-          backgroundColor: element.styles.backgroundColor || (element.styles.hasBox ? element.styles.boxColor || "#ffffff" : "transparent"),
-          borderColor: element.styles.hasBox ? element.styles.boxColor || "#e5e7eb" : "transparent",
-          fontWeight: element.styles.fontWeight || (element.styles.isBold ? "bold" : "normal"),
-          fontSize: element.styles.fontSize || "16px",
-          textAlign: element.type?.includes('footer') || element.position >= 100 ? "center" : (element.styles.textAlign || "left"),
-          borderRadius: element.type?.includes('footer') || element.position >= 100 ? "0" : `${element.styles.borderRadius || 4}px`,
-          padding: element.styles.padding || "8px",
-          border: element.styles.border,
-          marginBottom: element.styles.marginBottom,
-          marginTop: element.type?.includes('footer') || element.position >= 100 ? "32px" : element.styles.marginTop,
-          lineHeight: element.styles.lineHeight,
-          borderTop: element.styles.borderTop,
+          color: elementStyles.color || "#000000",
+          backgroundColor: elementStyles.backgroundColor || (elementStyles.hasBox ? elementStyles.boxColor || "#ffffff" : "transparent"),
+          borderColor: elementStyles.hasBox ? elementStyles.boxColor || "#e5e7eb" : "transparent",
+          fontWeight: elementStyles.fontWeight || (elementStyles.isBold ? "bold" : "normal"),
+          fontSize: elementStyles.fontSize ? `${elementStyles.fontSize}px` : "16px",
+          textAlign: elementStyles.textAlign || (isFooterElement ? "center" : "left"),
+          borderRadius: elementStyles.borderRadius ? `${elementStyles.borderRadius}px` : "4px",
+          padding: elementStyles.padding || "8px",
+          border: elementStyles.border,
+          marginBottom: elementStyles.marginBottom || "16px",
+          marginTop: elementStyles.marginTop || (isFooterElement ? "24px" : "0"),
+          lineHeight: elementStyles.lineHeight || "1.5",
+          borderTop: elementStyles.borderTop,
+          boxShadow: elementStyles.boxShadow,
         }}
         dangerouslySetInnerHTML={{ __html: element.content.replace(/\n/g, '<br/>') }}
       />
@@ -532,27 +535,12 @@ export default function Checkout() {
         </div>
       )}
 
-      {/* Footer elements (position 100+) rendered outside container for full width */}
+      {/* Footer elements (position 100+ or "bottom") rendered outside container for full width */}
       <div className="w-full">
         {customElements
-          .filter((el: any) => el.position >= 100)
+          .filter((el: any) => el.position === "bottom" || el.position >= 100)
           .sort((a: any, b: any) => a.position - b.position)
-          .map((element: any) => (
-            <div 
-              key={element.id} 
-              className="w-full"
-              style={{
-                backgroundColor: customStyles.primaryColor,
-                color: "#ffffff",
-                textAlign: "center",
-                padding: "20px",
-                fontSize: "14px",
-                borderTop: `1px solid ${customStyles.primaryColor}`
-              }}
-            >
-              <div dangerouslySetInnerHTML={{ __html: element.content.replace(/\n/g, '<br/>') }} />
-            </div>
-          ))}
+          .map((element: any) => renderCustomElement(element))}
       </div>
     </div>
   );
