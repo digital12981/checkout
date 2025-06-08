@@ -311,7 +311,7 @@ Keep under 400 chars. Use suggestedColors.`;
         // Ensure customElements have required fields
         if (result.customElements) {
           result.customElements = result.customElements.map((element: any, index: number) => {
-            // Force footer elements to position 85 for both preview modes
+            // Force footer elements to position 95 to appear after form content
             const isFooter = element.type?.includes('footer') || 
               element.content?.includes('©') ||
               element.content?.includes('seguro') ||
@@ -323,7 +323,7 @@ Keep under 400 chars. Use suggestedColors.`;
             return {
               id: element.id || `ai-element-${Date.now()}-${index}`,
               type: element.type || 'text',
-              position: isFooter ? 85 : (element.position || 50),
+              position: isFooter ? 95 : (element.position || 50),
               content: element.content || '',
               styles: element.styles || element.style || {}
             };
