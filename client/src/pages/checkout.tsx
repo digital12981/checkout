@@ -1,123 +1,137 @@
+import { useParams, useLocation } from "wouter";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { useParams } from "wouter";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
-import { useToast } from "@/hooks/use-toast";
-import { formatCurrency } from "@/lib/utils";
-import { Clock, QrCode, Copy, ShoppingBag } from "lucide-react";
-import { apiRequest } from "@/lib/queryClient";
 import { useEffect, useState } from "react";
-import type { PaymentPage, PixPayment } from "@shared/schema";
+import { Button } from "@/components/ui/button";
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
+import { Input } from "@/components/ui/input";
+import { useToast } from "@/hooks/use-toast";
+import { formatCurrency, formatCpf, copyToClipboard } from "@/lib/utils";
+import { QrCode, Copy, Clock } from "lucide-react";
 
 const customerFormSchema = z.object({
   customerName: z.string().min(2, "Nome deve ter pelo menos 2 caracteres"),
   customerEmail: z.string().email("Email inválido"),
-  customerCpf: z.string().min(11, "CPF deve ter 11 dígitos").max(11, "CPF deve ter 11 dígitos"),
+  customerCpf: z.string().min(11, "CPF deve ter 11 dígitos"),
   customerPhone: z.string().min(10, "Telefone deve ter pelo menos 10 dígitos"),
 });
 
 type CustomerForm = z.infer<typeof customerFormSchema>;
 
+interface PixPayment {
+  id: number;
+  pixCode: string;
+  pixQrCode: string;
+  customerName: string;
+  customerEmail: string;
+  customerCpf: string;
+  customerPhone: string;
+  amount: string;
+  status: string;
+}
+
+interface PaymentPage {
+  id: number;
+  productName: string;
+  productDescription: string;
+  price: string;
+  customTitle?: string;
+  customSubtitle?: string;
+  customButtonText?: string;
+  customInstructions?: string;
+  primaryColor: string;
+  accentColor: string;
+  backgroundColor: string;
+  textColor: string;
+  logoUrl?: string;
+  logoPosition: string;
+  logoSize: number;
+  headerHeight: number;
+  customElements?: string;
+  skipForm: boolean;
+}
+
 export default function Checkout() {
-  const params = useParams();
-  const pageId = params.id;
+  const { id: pageId } = useParams<{ id: string }>();
+  const [location] = useLocation();
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const [pixPayment, setPixPayment] = useState<PixPayment | null>(null);
-  const [isGeneratingPayment, setIsGeneratingPayment] = useState(false);
 
-  const { data: page, isLoading: pageLoading, error } = useQuery<PaymentPage>({
-    queryKey: [`/api/payment-pages/${pageId}`],
-    enabled: !!pageId,
-  });
-
-
+  // Extract URL parameters for auto-fill
+  const urlParams = new URLSearchParams(location.split('?')[1] || '');
+  const autoFillData = {
+    nome: urlParams.get('nome') || '',
+    email: urlParams.get('email') || '',
+    cpf: urlParams.get('cpf') || '',
+    telefone: urlParams.get('telefone') || ''
+  };
 
   const form = useForm<CustomerForm>({
     resolver: zodResolver(customerFormSchema),
     defaultValues: {
-      customerName: "",
-      customerEmail: "",
-      customerCpf: "",
-      customerPhone: "",
+      customerName: autoFillData.nome,
+      customerEmail: autoFillData.email,
+      customerCpf: autoFillData.cpf,
+      customerPhone: autoFillData.telefone,
     },
   });
 
-  // Function to extract customer data from URL parameters
-  const getCustomerDataFromURL = () => {
-    let searchParams = window.location.search;
-    
-    // Handle encoded URLs where %3F is used instead of ?
-    if (!searchParams && window.location.pathname.includes('%3F')) {
-      const pathParts = window.location.pathname.split('%3F');
-      if (pathParts.length > 1) {
-        searchParams = '?' + decodeURIComponent(pathParts[1]);
-      }
-    }
-    
-    // Also handle the case where the full URL is encoded
-    if (!searchParams && window.location.href.includes('%3F')) {
-      const urlParts = window.location.href.split('%3F');
-      if (urlParts.length > 1) {
-        searchParams = '?' + decodeURIComponent(urlParts[1]);
-      }
-    }
-    
-    const urlParams = new URLSearchParams(searchParams);
-    return {
-      customerName: urlParams.get('nome') || '',
-      customerEmail: urlParams.get('email') || '',
-      customerCpf: urlParams.get('cpf') || '',
-      customerPhone: urlParams.get('telefone') || '',
-    };
-  };
-
-  // Auto-generate payment when skipForm is enabled and we have URL parameters
-  useEffect(() => {
-    // Only proceed if we have a page loaded and skipForm is enabled
-    if (!page || !page.skipForm) return;
-    
-    // Check if we have customer data in URL parameters
-    const customerData = getCustomerDataFromURL();
-    const hasRequiredData = customerData.customerName && customerData.customerEmail && customerData.customerCpf;
-    
-    // Generate payment if we have required data and haven't generated one yet
-    if (hasRequiredData && !pixPayment && !isGeneratingPayment) {
-      setIsGeneratingPayment(true);
-      createPaymentMutation.mutate(customerData);
-    }
-  }, [page, pixPayment, isGeneratingPayment]);
+  const { data: page, isLoading, error } = useQuery({
+    queryKey: [`/api/payment-pages/${pageId}`],
+    enabled: !!pageId,
+  });
 
   const createPaymentMutation = useMutation({
     mutationFn: async (data: CustomerForm) => {
-      const response = await apiRequest("POST", "/api/pix-payments", {
-        paymentPageId: Number(pageId),
-        ...data,
+      const response = await fetch("/api/pix-payments", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          paymentPageId: parseInt(pageId!),
+          customerName: data.customerName,
+          customerEmail: data.customerEmail,
+          customerCpf: data.customerCpf,
+          customerPhone: data.customerPhone,
+        }),
       });
-      return response.json ? await response.json() : response;
+
+      if (!response.ok) {
+        throw new Error("Falha ao criar pagamento PIX");
+      }
+
+      return response.json();
     },
     onSuccess: (payment: PixPayment) => {
       setPixPayment(payment);
-      setIsGeneratingPayment(false);
       toast({
-        title: "PIX gerado com sucesso!",
-        description: "Escaneie o QR Code ou copie o código PIX para pagar.",
+        title: "PIX gerado!",
+        description: "Escaneie o QR Code ou copie o código PIX",
       });
-      queryClient.invalidateQueries({ queryKey: ["/api/pix-payments"] });
     },
-    onError: (error: any) => {
-      setIsGeneratingPayment(false);
+    onError: () => {
       toast({
-        title: "Erro ao gerar PIX",
-        description: error.message || "Tente novamente em alguns instantes.",
+        title: "Erro",
+        description: "Falha ao gerar PIX",
         variant: "destructive",
       });
     },
   });
+
+  // Auto-generate PIX for skip form pages
+  useEffect(() => {
+    if (page?.skipForm && autoFillData.nome && autoFillData.email && autoFillData.cpf && autoFillData.telefone) {
+      const formData = {
+        customerName: autoFillData.nome,
+        customerEmail: autoFillData.email,
+        customerCpf: autoFillData.cpf,
+        customerPhone: autoFillData.telefone,
+      };
+      createPaymentMutation.mutate(formData);
+    }
+  }, [page?.skipForm, autoFillData.nome, autoFillData.email, autoFillData.cpf, autoFillData.telefone]);
 
   const onSubmit = (data: CustomerForm) => {
     createPaymentMutation.mutate(data);
@@ -125,75 +139,44 @@ export default function Checkout() {
 
   const copyPixCode = async () => {
     if (pixPayment?.pixCode) {
-      try {
-        await navigator.clipboard.writeText(pixPayment.pixCode);
-        toast({
-          title: "Código PIX copiado!",
-          description: "Cole no seu app do banco para pagar.",
-        });
-      } catch (error) {
-        toast({
-          title: "Erro ao copiar",
-          description: "Tente selecionar e copiar manualmente.",
-          variant: "destructive",
-        });
-      }
+      await copyToClipboard(pixPayment.pixCode);
+      toast({
+        title: "Copiado!",
+        description: "Código PIX copiado para a área de transferência",
+      });
     }
   };
 
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+          <p className="text-gray-600">Carregando página de pagamento...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (error || !page) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <h1 className="text-2xl font-bold text-gray-900 mb-2">Página não encontrada</h1>
+          <p className="text-gray-600">A página de pagamento solicitada não existe.</p>
+        </div>
+      </div>
+    );
+  }
+
   const getCustomStyles = (page: PaymentPage) => {
     return {
-      primaryColor: page.primaryColor || "#2563eb",
-      accentColor: page.accentColor || "#1d4ed8", 
-      backgroundColor: page.backgroundColor || "#f8fafc",
+      primaryColor: page.primaryColor || "#1f2937",
+      accentColor: page.accentColor || "#3b82f6",
+      backgroundColor: page.backgroundColor || "#f9fafb",
       textColor: page.textColor || "#1f2937",
     };
   };
-
-  if (pageLoading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto mb-4"></div>
-          <p className="text-neutral-600">Carregando página...</p>
-        </div>
-      </div>
-    );
-  }
-
-  if (!page) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="text-center">
-          <h1 className="text-2xl font-bold text-neutral-800 mb-2">Página não encontrada</h1>
-          <p className="text-neutral-600">A página de pagamento que você está procurando não existe.</p>
-        </div>
-      </div>
-    );
-  }
-
-  // Show loading screen when generating payment for skipForm
-  if (page.skipForm && isGeneratingPayment && !pixPayment) {
-    return (
-      <div 
-        className="min-h-screen flex items-center justify-center"
-        style={{ backgroundColor: getCustomStyles(page).backgroundColor }}
-      >
-        <div className="text-center">
-          {page.logoUrl && (
-            <img 
-              src={page.logoUrl} 
-              alt="Logo" 
-              className="w-20 h-20 object-contain mx-auto mb-6"
-            />
-          )}
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
-          <p className="text-lg font-medium text-neutral-800">Gerando pagamento...</p>
-          <p className="text-sm text-neutral-600 mt-2">Aguarde um momento</p>
-        </div>
-      </div>
-    );
-  }
 
   const customStyles = getCustomStyles(page);
 
@@ -226,7 +209,6 @@ export default function Checkout() {
       );
     }
 
-    // Build style object from element.styles
     const elementStyles = element.styles || {};
     const isFooterElement = element.type?.includes('footer') || element.position === "bottom" || element.position >= 100;
     
@@ -249,8 +231,8 @@ export default function Checkout() {
           lineHeight: elementStyles.lineHeight || "1.5",
           borderTop: elementStyles.borderTop,
           boxShadow: elementStyles.boxShadow,
-          minHeight: "20px", // Ensure visibility
-          display: "block", // Force display
+          minHeight: "20px",
+          display: "block",
         }}
         dangerouslySetInnerHTML={{ __html: element.content.replace(/\n/g, '<br/>') }}
       />
@@ -262,58 +244,44 @@ export default function Checkout() {
       className="min-h-screen w-full"
       style={{ backgroundColor: customStyles.backgroundColor }}
     >
-      {/* Custom elements positioned at top */}
-      {customElements.filter((el: any) => el.position === "top").map((element: any) => (
-        <div key={element.id} className="w-full">
-          {renderCustomElement(element)}
-        </div>
-      ))}
+      {/* Top positioned elements */}
+      {customElements
+        .filter((el: any) => el.position === "top")
+        .map((element: any) => (
+          <div key={element.id} className="w-full">
+            {renderCustomElement(element)}
+          </div>
+        ))}
 
       {/* Header */}
       <div 
         className="w-full text-white text-center flex flex-col justify-center"
         style={{ 
           backgroundColor: customStyles.primaryColor,
-          height: `${page.headerHeight || 96}px`,
+          minHeight: `${page.headerHeight || 120}px`,
           padding: "24px"
         }}
       >
-        {page.showLogo !== false && (
+        {page.logoUrl && (
           <div className={`mb-4 flex ${page.logoPosition === 'left' ? 'justify-start' : page.logoPosition === 'right' ? 'justify-end' : 'justify-center'}`}>
-            {page.logoUrl ? (
-              <img 
-                src={page.logoUrl} 
-                alt="Logo" 
-                className="object-contain rounded"
-                style={{ width: `${page.logoSize || 64}px`, height: `${page.logoSize || 64}px` }}
-                onError={(e) => {
-                  e.currentTarget.style.display = 'none';
-                }}
-              />
-            ) : (
-              <div className="bg-white/20 rounded-full flex items-center justify-center"
-                style={{ width: `${page.logoSize || 64}px`, height: `${page.logoSize || 64}px` }}>
-                <ShoppingBag className="w-8 h-8" />
-              </div>
-            )}
+            <img 
+              src={page.logoUrl} 
+              alt="Logo" 
+              className="object-contain rounded"
+              style={{ width: `${page.logoSize || 64}px`, height: `${page.logoSize || 64}px` }}
+            />
           </div>
         )}
         
-        {(page.customTitle || (!page.customTitle && page.productName)) && (
+        {page.customTitle && (
           <h1 className="text-2xl font-bold mb-2">
-            {page.customTitle || page.productName}
+            {page.customTitle}
           </h1>
         )}
         
         {page.customSubtitle && (
-          <p className="text-white/90 mb-2">
+          <p className="text-white/90 mb-4">
             {page.customSubtitle}
-          </p>
-        )}
-        
-        {(!page.customTitle && !page.customSubtitle && page.productDescription) && (
-          <p className="text-white/80 text-sm mb-4">
-            {page.productDescription}
           </p>
         )}
         
@@ -322,22 +290,17 @@ export default function Checkout() {
         </div>
       </div>
 
-      {/* Custom elements positioned at middle */}
-      {customElements.filter((el: any) => el.position === "middle").map((element: any) => (
-        <div key={element.id} className="w-full max-w-2xl mx-auto p-6">
-          {renderCustomElement(element)}
-        </div>
-      ))}
+      {/* Middle positioned elements */}
+      {customElements
+        .filter((el: any) => el.position === "middle")
+        .map((element: any) => (
+          <div key={element.id} className="w-full max-w-4xl mx-auto px-6 py-2">
+            {renderCustomElement(element)}
+          </div>
+        ))}
 
-      {/* Custom elements in form/content area (positions 0-99) */}
+      {/* Content/Form area */}
       <div className="w-full max-w-2xl mx-auto p-6">
-        {/* Custom elements before form */}
-        {customElements
-          .filter((el: any) => el.position >= 0 && el.position < 50 && el.position !== "top" && el.position !== "middle" && el.position !== "bottom")
-          .sort((a: any, b: any) => a.position - b.position)
-          .map((element: any) => renderCustomElement(element))}
-
-        {/* Customer Form - only show if skipForm is disabled */}
         {!pixPayment && !page.skipForm && (
           <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
@@ -348,10 +311,7 @@ export default function Checkout() {
                   <FormItem>
                     <FormLabel>Nome Completo</FormLabel>
                     <FormControl>
-                      <Input 
-                        placeholder="Digite seu nome completo" 
-                        {...field} 
-                      />
+                      <Input placeholder="Digite seu nome completo" {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -365,11 +325,7 @@ export default function Checkout() {
                   <FormItem>
                     <FormLabel>Email</FormLabel>
                     <FormControl>
-                      <Input 
-                        type="email"
-                        placeholder="Digite seu email" 
-                        {...field} 
-                      />
+                      <Input type="email" placeholder="Digite seu email" {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -384,12 +340,9 @@ export default function Checkout() {
                     <FormLabel>CPF</FormLabel>
                     <FormControl>
                       <Input 
-                        placeholder="Digite seu CPF (apenas números)" 
-                        value={field.value}
-                        onChange={(e) => {
-                          const value = e.target.value.replace(/\D/g, '').slice(0, 11);
-                          field.onChange(value);
-                        }}
+                        placeholder="Digite seu CPF" 
+                        {...field}
+                        onChange={(e) => field.onChange(formatCpf(e.target.value))}
                       />
                     </FormControl>
                     <FormMessage />
@@ -404,10 +357,7 @@ export default function Checkout() {
                   <FormItem>
                     <FormLabel>Telefone</FormLabel>
                     <FormControl>
-                      <Input 
-                        placeholder="Digite seu telefone" 
-                        {...field} 
-                      />
+                      <Input placeholder="Digite seu telefone" {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -429,128 +379,77 @@ export default function Checkout() {
           </Form>
         )}
 
-        {/* Custom elements after form */}
-        {customElements
-          .filter((el: any) => el.position >= 50 && el.position < 100)
-          .sort((a: any, b: any) => a.position - b.position)
-          .map((element: any) => renderCustomElement(element))}
-      </div>
+        {/* PIX Payment Display */}
+        {pixPayment && (
+          <div>
+            <h3 className="font-semibold text-neutral-800 mb-4 text-center">
+              Pagamento PIX
+            </h3>
 
-      {/* PIX Payment Section */}
-      {pixPayment && (
-        <div className="w-full max-w-2xl mx-auto p-6">
-          {/* Custom elements before payment */}
-          {customElements
-            .filter((el: any) => el.position >= 0 && el.position < 50)
-            .sort((a: any, b: any) => a.position - b.position)
-            .map((element: any) => renderCustomElement(element))}
-
-          <h3 className="font-semibold text-neutral-800 mb-4 text-center">
-            Pagamento PIX
-          </h3>
-
-          {/* QR Code */}
-          <div className="text-center mb-6">
-            <div className="w-48 h-48 bg-white border-2 border-neutral-200 rounded-lg mx-auto flex items-center justify-center mb-4">
-              {pixPayment.pixQrCode ? (
-                <img 
-                  src={pixPayment.pixQrCode} 
-                  alt="QR Code PIX" 
-                  className="w-40 h-40 object-contain"
-                />
-              ) : (
-                <div className="w-40 h-40 bg-black/10 rounded flex items-center justify-center">
-                  <QrCode className="w-16 h-16 text-neutral-400" />
-                </div>
-              )}
-            </div>
-            <p className="text-sm text-neutral-600">
-              Escaneie o QR Code com seu app do banco
-            </p>
-          </div>
-
-          {/* PIX Code */}
-          {pixPayment.pixCode && (
-            <div className="mb-6">
-              <label className="block text-sm font-medium text-neutral-700 mb-2">
-                Ou copie o código PIX:
-              </label>
-              <div className="flex">
-                <input
-                  type="text"
-                  value={pixPayment.pixCode}
-                  readOnly
-                  className="flex-1 px-3 py-2 border border-neutral-300 rounded-l-md bg-neutral-50 text-sm"
-                />
-                <Button
-                  type="button"
-                  onClick={copyPixCode}
-                  className="px-4 py-2 rounded-l-none"
-                  style={{ backgroundColor: customStyles.accentColor }}
-                >
-                  <Copy className="w-4 h-4" />
-                </Button>
+            <div className="text-center mb-6">
+              <div className="w-48 h-48 bg-white border-2 border-neutral-200 rounded-lg mx-auto flex items-center justify-center mb-4">
+                {pixPayment.pixQrCode ? (
+                  <img 
+                    src={pixPayment.pixQrCode} 
+                    alt="QR Code PIX" 
+                    className="w-40 h-40 object-contain"
+                  />
+                ) : (
+                  <div className="w-40 h-40 bg-black/10 rounded flex items-center justify-center">
+                    <QrCode className="w-16 h-16 text-neutral-400" />
+                  </div>
+                )}
               </div>
-            </div>
-          )}
-
-          {/* Payment Details */}
-          <div className="bg-neutral-50 rounded-lg p-4 mb-6">
-            <div className="flex justify-between items-center mb-2">
-              <span className="text-sm text-neutral-600">Valor:</span>
-              <span className="font-semibold" style={{ color: customStyles.textColor }}>
-                {formatCurrency(page.price)}
-              </span>
-            </div>
-            <div className="flex justify-between items-center mb-2">
-              <span className="text-sm text-neutral-600">Produto:</span>
-              <span className="font-medium" style={{ color: customStyles.textColor }}>
-                {page.productName}
-              </span>
-            </div>
-            <div className="flex justify-between items-center">
-              <span className="text-sm text-neutral-600">Cliente:</span>
-              <span className="font-medium" style={{ color: customStyles.textColor }}>
-                {pixPayment.customerName}
-              </span>
-            </div>
-          </div>
-
-          {/* Custom Instructions */}
-          {page.customInstructions && (
-            <div className="mb-4 p-4 bg-blue-50 rounded-lg">
-              <p className="text-sm" style={{ color: customStyles.textColor }}>
-                {page.customInstructions}
+              <p className="text-sm text-neutral-600">
+                Escaneie o QR Code com seu app do banco
               </p>
             </div>
-          )}
 
-          {/* Custom elements after payment */}
-          {customElements
-            .filter((el: any) => el.position >= 50 && el.position < 100)
-            .sort((a: any, b: any) => a.position - b.position)
-            .map((element: any) => renderCustomElement(element))}
+            {pixPayment.pixCode && (
+              <div className="mb-6">
+                <label className="block text-sm font-medium text-neutral-700 mb-2">
+                  Ou copie o código PIX:
+                </label>
+                <div className="flex">
+                  <input
+                    type="text"
+                    value={pixPayment.pixCode}
+                    readOnly
+                    className="flex-1 px-3 py-2 border border-neutral-300 rounded-l-md bg-neutral-50 text-sm"
+                  />
+                  <Button
+                    type="button"
+                    onClick={copyPixCode}
+                    className="px-4 py-2 rounded-l-none"
+                    style={{ backgroundColor: customStyles.accentColor }}
+                  >
+                    <Copy className="w-4 h-4" />
+                  </Button>
+                </div>
+              </div>
+            )}
 
-          {/* Payment Status */}
-          <div className="text-center">
-            <div className="inline-flex items-center space-x-2 text-yellow-600 bg-yellow-50 px-4 py-2 rounded-lg">
-              <Clock className="w-4 h-4 animate-pulse" />
-              <span className="text-sm font-medium">Aguardando pagamento...</span>
+            <div className="text-center">
+              <div className="inline-flex items-center space-x-2 text-yellow-600 bg-yellow-50 px-4 py-2 rounded-lg">
+                <Clock className="w-4 h-4 animate-pulse" />
+                <span className="text-sm font-medium">Aguardando pagamento...</span>
+              </div>
+              <p className="text-xs text-neutral-600 mt-2">
+                O pagamento será confirmado automaticamente
+              </p>
             </div>
-            <p className="text-xs text-neutral-600 mt-2">
-              O pagamento será confirmado automaticamente
-            </p>
           </div>
-        </div>
-      )}
-
-      {/* Footer elements (position 100+ or "bottom") rendered outside container for full width */}
-      <div className="w-full">
-        {customElements
-          .filter((el: any) => el.position === "bottom" || el.position >= 100)
-          .sort((a: any, b: any) => a.position - b.position)
-          .map((element: any) => renderCustomElement(element))}
+        )}
       </div>
+
+      {/* Bottom positioned elements */}
+      {customElements
+        .filter((el: any) => el.position === "bottom")
+        .map((element: any) => (
+          <div key={element.id} className="w-full">
+            {renderCustomElement(element)}
+          </div>
+        ))}
     </div>
   );
 }
