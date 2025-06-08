@@ -197,6 +197,55 @@ export default function Checkout() {
 
   const customStyles = getCustomStyles(page);
 
+  // Parse custom elements
+  const customElements = page.customElements ? JSON.parse(page.customElements) : [];
+
+  const renderCustomElement = (element: any) => {
+    if (element.type === "image") {
+      return (
+        <div key={element.id} className="mb-4 text-center">
+          <img
+            src={element.content}
+            alt="Custom element"
+            className="mx-auto"
+            style={{
+              width: element.styles.imageSize || 200,
+              borderRadius: element.styles.borderRadius || 8
+            }}
+            onError={(e) => {
+              e.currentTarget.src = "https://via.placeholder.com/200x100?text=Imagem+não+encontrada";
+            }}
+          />
+        </div>
+      );
+    }
+
+    return (
+      <div
+        key={element.id}
+        className={`mb-4 ${element.styles.hasBox ? 'border' : ''} ${
+          element.type?.includes('footer') || element.position >= 100 ? 'w-full text-center' : ''
+        }`}
+        style={{
+          color: element.styles.color || "#000000",
+          backgroundColor: element.styles.backgroundColor || (element.styles.hasBox ? element.styles.boxColor || "#ffffff" : "transparent"),
+          borderColor: element.styles.hasBox ? element.styles.boxColor || "#e5e7eb" : "transparent",
+          fontWeight: element.styles.fontWeight || (element.styles.isBold ? "bold" : "normal"),
+          fontSize: element.styles.fontSize || "16px",
+          textAlign: element.type?.includes('footer') || element.position >= 100 ? "center" : (element.styles.textAlign || "left"),
+          borderRadius: element.type?.includes('footer') || element.position >= 100 ? "0" : `${element.styles.borderRadius || 4}px`,
+          padding: element.styles.padding || "8px",
+          border: element.styles.border,
+          marginBottom: element.styles.marginBottom,
+          marginTop: element.type?.includes('footer') || element.position >= 100 ? "32px" : element.styles.marginTop,
+          lineHeight: element.styles.lineHeight,
+          borderTop: element.styles.borderTop,
+        }}
+        dangerouslySetInnerHTML={{ __html: element.content.replace(/\n/g, '<br/>') }}
+      />
+    );
+  };
+
   return (
     <div 
       className="min-h-screen w-full"
@@ -204,22 +253,35 @@ export default function Checkout() {
     >
       {/* Header */}
       <div 
-        className="w-full p-6 text-white text-center"
-        style={{ backgroundColor: customStyles.primaryColor }}
+        className="w-full text-white text-center flex flex-col justify-center"
+        style={{ 
+          backgroundColor: customStyles.primaryColor,
+          height: `${page.headerHeight || 96}px`,
+          padding: "24px"
+        }}
       >
+        {/* Header custom elements (negative positions for header) */}
+        {customElements.filter((el: any) => el.position < -10).map((element: any) => (
+          <div key={element.id}>
+            {renderCustomElement(element)}
+          </div>
+        ))}
+
         {page.showLogo !== false && (
           <div className={`mb-4 flex ${page.logoPosition === 'left' ? 'justify-start' : page.logoPosition === 'right' ? 'justify-end' : 'justify-center'}`}>
             {page.logoUrl ? (
               <img 
                 src={page.logoUrl} 
                 alt="Logo" 
-                className="w-16 h-16 object-contain rounded"
+                className="object-contain rounded"
+                style={{ width: `${page.logoSize || 64}px`, height: `${page.logoSize || 64}px` }}
                 onError={(e) => {
                   e.currentTarget.style.display = 'none';
                 }}
               />
             ) : (
-              <div className="w-16 h-16 bg-white/20 rounded-full flex items-center justify-center">
+              <div className="bg-white/20 rounded-full flex items-center justify-center"
+                style={{ width: `${page.logoSize || 64}px`, height: `${page.logoSize || 64}px` }}>
                 <ShoppingBag className="w-8 h-8" />
               </div>
             )}
@@ -247,9 +309,16 @@ export default function Checkout() {
         </div>
       </div>
 
-      {/* Customer Form - only show if skipForm is disabled */}
-      {!pixPayment && !page.skipForm && (
-        <div className="w-full max-w-2xl mx-auto p-6">
+      {/* Custom elements in form/content area (positions 0-99) */}
+      <div className="w-full max-w-2xl mx-auto p-6">
+        {/* Custom elements before form */}
+        {customElements
+          .filter((el: any) => el.position >= 0 && el.position < 50)
+          .sort((a: any, b: any) => a.position - b.position)
+          .map((element: any) => renderCustomElement(element))}
+
+        {/* Customer Form - only show if skipForm is disabled */}
+        {!pixPayment && !page.skipForm && (
           <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
               <FormField
@@ -338,12 +407,24 @@ export default function Checkout() {
               </Button>
             </form>
           </Form>
-        </div>
-      )}
+        )}
+
+        {/* Custom elements after form */}
+        {customElements
+          .filter((el: any) => el.position >= 50 && el.position < 100)
+          .sort((a: any, b: any) => a.position - b.position)
+          .map((element: any) => renderCustomElement(element))}
+      </div>
 
       {/* PIX Payment Section */}
       {pixPayment && (
         <div className="w-full max-w-2xl mx-auto p-6">
+          {/* Custom elements before payment */}
+          {customElements
+            .filter((el: any) => el.position >= 0 && el.position < 50)
+            .sort((a: any, b: any) => a.position - b.position)
+            .map((element: any) => renderCustomElement(element))}
+
           <h3 className="font-semibold text-neutral-800 mb-4 text-center">
             Pagamento PIX
           </h3>
@@ -424,6 +505,12 @@ export default function Checkout() {
             </div>
           )}
 
+          {/* Custom elements after payment */}
+          {customElements
+            .filter((el: any) => el.position >= 50 && el.position < 100)
+            .sort((a: any, b: any) => a.position - b.position)
+            .map((element: any) => renderCustomElement(element))}
+
           {/* Payment Status */}
           <div className="text-center">
             <div className="inline-flex items-center space-x-2 text-yellow-600 bg-yellow-50 px-4 py-2 rounded-lg">
@@ -436,6 +523,29 @@ export default function Checkout() {
           </div>
         </div>
       )}
+
+      {/* Footer elements (position 100+) rendered outside container for full width */}
+      <div className="w-full">
+        {customElements
+          .filter((el: any) => el.position >= 100)
+          .sort((a: any, b: any) => a.position - b.position)
+          .map((element: any) => (
+            <div 
+              key={element.id} 
+              className="w-full"
+              style={{
+                backgroundColor: customStyles.primaryColor,
+                color: "#ffffff",
+                textAlign: "center",
+                padding: "20px",
+                fontSize: "14px",
+                borderTop: `1px solid ${customStyles.primaryColor}`
+              }}
+            >
+              <div dangerouslySetInnerHTML={{ __html: element.content.replace(/\n/g, '<br/>') }} />
+            </div>
+          ))}
+      </div>
     </div>
   );
 }
