@@ -1911,7 +1911,7 @@ export default function EditPage() {
               <span>Preview</span>
             </h3>
             <p className="text-sm text-neutral-600 mt-1">
-              Visualização da {activeStep === "form" ? "página de dados" : "página de pagamento"}
+              Visualização da {(activeStep === "form" && !formData.skipForm) ? "página de dados" : "página de pagamento"}
             </p>
           </div>
           <div className="bg-neutral-100" style={{ height: 'calc(100% - 73px)' }}>
@@ -1924,7 +1924,7 @@ export default function EditPage() {
               </div>
             ) : (
               <div className="scale-75 origin-top-left w-[133%] h-[133%]">
-                {activeStep === "form" ? <FormStepPreview /> : <PaymentStepPreview />}
+                {(activeStep === "form" && !formData.skipForm) ? <FormStepPreview /> : <PaymentStepPreview />}
               </div>
             )}
           </div>
