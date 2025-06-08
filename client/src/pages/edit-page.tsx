@@ -1057,6 +1057,15 @@ export default function EditPage() {
 
         </div>
 
+        {/* Footer elements (position 100+) rendered after the card content */}
+        {customElements
+          .filter(el => el.position >= 100)
+          .sort((a, b) => a.position - b.position)
+          .map(element => (
+            <div key={element.id} className="mt-4">
+              {renderCustomElement(element)}
+            </div>
+          ))}
       </Card>
     </div>
   );
