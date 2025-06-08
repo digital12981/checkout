@@ -250,6 +250,15 @@ export default function Checkout() {
       className="min-h-screen w-full"
       style={{ backgroundColor: customStyles.backgroundColor }}
     >
+      {/* Top positioned elements (string positions) */}
+      {customElements
+        .filter((el: any) => el.position === "top")
+        .map((element: any) => (
+          <div key={element.id} className="w-full">
+            {renderCustomElement(element)}
+          </div>
+        ))}
+
       {/* Header */}
       <div 
         className="w-full p-6 text-white text-center flex flex-col justify-center"
@@ -260,7 +269,7 @@ export default function Checkout() {
       >
         {/* Header custom elements (negative positions for header) */}
         {customElements
-          .filter((el: any) => el.position < -10)
+          .filter((el: any) => typeof el.position === 'number' && el.position < -10)
           .sort((a: any, b: any) => a.position - b.position)
           .map((element: any) => (
             <div key={element.id}>
@@ -281,7 +290,7 @@ export default function Checkout() {
 
         {/* Header custom elements after logo */}
         {customElements
-          .filter((el: any) => el.position >= -10 && el.position < 0)
+          .filter((el: any) => typeof el.position === 'number' && el.position >= -10 && el.position < 0)
           .sort((a: any, b: any) => a.position - b.position)
           .map((element: any) => (
             <div key={element.id}>
@@ -306,18 +315,28 @@ export default function Checkout() {
         </div>
       </div>
 
-      {/* Form area */}
-      <div className="w-full p-6 bg-white flex justify-center">
-        <div className="w-full max-w-md">
-          {/* Render body elements in order (excluding footers) */}
-          {customElements
-            .filter((el: any) => el.position >= 0 && el.position < 100)
-            .sort((a: any, b: any) => a.position - b.position)
-            .map((element: any) => (
-              <div key={element.id}>
-                {renderCustomElement(element)}
-              </div>
-            ))}
+      {/* Form area - full white background to bottom */}
+      <div className="w-full bg-white min-h-screen">
+        <div className="w-full p-6 flex justify-center">
+          <div className="w-full max-w-md">
+            {/* Middle positioned elements (string positions) */}
+            {customElements
+              .filter((el: any) => el.position === "middle")
+              .map((element: any) => (
+                <div key={element.id} className="mb-4">
+                  {renderCustomElement(element)}
+                </div>
+              ))}
+
+            {/* Render body elements in order (numeric positions) */}
+            {customElements
+              .filter((el: any) => typeof el.position === 'number' && el.position >= 0 && el.position < 100)
+              .sort((a: any, b: any) => a.position - b.position)
+              .map((element: any) => (
+                <div key={element.id}>
+                  {renderCustomElement(element)}
+                </div>
+              ))}
 
           {/* Customer Form - only show if skipForm is disabled */}
           {!pixPayment && !page.skipForm && (
