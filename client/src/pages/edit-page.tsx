@@ -232,7 +232,7 @@ export default function EditPage() {
   });
 
   const onSubmit = (data: EditPageForm) => {
-    // Capture the current template structure from the preview
+    // Capture the current template structure from the preview with current customElements state
     const captureTemplateStructure = () => {
       return {
         formData: {
@@ -240,7 +240,7 @@ export default function EditPage() {
           customTitle: data.customTitle?.trim() || "",
           customSubtitle: data.customSubtitle?.trim() || "",
         },
-        customElements: customElements,
+        customElements: customElements, // Use current state, not form data
         renderSettings: {
           showLogo: data.showLogo,
           logoUrl: data.logoUrl,
@@ -261,9 +261,11 @@ export default function EditPage() {
       ...data,
       customTitle: data.customTitle?.trim() || "",
       customSubtitle: data.customSubtitle?.trim() || "",
-      customElements: JSON.stringify(customElements),
+      customElements: JSON.stringify(customElements), // Use current state
       templateStructure: JSON.stringify(templateStructure)
     };
+    
+    console.log("Saving template with elements:", customElements.length);
     updatePageMutation.mutate(updatedData);
   };
 
@@ -316,10 +318,45 @@ export default function EditPage() {
         .sort((a, b) => a.position - b.position)
         .map((el, index) => ({ ...el, position: index }));
       
-      return [...reorderedHeader, ...reorderedBody];
+      const newElements = [...reorderedHeader, ...reorderedBody];
+      
+      // Auto-save after element deletion
+      setTimeout(() => {
+        const currentFormData = form.getValues();
+        const templateStructure = {
+          formData: {
+            ...currentFormData,
+            customTitle: currentFormData.customTitle?.trim() || "",
+            customSubtitle: currentFormData.customSubtitle?.trim() || "",
+          },
+          customElements: newElements,
+          renderSettings: {
+            showLogo: currentFormData.showLogo,
+            logoUrl: currentFormData.logoUrl,
+            logoPosition: currentFormData.logoPosition,
+            logoSize: currentFormData.logoSize,
+            headerHeight: currentFormData.headerHeight,
+            primaryColor: currentFormData.primaryColor,
+            accentColor: currentFormData.accentColor,
+            backgroundColor: currentFormData.backgroundColor,
+            textColor: currentFormData.textColor,
+          }
+        };
+        
+        const updatedData = {
+          ...currentFormData,
+          customElements: JSON.stringify(newElements),
+          templateStructure: JSON.stringify(templateStructure)
+        };
+        
+        console.log("Auto-saving after element deletion. New count:", newElements.length);
+        updatePageMutation.mutate(updatedData);
+      }, 100);
+      
+      return newElements;
     });
     setSelectedElement(null);
-  }, []);
+  }, [form, updatePageMutation]);
 
   const insertElementAtPosition = useCallback((type: "text" | "image", position: number) => {
     const newElement: CustomElement = {
