@@ -97,14 +97,28 @@ Create appropriate styling, colors, and elements based on the charge context.`;
       try {
         let jsonText = content.text.trim();
         
+        // Remove markdown code blocks
         if (jsonText.startsWith('```json')) {
           jsonText = jsonText.replace(/^```json\s*/, '').replace(/\s*```$/, '');
         } else if (jsonText.startsWith('```')) {
           jsonText = jsonText.replace(/^```\s*/, '').replace(/\s*```$/, '');
         }
         
+        // Find the main JSON object boundaries
         const jsonStart = jsonText.indexOf('{');
-        const jsonEnd = jsonText.lastIndexOf('}');
+        let jsonEnd = -1;
+        let braceCount = 0;
+        
+        for (let i = jsonStart; i < jsonText.length; i++) {
+          if (jsonText[i] === '{') braceCount++;
+          if (jsonText[i] === '}') {
+            braceCount--;
+            if (braceCount === 0) {
+              jsonEnd = i;
+              break;
+            }
+          }
+        }
         
         if (jsonStart !== -1 && jsonEnd !== -1) {
           jsonText = jsonText.substring(jsonStart, jsonEnd + 1);

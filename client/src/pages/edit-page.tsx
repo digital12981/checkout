@@ -113,6 +113,7 @@ export default function EditPage() {
   const [isAiProcessing, setIsAiProcessing] = useState<boolean>(false);
   const [aiStatus, setAiStatus] = useState<string>("");
   const [templateSnapshot, setTemplateSnapshot] = useState<any>(null);
+  const [previewKey, setPreviewKey] = useState(0);
   const { toast } = useToast();
   const queryClient = useQueryClient();
   
@@ -455,16 +456,22 @@ export default function EditPage() {
       // Apply changes immediately with visual feedback
       if (result.formData) {
         setAiStatus("Atualizando cores e textos...");
-        // Reset form and force re-render by setting each field individually
-        Object.keys(result.formData).forEach(key => {
-          form.setValue(key as any, result.formData[key]);
+        // Update form data with force re-render
+        const newFormData = { ...form.getValues(), ...result.formData };
+        form.reset(newFormData);
+        
+        // Force individual field updates to trigger watchers
+        Object.entries(result.formData).forEach(([key, value]) => {
+          form.setValue(key as any, value, { shouldDirty: true, shouldTouch: true, shouldValidate: true });
         });
-        form.trigger(); // Trigger validation and re-render
       }
       if (result.customElements) {
         setAiStatus("Adicionando elementos...");
         setCustomElements(result.customElements);
       }
+
+      // Force preview re-render
+      setPreviewKey(prev => prev + 1);
 
       setAiStatus("Concluído!");
       setTimeout(() => setAiStatus(""), 2000);
