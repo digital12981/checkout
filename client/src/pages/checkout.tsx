@@ -73,18 +73,53 @@ export default function Checkout() {
     };
   };
 
+  // Initialize URL params tracking and reset payment state when URL parameters change
+  useEffect(() => {
+    const currentUrlParams = window.location.search;
+    
+    // Initialize on first load
+    if (!lastUrlParams) {
+      setLastUrlParams(currentUrlParams);
+      return;
+    }
+    
+    // Reset if URL params changed and we have new params
+    if (currentUrlParams !== lastUrlParams && currentUrlParams) {
+      console.log('URL parameters changed, resetting payment state');
+      setPixPayment(null);
+      setIsGeneratingPayment(false);
+      setLastUrlParams(currentUrlParams);
+    }
+  }, [lastUrlParams]);
+
   // Auto-generate payment when skipForm is enabled
   useEffect(() => {
+    console.log('Checkout useEffect triggered', {
+      page: page?.id,
+      skipForm: page?.skipForm,
+      pixPayment: !!pixPayment,
+      isGeneratingPayment,
+      urlParams: window.location.search
+    });
+
     if (page && page.skipForm && !pixPayment && !isGeneratingPayment) {
       const customerData = getCustomerDataFromURL();
+      console.log('Customer data from URL:', customerData);
       
       // Validate required fields
       if (customerData.customerName && customerData.customerEmail && customerData.customerCpf) {
+        console.log('Valid customer data found, generating payment...');
         setIsGeneratingPayment(true);
         createPaymentMutation.mutate(customerData);
+      } else {
+        console.log('Missing required customer data:', {
+          name: !!customerData.customerName,
+          email: !!customerData.customerEmail,
+          cpf: !!customerData.customerCpf
+        });
       }
     }
-  }, [page]);
+  }, [page, pixPayment, isGeneratingPayment]);
 
   const createPaymentMutation = useMutation({
     mutationFn: async (data: CustomerForm) => {
