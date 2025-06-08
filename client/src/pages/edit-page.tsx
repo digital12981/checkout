@@ -82,7 +82,7 @@ type EditPageForm = z.infer<typeof editPageSchema>;
 // Custom element types
 interface CustomElement {
   id: string;
-  type: "text" | "image";
+  type: "text" | "image" | "footer" | "banner" | "info-box" | "trust-element" | "footer-info" | "footer-element" | string;
   position: number;
   content: string;
   styles: {
@@ -95,6 +95,13 @@ interface CustomElement {
     borderRadius?: number;
     fontSize?: number;
     textAlign?: "left" | "center" | "right";
+    padding?: string;
+    border?: string;
+    marginBottom?: string;
+    marginTop?: string;
+    fontWeight?: string;
+    lineHeight?: string;
+    borderTop?: string;
   };
 }
 
@@ -470,8 +477,14 @@ export default function EditPage() {
       }
       if (result.customElements) {
         setAiStatus("Adicionando elementos...");
+        console.log("AI Response customElements:", result.customElements);
+        console.log("Current customElements before merge:", customElements);
         // Merge new elements with existing ones instead of replacing
-        setCustomElements(prev => [...prev, ...result.customElements]);
+        setCustomElements(prev => {
+          const merged = [...prev, ...result.customElements];
+          console.log("Merged customElements:", merged);
+          return merged;
+        });
       }
 
       // Force preview re-render
@@ -506,7 +519,7 @@ export default function EditPage() {
     const isSelected = selectedElement === element.id;
     const isEditing = editingElementId === element.id;
     
-    if (element.type === "text") {
+    if (element.type !== "image") {
       return (
         <div
           key={element.id}
