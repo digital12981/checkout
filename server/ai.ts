@@ -194,7 +194,7 @@ RULES:
 - For footers: include company/institution name from description
 - For text blocks: match the product/service theme
 - customElements must have: id, type, position, content, styles
-- Position footers at 85 (to show in both previews)
+- Position footers at 100+ (to appear at bottom of page)
 - Return ONLY JSON changes
 - Keep response under 300 characters
 
