@@ -171,7 +171,7 @@ export default function Checkout() {
 
   const renderCustomElement = (element: CustomElement) => {
     const elementStyles = element.styles || {};
-    const isFooterElement = element.type === "footer" || element.type === "footer-info" || element.type === "footer-element";
+    const isFooterElement = element.position === "bottom" || element.type === "footer" || element.type === "footer-info" || element.type === "footer-element";
 
     if (element.type === "image") {
       return (
@@ -200,11 +200,10 @@ export default function Checkout() {
 
     return (
       <div
-        className={`${isFooterElement ? 'w-full' : ''}`}
         style={{
           color: elementStyles.color || "#000000",
           backgroundColor: elementStyles.backgroundColor || "transparent",
-          fontWeight: elementStyles.isBold ? "bold" : elementStyles.fontWeight || "normal",
+          fontWeight: elementStyles.fontWeight || "normal",
           fontSize: `${elementStyles.fontSize || 16}px`,
           textAlign: elementStyles.textAlign || "left",
           padding: elementStyles.padding || "0",
@@ -214,10 +213,7 @@ export default function Checkout() {
           marginTop: elementStyles.marginTop || "0px",
           lineHeight: elementStyles.lineHeight || "1.5",
           borderTop: elementStyles.borderTop,
-          width: isFooterElement ? "100vw" : "auto",
-          marginLeft: isFooterElement ? "-50vw" : "0",
-          left: isFooterElement ? "50%" : "auto",
-          position: isFooterElement ? "relative" : "static"
+          boxShadow: elementStyles.boxShadow,
         }}
         dangerouslySetInnerHTML={{ __html: element.content.replace(/\n/g, '<br/>') }}
       />
@@ -261,8 +257,7 @@ export default function Checkout() {
           >
             {/* Header custom elements */}
             {templateElements
-              .filter((el: any) => el.position < 0)
-              .sort((a: any, b: any) => a.position - b.position)
+              .filter((el: any) => el.position === "top" || el.position < 0)
               .map((element: any, index: number) => (
               <div key={element.id || index} className="mb-4">
                 {renderCustomElement(element)}
@@ -305,8 +300,7 @@ export default function Checkout() {
             <div className="w-full max-w-md">
               {/* Body elements */}
               {templateElements
-                .filter((el: any) => el.position >= 0 && el.position < 100)
-                .sort((a: any, b: any) => a.position - b.position)
+                .filter((el: any) => el.position === "middle" || (el.position >= 0 && el.position < 100))
                 .map((element: any, index: number) => (
                   <div key={element.id || index} className="mb-4">
                     {renderCustomElement(element)}
@@ -427,8 +421,7 @@ export default function Checkout() {
 
               {/* Footer elements */}
               {templateElements
-                .filter((el: any) => el.position >= 100)
-                .sort((a: any, b: any) => a.position - b.position)
+                .filter((el: any) => el.position === "bottom" || el.position >= 100)
                 .map((element: any, index: number) => (
                   <div key={element.id || index} className="mt-4">
                     {renderCustomElement(element)}
