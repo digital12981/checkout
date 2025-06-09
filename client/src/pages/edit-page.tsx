@@ -233,84 +233,81 @@ export default function EditPage() {
   });
 
   const capturePreviewHTML = () => {
-    // Wait for React to render completely, then capture the ACTUAL rendered HTML
     return new Promise<string>((resolve) => {
       setTimeout(() => {
         try {
-          // Find the preview container element
-          const previewContainer = document.querySelector('.flex-1.bg-gray-50');
+          // Find the specific preview element
+          const previewElement = document.getElementById('form-preview-capture');
           
-          if (!previewContainer) {
-            console.log("Preview container not found");
+          if (!previewElement) {
+            console.log("Form preview element not found");
             resolve("");
             return;
           }
           
-          // Get the first child which contains the actual preview
-          const previewContent = previewContainer.firstElementChild;
+          console.log("Found preview element:", previewElement);
           
-          if (!previewContent) {
-            console.log("Preview content not found");
-            resolve("");
-            return;
-          }
+          // Clone the element completely
+          const clone = previewElement.cloneNode(true) as HTMLElement;
           
-          // Clone the element to avoid modifying the original
-          const clone = previewContent.cloneNode(true) as HTMLElement;
-          
-          // Remove all editor-specific elements
-          const editorsElements = clone.querySelectorAll(
-            '.absolute, .ring-2, .cursor-pointer, [class*="border-dashed"], [class*="bg-primary/10"], .transition-colors, .z-10'
-          );
-          editorsElements.forEach(el => el.remove());
-          
-          // Remove editor event handlers
-          const allElements = clone.querySelectorAll('*');
-          allElements.forEach(el => {
-            el.removeAttribute('onclick');
-            el.removeAttribute('ondoubleclick');
-            el.removeAttribute('onmouseover');
-            el.removeAttribute('onmouseout');
+          // Remove ALL editor-specific interactive elements
+          const removeEditorElements = (element: Element) => {
+            // Remove drop zones
+            const dropZones = element.querySelectorAll('[class*="border-dashed"]');
+            dropZones.forEach(el => el.remove());
             
-            // Remove editor-specific classes
-            const classList = Array.from(el.classList);
-            classList.forEach(className => {
-              if (className.includes('cursor-pointer') || 
-                  className.includes('ring-') || 
-                  className.includes('border-dashed') ||
-                  className.includes('bg-primary/10') ||
-                  className.includes('transition-colors') ||
-                  className.includes('hover:') ||
-                  className.includes('z-10')) {
-                el.classList.remove(className);
-              }
+            // Remove floating menus
+            const floatingMenus = element.querySelectorAll('.absolute.top-0, .absolute.right-0, .absolute.z-10');
+            floatingMenus.forEach(el => el.remove());
+            
+            // Remove selection rings
+            const rings = element.querySelectorAll('.ring-2, .ring-primary');
+            rings.forEach(el => {
+              el.classList.remove('ring-2', 'ring-primary', 'cursor-pointer');
             });
-          });
+            
+            // Remove hover effects and transitions
+            const allElements = element.querySelectorAll('*');
+            allElements.forEach(el => {
+              // Remove editor event handlers
+              el.removeAttribute('onclick');
+              el.removeAttribute('ondoubleclick');
+              el.removeAttribute('onmouseover');
+              el.removeAttribute('onmouseout');
+              
+              // Remove editor classes
+              const classesToRemove = [
+                'cursor-pointer', 'ring-2', 'ring-primary', 'transition-colors',
+                'hover:ring-2', 'hover:ring-primary', 'z-10'
+              ];
+              
+              classesToRemove.forEach(className => {
+                el.classList.remove(className);
+              });
+            });
+          };
           
-          // Get the clean HTML and add a form placeholder
+          removeEditorElements(clone);
+          
+          // Get the clean HTML
           let cleanHTML = clone.outerHTML;
           
-          // Replace form elements with placeholder for dynamic content injection
+          // Replace any form content with placeholder for dynamic injection
           cleanHTML = cleanHTML.replace(
-            /<form[\s\S]*?<\/form>/gi,
-            '<!-- FORM_PLACEHOLDER -->'
+            /<div[^>]*class="[^"]*space-y-4[^"]*"[^>]*>[\s\S]*?<\/div>/gi,
+            '<div class="w-full max-w-md"><!-- FORM_PLACEHOLDER --></div>'
           );
           
-          // Also look for form inputs and replace them
-          cleanHTML = cleanHTML.replace(
-            /<div[^>]*class="[^"]*space-y-4[^"]*"[\s\S]*?<button[\s\S]*?<\/button>[\s\S]*?<\/div>/gi,
-            '<!-- FORM_PLACEHOLDER -->'
-          );
+          console.log("Successfully captured HTML length:", cleanHTML.length);
+          console.log("HTML contains form placeholder:", cleanHTML.includes('FORM_PLACEHOLDER'));
           
-          console.log("Captured actual HTML length:", cleanHTML.length);
-          console.log("Captured HTML preview:", cleanHTML.substring(0, 500));
           resolve(cleanHTML);
           
         } catch (error) {
           console.error("Error capturing preview HTML:", error);
           resolve("");
         }
-      }, 200); // Give React time to render
+      }, 300); // Give more time for React rendering
     });
   };
 
@@ -894,6 +891,7 @@ export default function EditPage() {
 
   const FormStepPreview = () => (
     <div 
+      id="form-preview-capture"
       className="min-h-screen w-full"
       style={{ backgroundColor: formData.backgroundColor }}
       onClick={(e) => {
