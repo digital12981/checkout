@@ -7,7 +7,26 @@
   <body>
     <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>
-    <!-- This is a replit script which adds a banner on the top of the page when opened in development mode outside the replit environment -->
-    <script type="text/javascript" src="https://replit.com/public/js/replit-dev-banner.js"></script>
+    <script>
+      // Ensure all interactions work properly
+      document.addEventListener('DOMContentLoaded', function() {
+        // Force enable pointer events and user selection
+        const style = document.createElement('style');
+        style.textContent = `
+          * { 
+            pointer-events: auto !important; 
+            user-select: auto !important;
+            -webkit-user-select: auto !important;
+            -moz-user-select: auto !important;
+            -ms-user-select: auto !important;
+          }
+          input, textarea, select, button {
+            pointer-events: auto !important;
+            -webkit-user-select: auto !important;
+          }
+        `;
+        document.head.appendChild(style);
+      });
+    </script>
   </body>
 </html>
