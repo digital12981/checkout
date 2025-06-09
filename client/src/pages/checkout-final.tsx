@@ -7,7 +7,6 @@ export default function CheckoutFinal() {
   const [, params] = useRoute("/checkout/:id");
   const [pixPayment, setPixPayment] = useState<any>(null);
   const [timeLeft, setTimeLeft] = useState(15 * 60);
-  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const pageQuery = useQuery({
     queryKey: [`/api/payment-pages/${params?.id}`],
@@ -43,7 +42,7 @@ export default function CheckoutFinal() {
     onSuccess: (payment: any) => {
       console.log('Payment created successfully:', payment);
       setPixPayment(payment);
-      setTimeLeft(15 * 60);
+      setTimeLeft(10 * 60); // 10 minutes for payment
     },
     onError: (error: any) => {
       console.error('Payment creation failed:', error);
@@ -51,85 +50,35 @@ export default function CheckoutFinal() {
     }
   });
 
+  // Simple timer
   useEffect(() => {
-    if (pixPayment && timeLeft > 0) {
-      const timer = setInterval(() => {
-        setTimeLeft(prev => {
-          if (prev <= 1) {
-            clearInterval(timer);
-            return 0;
+    const interval = setInterval(() => {
+      setTimeLeft(prev => Math.max(0, prev - 1));
+    }, 1000);
+    return () => clearInterval(interval);
+  }, []);
+
+  // PIX payment status polling
+  useEffect(() => {
+    if (pixPayment) {
+      const timer = setInterval(async () => {
+        try {
+          const response = await fetch(`/api/pix-payments/${pixPayment.id}`);
+          if (response.ok) {
+            const updatedPayment = await response.json();
+            setPixPayment(updatedPayment);
+            if (updatedPayment.status === 'completed') {
+              clearInterval(timer);
+            }
           }
-          return prev - 1;
-        });
-      }, 1000);
+        } catch (error) {
+          console.error('Error polling payment status:', error);
+        }
+      }, 5000);
+      
       return () => clearInterval(timer);
     }
-  }, [pixPayment, timeLeft]);
-
-  // Timer effect for form countdown
-  useEffect(() => {
-    if (!pixPayment) {
-      const interval = setInterval(() => {
-        setTimeLeft(prev => {
-          const newTime = Math.max(0, prev - 1);
-          // Update DOM element
-          const timer = document.getElementById('countdown-timer');
-          if (timer) {
-            const mins = Math.floor(newTime / 60);
-            const secs = newTime % 60;
-            timer.textContent = `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
-            if (newTime <= 0) timer.style.color = '#DC2626';
-          }
-          return newTime;
-        });
-      }, 1000);
-      return () => clearInterval(interval);
-    }
   }, [pixPayment]);
-
-  // Form setup effect - simplified to avoid conflicts
-  useEffect(() => {
-    if (!pixPayment && pageQuery.data) {
-      const setupTimeout = setTimeout(() => {
-        const form = document.querySelector('form[data-react-form]') as HTMLFormElement;
-        if (form && !form.getAttribute('data-setup-complete')) {
-          form.setAttribute('data-setup-complete', 'true');
-          
-          const handleSubmit = async (e: Event) => {
-            e.preventDefault();
-            if (isSubmitting) return;
-            setIsSubmitting(true);
-            try {
-              const formData = new FormData(form);
-              await createPaymentMutation.mutateAsync(formData);
-            } finally {
-              setIsSubmitting(false);
-            }
-          };
-
-          const handleCpfInput = (e: Event) => {
-            const target = e.target as HTMLInputElement;
-            target.value = formatCpf(target.value);
-          };
-
-          const handlePhoneInput = (e: Event) => {
-            const target = e.target as HTMLInputElement;
-            target.value = formatPhone(target.value);
-          };
-
-          form.addEventListener('submit', handleSubmit);
-          
-          const cpfInput = form.querySelector('input[name="customerCpf"]');
-          const phoneInput = form.querySelector('input[name="customerPhone"]');
-          
-          if (cpfInput) cpfInput.addEventListener('input', handleCpfInput);
-          if (phoneInput) phoneInput.addEventListener('input', handlePhoneInput);
-        }
-      }, 300);
-      
-      return () => clearTimeout(setupTimeout);
-    }
-  }, [!!pageQuery.data && !pixPayment]);
 
   const formatTime = (seconds: number) => {
     const minutes = Math.floor(seconds / 60);
@@ -138,240 +87,282 @@ export default function CheckoutFinal() {
   };
 
   if (pageQuery.isLoading) {
-    return <div className="flex items-center justify-center min-h-screen">Carregando...</div>;
+    return <div className="min-h-screen flex items-center justify-center">Carregando...</div>;
   }
 
-  if (pageQuery.error || !pageQuery.data) {
-    return <div className="flex items-center justify-center min-h-screen">Página não encontrada</div>;
+  if (!pageQuery.data) {
+    return <div className="min-h-screen flex items-center justify-center">Página não encontrada</div>;
   }
 
   const page = pageQuery.data as any;
 
-  // Use the exact previewHtml from database with logo and custom design
-  let finalHtml = page.previewHtml;
-  
-  // Replace the form placeholder with actual form HTML
-  if (finalHtml.includes('{{FORM_PLACEHOLDER}}')) {
-    const formHtml = `
-      <!-- Status Compacto -->
-      <div class="bg-amber-50 border border-amber-300 rounded-md p-3 mb-4 text-center">
-        <div class="flex items-center justify-center mb-2">
-          <svg class="animate-spin h-4 w-4 mr-2 text-amber-500" fill="none" viewBox="0 0 24 24">
-            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 714 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-          </svg>
-          <span class="text-sm font-medium text-amber-600">Aguardando Pagamento...</span>
-        </div>
-        <div id="countdown-timer" class="text-lg font-bold font-mono text-amber-700">15:00</div>
-      </div>
+  // Render custom elements
+  const customElements = page.customElements ? JSON.parse(page.customElements) : [];
 
-      <form data-react-form="true" class="space-y-4">
-        <div>
-          <label class="block text-sm font-medium text-gray-700 mb-1">Nome completo</label>
-          <input type="text" name="customerName" required 
-                 class="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500" />
-        </div>
-        
-        <div>
-          <label class="block text-sm font-medium text-gray-700 mb-1">Email</label>
-          <input type="email" name="customerEmail" required 
-                 class="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500" />
-        </div>
-        
-        <div>
-          <label class="block text-sm font-medium text-gray-700 mb-1">CPF</label>
-          <input type="text" name="customerCpf" required maxlength="14" placeholder="000.000.000-00"
-                 class="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500" />
-        </div>
-        
-        <div>
-          <label class="block text-sm font-medium text-gray-700 mb-1">Telefone</label>
-          <input type="tel" name="customerPhone" required placeholder="(11) 99999-9999"
-                 class="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500" />
-        </div>
-        
-        <button type="submit"
-                class="w-full text-white py-3 px-6 rounded-md font-semibold hover:opacity-90 transition-colors disabled:opacity-50 flex items-center justify-center gap-2"
-                style="background-color: ${page.accentColor};" ${isSubmitting ? 'disabled' : ''}>
-          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path>
-          </svg>
-          ${isSubmitting ? 'Processando...' : (page.customButtonText || 'Pagar com PIX')}
-        </button>
-      </form>
-    `;
-    finalHtml = finalHtml.replace('{{FORM_PLACEHOLDER}}', formHtml);
-  }
-  
-  // Add footer at the very end if missing
-  if (!finalHtml.includes('<footer')) {
-    finalHtml += `
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    const formData = new FormData(e.currentTarget);
+    createPaymentMutation.mutate(formData);
+  };
+
+  const handleCpfChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    e.target.value = formatCpf(e.target.value);
+  };
+
+  const handlePhoneChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    e.target.value = formatPhone(e.target.value);
+  };
+
+  const renderCustomElement = (element: any) => {
+    const styles = element.styles || {};
     
-    <!-- Footer -->
-    <footer class="w-full py-6 px-6 border-t border-gray-200 bg-gray-50">
-      <div class="max-w-md mx-auto text-center">
-        <div class="flex items-center justify-center space-x-6 text-sm text-gray-600 mb-3">
-          <span class="flex items-center space-x-1">
-            <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-              <path fill-rule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clip-rule="evenodd" />
-            </svg>
-            <span>Pagamento Seguro</span>
-          </span>
-          <span class="flex items-center space-x-1">
-            <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-              <path fill-rule="evenodd" d="M6.267 3.455a3.066 3.066 0 001.745-.723 3.066 3.066 0 013.976 0 3.066 3.066 0 001.745.723 3.066 3.066 0 012.812 2.812c.051.643.304 1.254.723 1.745a3.066 3.066 0 010 3.976 3.066 3.066 0 00-.723 1.745 3.066 3.066 0 01-2.812 2.812 3.066 3.066 0 00-1.745.723 3.066 3.066 0 01-3.976 0 3.066 3.066 0 00-1.745-.723 3.066 3.066 0 01-2.812-2.812 3.066 3.066 0 00-.723-1.745 3.066 3.066 0 010-3.976 3.066 3.066 0 00.723-1.745 3.066 3.066 0 012.812-2.812zm7.44 5.252a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
-            </svg>
-            <span>Processamento Imediato</span>
-          </span>
-        </div>
-        <div class="text-xs text-gray-500">
-          Seus dados estão protegidos e a transação é processada com segurança
-        </div>
-      </div>
-    </footer>`;
-  }
-  
-  // If we have a PIX payment, show the payment interface instead
-  if (pixPayment) {
-    finalHtml = `<div class="min-h-screen w-full" style="background-color: ${page.backgroundColor};">
-      <!-- Header -->
-      <div class="w-full px-4 py-4 text-white text-center flex flex-col justify-center" style="background-color: ${page.primaryColor}; min-height: ${Math.max(page.headerHeight - 40, 180)}px;">
-        ${page.showLogo && page.logoUrl ? `
-          <div class="mb-3 flex justify-center">
-            <img src="${page.logoUrl}" alt="Logo" class="object-contain rounded" style="width: ${Math.min(page.logoSize, 80)}px; height: ${Math.min(page.logoSize, 80)}px;" />
-          </div>
-        ` : ''}
-        
-        <h1 class="text-lg sm:text-xl md:text-2xl font-bold mb-2 leading-tight">Pagamento PIX Gerado</h1>
-        <p class="text-sm sm:text-base md:text-lg opacity-90 leading-snug px-2">Escaneie o QR Code ou copie o código PIX para finalizar</p>
-      </div>
-      
-      <!-- Main Content -->
-      <div class="flex-1 p-6">
-        <!-- Status Compacto -->
-        <div class="max-w-md mx-auto mb-6">
-          <div class="bg-amber-50 border border-amber-300 rounded-md p-3 text-center">
-            <div class="flex items-center justify-center mb-2">
-              <svg class="animate-spin h-4 w-4 mr-2 text-amber-500" fill="none" viewBox="0 0 24 24">
-                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 714 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-              </svg>
-              <span class="text-sm font-medium text-amber-600">Aguardando pagamento...</span>
-            </div>
-            <div id="payment-timer" class="text-lg font-bold font-mono text-amber-700">${formatTime(timeLeft)}</div>
-          </div>
-        </div>
-        
-        <script>
-          // Sincronizar cronômetro com React state
-          let paymentTimeLeft = ${timeLeft};
-          
-          function updatePaymentTimer() {
-            const timer = document.getElementById('payment-timer');
-            if (timer && paymentTimeLeft > 0) {
-              const minutes = Math.floor(paymentTimeLeft / 60);
-              const seconds = paymentTimeLeft % 60;
-              timer.textContent = minutes.toString().padStart(2, '0') + ':' + seconds.toString().padStart(2, '0');
-              paymentTimeLeft--;
-              
-              if (paymentTimeLeft <= 0) {
-                timer.textContent = '00:00';
-                timer.style.color = '#DC2626';
-              }
-            }
-          }
-          
-          setInterval(updatePaymentTimer, 1000);
-          updatePaymentTimer();
-        </script>
+    const baseStyle: React.CSSProperties = {
+      color: styles.color || page.textColor,
+      backgroundColor: styles.backgroundColor,
+      fontWeight: styles.isBold ? 'bold' : styles.fontWeight || 'normal',
+      fontSize: styles.fontSize ? `${styles.fontSize}px` : undefined,
+      textAlign: styles.textAlign || 'left',
+      padding: styles.padding,
+      border: styles.border,
+      borderRadius: styles.borderRadius ? `${styles.borderRadius}px` : undefined,
+      marginBottom: styles.marginBottom,
+      marginTop: styles.marginTop,
+      lineHeight: styles.lineHeight,
+      borderTop: styles.borderTop,
+      boxShadow: styles.boxShadow
+    };
 
-        <!-- Payment Status -->
-        <div class="max-w-md mx-auto mb-6">
-          <div class="bg-white border border-gray-200 rounded-lg p-6">
-            <div class="text-center mb-6">
-              <div class="w-16 h-16 mx-auto mb-4 bg-green-100 rounded-full flex items-center justify-center">
-                <svg class="w-8 h-8 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
-                </svg>
+    if (styles.hasBox && styles.boxColor) {
+      baseStyle.backgroundColor = styles.boxColor;
+      baseStyle.padding = baseStyle.padding || '12px';
+      baseStyle.borderRadius = baseStyle.borderRadius || '8px';
+    }
+
+    switch (element.type) {
+      case 'text':
+        return (
+          <div key={element.id} style={baseStyle}>
+            {element.content}
+          </div>
+        );
+      case 'image':
+        return (
+          <div key={element.id} style={baseStyle}>
+            <img 
+              src={element.content} 
+              alt="Custom" 
+              style={{ 
+                width: styles.imageSize ? `${styles.imageSize}px` : 'auto',
+                height: 'auto',
+                maxWidth: '100%'
+              }}
+            />
+          </div>
+        );
+      case 'separator':
+        return (
+          <hr 
+            key={element.id} 
+            style={{
+              ...baseStyle,
+              border: 'none',
+              borderTop: styles.border || `1px solid ${page.textColor}`,
+              margin: `${styles.marginTop || '20px'} 0 ${styles.marginBottom || '20px'} 0`
+            }}
+          />
+        );
+      default:
+        return null;
+    }
+  };
+
+  return (
+    <div 
+      className="min-h-screen"
+      style={{ 
+        backgroundColor: page.backgroundColor,
+        color: page.textColor,
+        fontFamily: 'Inter, sans-serif'
+      }}
+    >
+      {/* Header */}
+      <header 
+        className="w-full px-4 py-6"
+        style={{ 
+          backgroundColor: page.primaryColor,
+          height: `${page.headerHeight}px`,
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: page.logoPosition
+        }}
+      >
+        {page.showLogo && page.logoUrl && (
+          <img 
+            src={page.logoUrl} 
+            alt="Logo" 
+            style={{ 
+              height: `${page.logoSize}px`,
+              maxWidth: '100%',
+              objectFit: 'contain'
+            }}
+          />
+        )}
+      </header>
+
+      {/* Main Content */}
+      <main className="container mx-auto px-4 py-8 max-w-2xl">
+        {/* Custom Elements - Before Content */}
+        {customElements
+          .filter((el: any) => el.position === 'before')
+          .sort((a: any, b: any) => (a.order || 0) - (b.order || 0))
+          .map(renderCustomElement)}
+
+        {!pixPayment ? (
+          // Form Step
+          <div className="bg-white rounded-lg shadow-lg p-8">
+            <div className="text-center mb-8">
+              <h1 className="text-2xl md:text-3xl font-bold mb-4" style={{ color: page.primaryColor }}>
+                {page.customTitle || page.productName}
+              </h1>
+              <p className="text-gray-600 mb-6">
+                {page.customSubtitle || page.productDescription}
+              </p>
+              <div className="text-3xl font-bold mb-4" style={{ color: page.primaryColor }}>
+                R$ {page.price}
               </div>
-              <h2 class="text-xl font-bold mb-2" style="color: ${page.primaryColor};">PIX Gerado com Sucesso</h2>
-              <p class="text-gray-600">Valor: <strong>R$ ${page.price}</strong></p>
-            </div>
-
-            <div class="bg-white border-2 border-gray-200 rounded-lg p-4 mb-6 text-center">
-              <img src="${pixPayment.pixQrCode}" alt="QR Code PIX" class="mx-auto max-w-full h-auto" style="max-width: 200px;" />
-            </div>
-
-            <div class="space-y-4">
-              <div>
-                <label class="block text-sm font-medium text-gray-700 mb-2">Código PIX (Copiar e Colar)</label>
-                <div class="bg-gray-50 border border-gray-300 rounded-md p-3">
-                  <div class="text-xs font-mono break-all text-gray-800">${pixPayment.pixCode}</div>
+              
+              {/* Timer */}
+              <div className="mb-6">
+                <div className="text-sm text-gray-500 mb-2">Tempo restante para finalizar:</div>
+                <div 
+                  className="text-2xl font-mono font-bold"
+                  style={{ color: timeLeft <= 60 ? '#DC2626' : page.primaryColor }}
+                >
+                  {formatTime(timeLeft)}
                 </div>
-                <button onclick="navigator.clipboard.writeText('${pixPayment.pixCode}').then(() => alert('Código PIX copiado para a área de transferência!'))" 
-                        class="w-full mt-2 text-white py-2 px-4 rounded-md font-medium hover:opacity-90 transition-colors" 
-                        style="background-color: ${page.accentColor};">
-                  📋 Copiar Código PIX
+              </div>
+            </div>
+
+            <form onSubmit={handleSubmit} className="space-y-6">
+              <div>
+                <label className="block text-sm font-medium mb-2">Nome Completo</label>
+                <input
+                  type="text"
+                  name="customerName"
+                  required
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  placeholder="Digite seu nome completo"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium mb-2">E-mail</label>
+                <input
+                  type="email"
+                  name="customerEmail"
+                  required
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  placeholder="Digite seu e-mail"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium mb-2">CPF</label>
+                <input
+                  type="text"
+                  name="customerCpf"
+                  required
+                  onChange={handleCpfChange}
+                  maxLength={14}
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  placeholder="000.000.000-00"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium mb-2">Telefone</label>
+                <input
+                  type="text"
+                  name="customerPhone"
+                  required
+                  onChange={handlePhoneChange}
+                  maxLength={15}
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  placeholder="(11) 99999-9999"
+                />
+              </div>
+
+              <button
+                type="submit"
+                disabled={createPaymentMutation.isPending}
+                className="w-full py-4 px-6 text-white font-semibold rounded-lg hover:opacity-90 disabled:opacity-50 transition-opacity"
+                style={{ backgroundColor: page.primaryColor }}
+              >
+                {createPaymentMutation.isPending ? 'Processando...' : (page.customButtonText || 'Pagar com PIX')}
+              </button>
+            </form>
+          </div>
+        ) : (
+          // Payment Step
+          <div className="bg-white rounded-lg shadow-lg p-8 text-center">
+            <h2 className="text-2xl font-bold mb-6" style={{ color: page.primaryColor }}>
+              Pagamento PIX
+            </h2>
+            
+            <div className="mb-6">
+              <div className="text-sm text-gray-500 mb-2">Status:</div>
+              <div className="text-lg font-semibold" style={{ color: page.primaryColor }}>
+                Aguardando Pagamento...
+              </div>
+            </div>
+
+            <div className="mb-6">
+              <div className="text-sm text-gray-500 mb-2">Tempo restante:</div>
+              <div 
+                className="text-xl font-mono font-bold"
+                style={{ color: timeLeft <= 60 ? '#DC2626' : page.primaryColor }}
+              >
+                {formatTime(timeLeft)}
+              </div>
+            </div>
+
+            {pixPayment.pixQrCode && (
+              <div className="mb-6">
+                <img 
+                  src={pixPayment.pixQrCode} 
+                  alt="QR Code PIX" 
+                  className="mx-auto mb-4 max-w-xs"
+                />
+              </div>
+            )}
+
+            {pixPayment.pixCode && (
+              <div className="mb-6">
+                <div className="text-sm text-gray-500 mb-2">Código PIX (Copia e Cola):</div>
+                <div className="bg-gray-100 p-4 rounded-lg text-sm font-mono break-all">
+                  {pixPayment.pixCode}
+                </div>
+                <button
+                  onClick={() => navigator.clipboard.writeText(pixPayment.pixCode)}
+                  className="mt-2 text-sm text-blue-600 hover:text-blue-800"
+                >
+                  Copiar código
                 </button>
               </div>
+            )}
 
-              <div class="bg-blue-50 rounded-md p-4 border border-blue-200">
-                <h3 class="font-medium text-blue-900 mb-2">📱 Como pagar:</h3>
-                <ol class="text-sm text-blue-800 space-y-1">
-                  <li>1. Abra o app do seu banco</li>
-                  <li>2. Procure pela opção PIX</li>
-                  <li>3. Escaneie o QR Code ou cole o código</li>
-                  <li>4. Confirme o pagamento de R$ ${page.price}</li>
-                </ol>
-              </div>
-
-              <div class="bg-yellow-50 rounded-md p-4 border border-yellow-200">
-                <div class="flex items-start">
-                  <svg class="w-5 h-5 text-yellow-600 mr-2 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                  </svg>
-                  <div class="text-sm text-yellow-800">
-                    <p><strong>Status do Pagamento:</strong> ${pixPayment.status === 'PENDING' ? 'Aguardando Pagamento' : pixPayment.status}</p>
-                    <p class="mt-1">A página será atualizada automaticamente após a confirmação do pagamento.</p>
-                  </div>
-                </div>
-              </div>
+            <div className="text-sm text-gray-600">
+              {page.customInstructions || 'Escaneie o QR Code ou use o código PIX para efetuar o pagamento.'}
             </div>
           </div>
-        </div>
-      </div>
-      
-      <!-- Footer -->
-      <footer class="w-full py-6 px-6 border-t border-gray-200 bg-gray-50">
-        <div class="max-w-md mx-auto text-center">
-          <div class="flex items-center justify-center space-x-6 text-sm text-gray-600 mb-3">
-            <span class="flex items-center space-x-1">
-              <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-                <path fill-rule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clip-rule="evenodd" />
-              </svg>
-              <span>Pagamento Seguro</span>
-            </span>
-            <span class="flex items-center space-x-1">
-              <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-                <path fill-rule="evenodd" d="M6.267 3.455a3.066 3.066 0 001.745-.723 3.066 3.066 0 013.976 0 3.066 3.066 0 001.745.723 3.066 3.066 0 012.812 2.812c.051.643.304 1.254.723 1.745a3.066 3.066 0 010 3.976 3.066 3.066 0 00-.723 1.745 3.066 3.066 0 01-2.812 2.812 3.066 3.066 0 00-1.745.723 3.066 3.066 0 01-3.976 0 3.066 3.066 0 00-1.745-.723 3.066 3.066 0 01-2.812-2.812 3.066 3.066 0 00-.723-1.745 3.066 3.066 0 010-3.976 3.066 3.066 0 00.723-1.745 3.066 3.066 0 012.812-2.812zm7.44 5.252a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
-              </svg>
-              <span>PIX Instantâneo</span>
-            </span>
-          </div>
-          <div class="text-xs text-gray-500">
-            PIX ID: ${pixPayment.id} • Transação processada com segurança
-          </div>
-        </div>
-      </footer>
-      
-      <script>
-        // Update timer display every second
-        setInterval(() => {
-          window.location.reload();
-        }, 30000); // Refresh every 30 seconds to update timer
-      </script>
-    </div>`;
-  }
+        )}
 
-  return <div dangerouslySetInnerHTML={{ __html: finalHtml }} />;
+        {/* Custom Elements - After Content */}
+        {customElements
+          .filter((el: any) => el.position === 'after')
+          .sort((a: any, b: any) => (a.order || 0) - (b.order || 0))
+          .map(renderCustomElement)}
+      </main>
+    </div>
+  );
 }
