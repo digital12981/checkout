@@ -9,6 +9,31 @@ export default function CheckoutHtml() {
   const [location] = useLocation();
   const [pixPayment, setPixPayment] = useState<any>(null);
   const [isLoading, setIsLoading] = useState(false);
+  const [timeLeft, setTimeLeft] = useState(15 * 60); // 15 minutes in seconds
+
+  // Timer functionality
+  useEffect(() => {
+    if (pixPayment && timeLeft > 0) {
+      const timer = setInterval(() => {
+        setTimeLeft(prev => {
+          if (prev <= 1) {
+            clearInterval(timer);
+            return 0;
+          }
+          return prev - 1;
+        });
+      }, 1000);
+
+      return () => clearInterval(timer);
+    }
+  }, [pixPayment, timeLeft]);
+
+  // Format time as MM:SS
+  const formatTime = (seconds: number) => {
+    const minutes = Math.floor(seconds / 60);
+    const remainingSeconds = seconds % 60;
+    return `${minutes.toString().padStart(2, '0')}:${remainingSeconds.toString().padStart(2, '0')}`;
+  };
 
   const pageQuery = useQuery({
     queryKey: [`/api/payment-pages/${params?.id}`],
@@ -76,13 +101,34 @@ export default function CheckoutHtml() {
       // PIX Payment View
       const pixContent = `
         <div class="space-y-6 text-center">
-          <div class="inline-flex items-center justify-center w-16 h-16 bg-green-100 rounded-full mb-4">
-            <svg class="w-8 h-8 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
-            </svg>
+          <div class="text-lg font-semibold text-gray-800 mb-4">
+            Valor: R$ ${parseFloat((page as any).price).toFixed(2).replace('.', ',')}
           </div>
-          <h2 class="text-xl font-semibold text-gray-900 mb-2">PIX Gerado com Sucesso!</h2>
-          <p class="text-gray-600 mb-6">Escaneie o QR Code ou copie o código PIX</p>
+
+          <div class="bg-yellow-50 border border-yellow-200 rounded-lg p-4 mb-6">
+            <div class="text-center space-y-2">
+              <div class="flex items-center justify-center gap-2 text-yellow-800">
+                <span class="text-sm font-medium">Aguardando pagamento...</span>
+                <div class="animate-spin h-4 w-4 border-2 border-yellow-600 border-t-transparent rounded-full"></div>
+              </div>
+              <div class="text-xl font-bold text-yellow-800" id="timer-display">
+                Expira em ${formatTime(timeLeft)}
+              </div>
+            </div>
+          </div>
+
+          <div class="text-center mb-6">
+            <p class="text-sm text-gray-600 mb-4">
+              Escaneie o QR Code com seu app de pagamento
+            </p>
+            <div class="flex justify-center mb-4">
+              <img 
+                src="https://upload.wikimedia.org/wikipedia/commons/thumb/a/a2/Logo%E2%80%94pix_powered_by_Banco_Central_%28Brazil%2C_2020%29.svg/2560px-Logo%E2%80%94pix_powered_by_Banco_Central_%28Brazil%2C_2020%29.svg.png"
+                alt="PIX Logo"
+                class="h-8 object-contain"
+              />
+            </div>
+          </div>
 
           <div class="bg-white border-2 border-gray-200 rounded-lg p-6">
             ${pixPayment.pixQrCode ? `
@@ -96,7 +142,7 @@ export default function CheckoutHtml() {
             <div class="space-y-3">
               <div class="text-sm text-gray-600">Código PIX:</div>
               <div class="bg-gray-50 border rounded p-3 text-sm break-all font-mono">${pixPayment.pixCode || 'Carregando...'}</div>
-              <button onclick="copyPixCode()" class="w-full bg-blue-600 text-white py-2 px-4 rounded hover:bg-blue-700">
+              <button onclick="copyPixCode()" class="w-full text-white py-2 px-4 shadow-lg transform transition-all duration-150 active:scale-95" style="background-color: #48AD45; border-radius: 4px; box-shadow: 0 4px 8px rgba(72, 173, 69, 0.3), 0 2px 4px rgba(0, 0, 0, 0.1); border: 1px solid rgba(255, 255, 255, 0.2);">
                 Copiar Código PIX
               </button>
             </div>

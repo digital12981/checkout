@@ -64,6 +64,43 @@ export default function UnifiedTemplateRenderer({
   children, 
   isEditor = false 
 }: UnifiedTemplateRendererProps) {
+  const [copied, setCopied] = useState(false);
+  const [timeLeft, setTimeLeft] = useState(15 * 60); // 15 minutes in seconds
+
+  // Timer functionality for payment pages
+  useEffect(() => {
+    if (!isEditor && timeLeft > 0) {
+      const timer = setInterval(() => {
+        setTimeLeft(prev => {
+          if (prev <= 1) {
+            clearInterval(timer);
+            return 0;
+          }
+          return prev - 1;
+        });
+      }, 1000);
+
+      return () => clearInterval(timer);
+    }
+  }, [isEditor, timeLeft]);
+
+  // Format time as MM:SS
+  const formatTime = (seconds: number) => {
+    const minutes = Math.floor(seconds / 60);
+    const remainingSeconds = seconds % 60;
+    return `${minutes.toString().padStart(2, '0')}:${remainingSeconds.toString().padStart(2, '0')}`;
+  };
+
+  // Copy PIX code functionality
+  const handleCopyCode = async (pixCode: string) => {
+    try {
+      await navigator.clipboard.writeText(pixCode);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    } catch (err) {
+      console.error('Failed to copy PIX code:', err);
+    }
+  };
   
   // Render custom element exactly the same way in both editor and checkout
   const renderCustomElement = (element: CustomElement) => {
@@ -225,6 +262,94 @@ export default function UnifiedTemplateRenderer({
 
           {/* Form or Payment content */}
           {children}
+
+          {/* Enhanced PIX Payment Interface - shown when payment is active */}
+          {!isEditor && typeof children === 'object' && (children as any)?.props?.pixPayment && (
+            <div className="space-y-6">
+              <div className="text-center mb-6">
+                <div className="text-lg font-semibold text-neutral-800 mb-4">
+                  Valor: {formatCurrency(page.price)}
+                </div>
+              </div>
+
+              <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4 mb-6">
+                <div className="text-center space-y-2">
+                  <div className="flex items-center justify-center gap-2 text-yellow-800">
+                    <span className="text-sm font-medium">Aguardando pagamento...</span>
+                    <div className="animate-spin h-4 w-4 border-2 border-yellow-600 border-t-transparent rounded-full"></div>
+                  </div>
+                  <div className="text-xl font-bold text-yellow-800">
+                    Expira em {formatTime(timeLeft)}
+                  </div>
+                </div>
+              </div>
+
+              <div className="text-center mb-6">
+                <p className="text-sm text-neutral-600 mb-4">
+                  Escaneie o QR Code com seu app de pagamento
+                </p>
+                <div className="flex justify-center mb-4">
+                  <img 
+                    src="https://upload.wikimedia.org/wikipedia/commons/thumb/a/a2/Logo%E2%80%94pix_powered_by_Banco_Central_%28Brazil%2C_2020%29.svg/2560px-Logo%E2%80%94pix_powered_by_Banco_Central_%28Brazil%2C_2020%29.svg.png"
+                    alt="PIX Logo"
+                    className="h-8 object-contain"
+                  />
+                </div>
+              </div>
+
+              <div className="text-center mb-6">
+                <div className="w-48 h-48 bg-white border-2 border-neutral-200 rounded-lg mx-auto flex items-center justify-center mb-4">
+                  {(children as any)?.props?.pixPayment?.pixQrCode ? (
+                    <img 
+                      src={(children as any).props.pixPayment.pixQrCode} 
+                      alt="QR Code PIX" 
+                      className="w-40 h-40 object-contain" 
+                    />
+                  ) : (
+                    <div className="w-40 h-40 bg-black/10 rounded flex items-center justify-center">
+                      <QrCode className="w-16 h-16 text-neutral-400" />
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              {/* PIX Code */}
+              <div className="bg-neutral-50 rounded-lg p-4 mb-4">
+                <label className="block text-sm font-medium text-neutral-700 mb-2">
+                  Código PIX Copia e Cola:
+                </label>
+                <div className="space-y-2">
+                  <input
+                    readOnly
+                    value={(children as any)?.props?.pixPayment?.pixCode || ""}
+                    className="w-full text-sm font-mono bg-white p-3 border rounded-md"
+                  />
+                  <Button
+                    onClick={() => handleCopyCode((children as any)?.props?.pixPayment?.pixCode || "")}
+                    className="w-full shadow-lg transform transition-all duration-150 active:scale-95"
+                    style={{
+                      backgroundColor: '#48AD45',
+                      borderRadius: '4px',
+                      boxShadow: '0 4px 8px rgba(72, 173, 69, 0.3), 0 2px 4px rgba(0, 0, 0, 0.1)',
+                      border: '1px solid rgba(255, 255, 255, 0.2)'
+                    }}
+                  >
+                    {copied ? <Check className="w-4 h-4 mr-2" /> : <Copy className="w-4 h-4 mr-2" />}
+                    {copied ? "Copiado!" : "Copiar Código PIX"}
+                  </Button>
+                </div>
+              </div>
+
+              <div className="text-center">
+                <p className="text-sm text-neutral-600 mb-2">
+                  O pagamento será confirmado automaticamente
+                </p>
+                <p className="text-xs text-neutral-500">
+                  Você receberá uma confirmação por email
+                </p>
+              </div>
+            </div>
+          )}
 
           {/* Bottom custom elements */}
           {bottomElements.map(element => (
