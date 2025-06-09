@@ -355,14 +355,19 @@ export default function Checkout() {
         </div>
       </div>
 
-      <div className="text-center space-y-4 mb-6">
-        <div className="flex items-center justify-center gap-2 text-lg font-semibold text-neutral-800">
-          <span>Aguardando pagamento...</span>
-          <div className="animate-spin h-5 w-5 border-2 border-blue-600 border-t-transparent rounded-full"></div>
+      <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4 mb-6">
+        <div className="text-center space-y-2">
+          <div className="flex items-center justify-center gap-2 text-yellow-800">
+            <span className="text-sm font-medium">Aguardando pagamento...</span>
+            <div className="animate-spin h-4 w-4 border-2 border-yellow-600 border-t-transparent rounded-full"></div>
+          </div>
+          <div className="text-xl font-bold text-yellow-800">
+            Expira em 15:00
+          </div>
         </div>
-        <div className="text-3xl font-bold text-blue-600">
-          15:00
-        </div>
+      </div>
+
+      <div className="text-center mb-6">
         <p className="text-sm text-neutral-600">
           Escaneie o QR Code com seu app do banco
         </p>
@@ -435,14 +440,19 @@ export default function Checkout() {
             </div>
           </div>
 
-          <div class="text-center space-y-4 mb-6">
-            <div class="flex items-center justify-center gap-2 text-lg font-semibold text-gray-800">
-              <span>Aguardando pagamento...</span>
-              <div class="animate-spin h-5 w-5 border-2 border-blue-600 border-t-transparent rounded-full"></div>
+          <div class="bg-yellow-50 border border-yellow-200 rounded-lg p-4 mb-6">
+            <div class="text-center space-y-2">
+              <div class="flex items-center justify-center gap-2 text-yellow-800">
+                <span class="text-sm font-medium">Aguardando pagamento...</span>
+                <div class="animate-spin h-4 w-4 border-2 border-yellow-600 border-t-transparent rounded-full"></div>
+              </div>
+              <div class="text-xl font-bold text-yellow-800">
+                Expira em 15:00
+              </div>
             </div>
-            <div class="text-3xl font-bold text-blue-600">
-              15:00
-            </div>
+          </div>
+
+          <div class="text-center mb-6">
             <p class="text-sm text-gray-600">
               Escaneie o QR Code com seu app do banco
             </p>

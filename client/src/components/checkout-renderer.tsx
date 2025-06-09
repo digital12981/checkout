@@ -1,6 +1,7 @@
 import { QrCode, ShoppingBag, Copy, Check } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useState } from "react";
+import { formatCurrency } from "@/lib/utils";
 
 interface CustomElement {
   id: string;
@@ -229,14 +230,19 @@ export default function CheckoutRenderer({ page, pixPayment, formContent }: Chec
                 </div>
               </div>
 
-              <div className="text-center space-y-4 mb-6">
-                <div className="flex items-center justify-center gap-2 text-lg font-semibold text-neutral-800">
-                  <span>Aguardando pagamento...</span>
-                  <div className="animate-spin h-5 w-5 border-2 border-blue-600 border-t-transparent rounded-full"></div>
+              <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4 mb-6">
+                <div className="text-center space-y-2">
+                  <div className="flex items-center justify-center gap-2 text-yellow-800">
+                    <span className="text-sm font-medium">Aguardando pagamento...</span>
+                    <div className="animate-spin h-4 w-4 border-2 border-yellow-600 border-t-transparent rounded-full"></div>
+                  </div>
+                  <div className="text-xl font-bold text-yellow-800">
+                    Expira em 15:00
+                  </div>
                 </div>
-                <div className="text-3xl font-bold text-blue-600">
-                  15:00
-                </div>
+              </div>
+
+              <div className="text-center mb-6">
                 <p className="text-sm text-neutral-600">
                   Escaneie o QR Code com seu app de pagamento
                 </p>

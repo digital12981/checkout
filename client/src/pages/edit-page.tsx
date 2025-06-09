@@ -946,14 +946,19 @@ export default function EditPage() {
                       </div>
                     </div>
 
-                    <div className="text-center space-y-3">
-                      <div className="flex items-center justify-center gap-2 text-lg font-semibold text-gray-900">
-                        <span>Aguardando pagamento...</span>
-                        <div className="animate-spin h-5 w-5 border-2 border-blue-600 border-t-transparent rounded-full"></div>
+                    <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4 mb-6">
+                      <div className="text-center space-y-2">
+                        <div className="flex items-center justify-center gap-2 text-yellow-800">
+                          <span className="text-sm font-medium">Aguardando pagamento...</span>
+                          <div className="animate-spin h-4 w-4 border-2 border-yellow-600 border-t-transparent rounded-full"></div>
+                        </div>
+                        <div className="text-xl font-bold text-yellow-800">
+                          Expira em 15:00
+                        </div>
                       </div>
-                      <div className="text-2xl font-bold text-blue-600">
-                        15:00
-                      </div>
+                    </div>
+
+                    <div className="text-center mb-6">
                       <div className="text-gray-600 text-sm">
                         Escaneie o QR Code ou copie o código PIX
                       </div>
@@ -1005,14 +1010,7 @@ export default function EditPage() {
                       </div>
                     </div>
 
-                    <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
-                      <div className="flex items-center gap-2 text-yellow-800">
-                        <Clock className="w-4 h-4" />
-                        <span className="text-sm font-medium">
-                          Aguardando pagamento... Expira em 15:00
-                        </span>
-                      </div>
-                    </div>
+
 
 
                   </div>
