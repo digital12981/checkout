@@ -153,37 +153,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
         });
       }
 
-      try {
-        pixResponse = await for4payments.createPixPayment({
-          name: requestData.customerName,
-          email: requestData.customerEmail,
-          cpf: requestData.customerCpf,
-          phone: requestData.customerPhone,
-          amount: parseFloat(paymentPage.price),
-        });
-      } catch (error) {
-        console.log("For4Payments API unavailable, generating fallback PIX payment for demonstration");
-        
-        // Generate authentic PIX code following Brazilian standards
-        const amount = parseFloat(paymentPage.price);
-        const pixKey = "14f4c1b4-1234-4567-8901-123456789012";
-        const merchantName = "CHECKOUTFY PAYMENT";
-        const merchantCity = "SAO PAULO";
-        
-        // Build authentic PIX code following BR Code standard
-        const amountStr = amount.toFixed(2).replace('.', '');
-        const pixCode = `00020126580014br.gov.bcb.pix0136${pixKey}520400005303986540${amountStr.padStart(8, '0')}5802BR59${merchantName.length.toString().padStart(2, '0')}${merchantName}60${merchantCity.length.toString().padStart(2, '0')}${merchantCity}62070503***6304`;
-        
-        pixResponse = {
-          id: `demo_${Date.now()}`,
-          pixCode: pixCode,
-          pixQrCode: `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(pixCode)}`,
-          status: "pending",
-          expiresAt: new Date(Date.now() + 15 * 60 * 1000).toISOString()
-        };
-        
-        console.log("Generated fallback PIX payment:", pixResponse);
-      }
+      pixResponse = await for4payments.createPixPayment({
+        name: requestData.customerName,
+        email: requestData.customerEmail,
+        cpf: requestData.customerCpf,
+        phone: requestData.customerPhone,
+        amount: parseFloat(paymentPage.price),
+      });
 
       // Store payment in database
       const pixPaymentData = {

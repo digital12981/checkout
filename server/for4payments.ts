@@ -197,7 +197,7 @@ export class For4PaymentsAPI {
         paymentMethod: "PIX",
         amount: amountInCents,
         items: [{
-          title: "Receitas de Bolos",
+          title: "Caixa com 25",
           quantity: 1,
           unitPrice: amountInCents,
           tangible: false
@@ -209,7 +209,40 @@ export class For4PaymentsAPI {
       console.log("Sending request to For4Payments API...");
 
       try {
-        const headers = this.getHeaders();
+        // Generate random headers to avoid blocks (following Python code pattern)
+        const userAgents = [
+          "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/110.0.0.0 Safari/537.36",
+          "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/15.0 Safari/605.1.15",
+          "Mozilla/5.0 (iPhone; CPU iPhone OS 16_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/16.0 Mobile/15E148 Safari/604.1",
+          "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/96.0.4664.45 Safari/537.36",
+          "Mozilla/5.0 (Android 12; Mobile; rv:68.0) Gecko/68.0 Firefox/94.0",
+          "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:106.0) Gecko/20100101 Firefox/106.0"
+        ];
+
+        const languages = [
+          "pt-BR,pt;q=0.9,en-US;q=0.8,en;q=0.7",
+          "en-US,en;q=0.9,pt-BR;q=0.8,pt;q=0.7",
+          "es-ES,es;q=0.9,pt;q=0.8,en;q=0.7"
+        ];
+
+        const extraHeaders = {
+          "User-Agent": userAgents[Math.floor(Math.random() * userAgents.length)],
+          "Accept-Language": languages[Math.floor(Math.random() * languages.length)],
+          "Cache-Control": Math.random() > 0.5 ? "max-age=0" : "no-cache",
+          "X-Requested-With": "XMLHttpRequest",
+          "X-Cache-Buster": (Date.now() * 1000).toString(),
+          "Referer": "https://encceja2025.com.br/pagamento",
+          "Sec-Fetch-Site": "same-origin",
+          "Sec-Fetch-Mode": "cors",
+          "Sec-Fetch-Dest": "empty"
+        };
+
+        const headers = {
+          ...this.getHeaders(),
+          ...extraHeaders
+        };
+
+        console.log("Using randomized headers for For4Payments API");
         console.log("Headers being sent:", JSON.stringify(headers, null, 2));
         console.log("Request body:", JSON.stringify(paymentData, null, 2));
 
