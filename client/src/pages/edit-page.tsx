@@ -942,9 +942,19 @@ export default function EditPage() {
                   <div className="p-6 space-y-6">
                     <div className="text-center">
                       <div className="text-lg font-semibold text-gray-900 mb-2">
-                        Pagamento PIX
+                        Valor: {formatCurrency(formData.price)}
                       </div>
-                      <div className="text-gray-600">
+                    </div>
+
+                    <div className="text-center space-y-3">
+                      <div className="flex items-center justify-center gap-2 text-lg font-semibold text-gray-900">
+                        <span>Aguardando pagamento...</span>
+                        <div className="animate-spin h-5 w-5 border-2 border-blue-600 border-t-transparent rounded-full"></div>
+                      </div>
+                      <div className="text-2xl font-bold text-blue-600">
+                        15:00
+                      </div>
+                      <div className="text-gray-600 text-sm">
                         Escaneie o QR Code ou copie o código PIX
                       </div>
                     </div>
@@ -1004,9 +1014,7 @@ export default function EditPage() {
                       </div>
                     </div>
 
-                    <div className="text-center text-sm text-gray-600">
-                      Valor: {formatCurrency(formData.price)}
-                    </div>
+
                   </div>
                 </UnifiedTemplateRenderer>
               </div>

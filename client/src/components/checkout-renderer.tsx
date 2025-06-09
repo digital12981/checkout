@@ -223,9 +223,24 @@ export default function CheckoutRenderer({ page, pixPayment, formContent }: Chec
             </>
           ) : (
             <>
-              <h3 className="font-semibold text-neutral-800 mb-4 text-center">
-                Pagamento PIX
-              </h3>
+              <div className="text-center mb-6">
+                <div className="text-lg font-semibold text-neutral-800 mb-4">
+                  Valor: {formatCurrency(page.price)}
+                </div>
+              </div>
+
+              <div className="text-center space-y-4 mb-6">
+                <div className="flex items-center justify-center gap-2 text-lg font-semibold text-neutral-800">
+                  <span>Aguardando pagamento...</span>
+                  <div className="animate-spin h-5 w-5 border-2 border-blue-600 border-t-transparent rounded-full"></div>
+                </div>
+                <div className="text-3xl font-bold text-blue-600">
+                  15:00
+                </div>
+                <p className="text-sm text-neutral-600">
+                  Escaneie o QR Code com seu app de pagamento
+                </p>
+              </div>
 
               {/* Middle elements before payment */}
               {middleElements.map(element => (
@@ -249,24 +264,19 @@ export default function CheckoutRenderer({ page, pixPayment, formContent }: Chec
                     </div>
                   )}
                 </div>
-                <p className="text-sm text-neutral-600">
-                  Escaneie o QR Code com seu app de pagamento
-                </p>
               </div>
 
               {/* PIX Code */}
               <div className="bg-neutral-50 rounded-lg p-4 mb-4">
                 <label className="block text-sm font-medium text-neutral-700 mb-2">
-                  Código PIX (Copia e Cola)
+                  Código PIX Copia e Cola:
                 </label>
                 <div className="space-y-2">
-                  <div className="flex">
-                    <input
-                      readOnly
-                      value={pixPayment.pixCode || ""}
-                      className="flex-1 text-sm font-mono bg-white p-2 border rounded-l"
-                    />
-                  </div>
+                  <input
+                    readOnly
+                    value={pixPayment.pixCode || ""}
+                    className="w-full text-sm font-mono bg-white p-3 border rounded-md"
+                  />
                   <Button
                     onClick={handleCopyCode}
                     className="w-full"

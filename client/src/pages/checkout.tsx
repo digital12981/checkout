@@ -349,9 +349,24 @@ export default function Checkout() {
     </Form>
   ) : pixPayment ? (
     <div>
-      <h3 className="font-semibold text-neutral-800 mb-4 text-center">
-        Pagamento PIX
-      </h3>
+      <div className="text-center mb-6">
+        <div className="text-lg font-semibold text-neutral-800 mb-4">
+          Valor: {formatCurrency(page.price)}
+        </div>
+      </div>
+
+      <div className="text-center space-y-4 mb-6">
+        <div className="flex items-center justify-center gap-2 text-lg font-semibold text-neutral-800">
+          <span>Aguardando pagamento...</span>
+          <div className="animate-spin h-5 w-5 border-2 border-blue-600 border-t-transparent rounded-full"></div>
+        </div>
+        <div className="text-3xl font-bold text-blue-600">
+          15:00
+        </div>
+        <p className="text-sm text-neutral-600">
+          Escaneie o QR Code com seu app do banco
+        </p>
+      </div>
 
       <div className="text-center mb-6">
         <div className="w-48 h-48 bg-white border-2 border-neutral-200 rounded-lg mx-auto flex items-center justify-center mb-4">
@@ -367,41 +382,35 @@ export default function Checkout() {
             </div>
           )}
         </div>
-        <p className="text-sm text-neutral-600">
-          Escaneie o QR Code com seu app do banco
-        </p>
       </div>
 
       {pixPayment.pixCode && (
         <div className="mb-6">
           <label className="block text-sm font-medium text-neutral-700 mb-2">
-            Ou copie o código PIX:
+            Código PIX Copia e Cola:
           </label>
-          <div className="flex">
+          <div className="space-y-2">
             <input
               type="text"
               value={pixPayment.pixCode}
               readOnly
-              className="flex-1 px-3 py-2 border border-neutral-300 rounded-l-md bg-neutral-50 text-sm"
+              className="w-full px-3 py-2 border border-neutral-300 rounded-md bg-neutral-50 text-sm font-mono"
             />
             <Button
               type="button"
               onClick={copyPixCode}
-              className="px-4 py-2 rounded-l-none"
+              className="w-full px-4 py-2"
               style={{ backgroundColor: page.accentColor }}
             >
-              <Copy className="w-4 h-4" />
+              <Copy className="w-4 h-4 mr-2" />
+              Copiar Código PIX
             </Button>
           </div>
         </div>
       )}
 
       <div className="text-center">
-        <div className="inline-flex items-center space-x-2 text-yellow-600 bg-yellow-50 px-4 py-2 rounded-lg">
-          <Clock className="w-4 h-4 animate-pulse" />
-          <span className="text-sm font-medium">Aguardando pagamento...</span>
-        </div>
-        <p className="text-xs text-neutral-600 mt-2">
+        <p className="text-xs text-neutral-600">
           O pagamento será confirmado automaticamente
         </p>
       </div>
@@ -420,9 +429,24 @@ export default function Checkout() {
       // Show PIX payment information
       const pixPaymentHtml = `
         <div>
-          <h3 class="font-semibold text-gray-800 mb-4 text-center">
-            Pagamento PIX
-          </h3>
+          <div class="text-center mb-6">
+            <div class="text-lg font-semibold text-gray-800 mb-4">
+              Valor: R$ ${page.price}
+            </div>
+          </div>
+
+          <div class="text-center space-y-4 mb-6">
+            <div class="flex items-center justify-center gap-2 text-lg font-semibold text-gray-800">
+              <span>Aguardando pagamento...</span>
+              <div class="animate-spin h-5 w-5 border-2 border-blue-600 border-t-transparent rounded-full"></div>
+            </div>
+            <div class="text-3xl font-bold text-blue-600">
+              15:00
+            </div>
+            <p class="text-sm text-gray-600">
+              Escaneie o QR Code com seu app do banco
+            </p>
+          </div>
 
           <div class="text-center mb-6">
             <div class="w-48 h-48 bg-white border-2 border-gray-200 rounded-lg mx-auto flex items-center justify-center mb-4">
@@ -436,8 +460,7 @@ export default function Checkout() {
                 </div>
               `}
             </div>
-            <p class="text-sm text-gray-600">
-              Escaneie o QR Code com seu app do banco
+          </div>
             </p>
           </div>
 
