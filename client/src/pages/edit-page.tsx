@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { useParams, useLocation } from "wouter";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -124,7 +124,7 @@ export default function EditPage() {
   const [aiStatus, setAiStatus] = useState<string>("");
   const [templateSnapshot, setTemplateSnapshot] = useState<any>(null);
   const [previewKey, setPreviewKey] = useState(0);
-  const previewRef = useRef<HTMLDivElement>(null);
+  const previewRef = React.useRef<HTMLDivElement>(null);
   const { toast } = useToast();
   const queryClient = useQueryClient();
   
