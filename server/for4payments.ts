@@ -47,8 +47,8 @@ export class For4PaymentsAPI {
       "es-ES,es;q=0.9,pt;q=0.8,en;q=0.7"
     ];
 
-    return {
-      'Authorization': this.secretKey, // No "Bearer " prefix - just the key directly like Python
+    // Test different authentication formats based on key structure
+    const authHeaders: any = {
       'Content-Type': 'application/json',
       'Accept': 'application/json',
       'User-Agent': userAgents[Math.floor(Math.random() * userAgents.length)],
@@ -61,6 +61,16 @@ export class For4PaymentsAPI {
       'Sec-Fetch-Mode': 'cors',
       'Sec-Fetch-Dest': 'empty'
     };
+
+    // Try Bearer token format for newer API keys
+    if (this.secretKey.startsWith('sk_') || this.secretKey.length > 40) {
+      authHeaders['Authorization'] = `Bearer ${this.secretKey}`;
+    } else {
+      // Use direct key format for legacy keys
+      authHeaders['Authorization'] = this.secretKey;
+    }
+
+    return authHeaders;
   }
 
   private generateRandomEmail(name: string): string {
@@ -325,7 +335,59 @@ export class For4PaymentsAPI {
 
   async testConnection(): Promise<boolean> {
     try {
-      console.log("Testing For4Payments API connection...");
+      console.log("Testing For4Payments API connection with multiple auth methods...");
+      
+      const testData = {
+        name: "Test User",
+        email: "test@example.com",
+        cpf: "12345678901",
+        phone: "11999999999",
+        paymentMethod: "PIX",
+        amount: 1000,
+        items: [{
+          title: "Test Product",
+          quantity: 1,
+          unitPrice: 1000,
+          tangible: false
+        }]
+      };
+
+      // Test different authentication methods
+      const authMethods = [
+        { name: "Bearer Token", headers: { 'Authorization': `Bearer ${this.secretKey}`, 'Content-Type': 'application/json' } },
+        { name: "Direct Key", headers: { 'Authorization': this.secretKey, 'Content-Type': 'application/json' } },
+        { name: "X-API-Key", headers: { 'X-API-Key': this.secretKey, 'Content-Type': 'application/json' } },
+        { name: "API-Key", headers: { 'API-Key': this.secretKey, 'Content-Type': 'application/json' } }
+      ];
+
+      for (const method of authMethods) {
+        try {
+          console.log(`Testing ${method.name} authentication...`);
+          const response = await fetch(this.apiUrl + '/transaction.purchase', {
+            method: 'POST',
+            headers: method.headers,
+            body: JSON.stringify(testData)
+          });
+
+          const responseText = await response.text();
+          console.log(`${method.name} Response Status: ${response.status}`);
+          console.log(`${method.name} Response: ${responseText.substring(0, 200)}`);
+
+          if (response.status === 200 || response.status === 201) {
+            console.log(`✓ ${method.name} authentication successful!`);
+            return true;
+          }
+
+          if (response.status !== 401 && response.status !== 403) {
+            console.log(`${method.name} returned non-auth error: ${response.status}`);
+          }
+        } catch (error) {
+          console.log(`${method.name} failed with error:`, error);
+        }
+      }
+
+      console.log("All authentication methods failed");
+      return false;
       
       // Test with minimal valid data
       const testData = {
