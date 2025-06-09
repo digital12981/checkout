@@ -332,39 +332,51 @@ export default function EditPage() {
       // Wait for React to fully render the preview, then capture the ACTUAL HTML
       await new Promise(resolve => setTimeout(resolve, 500));
       
-      // Find the preview container that is actually visible on screen
-      const previewContainer = document.querySelector('[id*="preview"], .min-h-screen');
+      // Find the actual preview content inside the preview panel
+      const previewPanel = document.querySelector('.flex-1.bg-gray-50.overflow-auto');
       
-      if (!previewContainer) {
-        console.error("Preview container not found");
+      if (!previewPanel) {
+        console.error("Preview panel not found");
         return;
       }
       
-      console.log("Found preview container:", previewContainer);
+      // Look for the min-h-screen div INSIDE the preview panel (the actual page content)
+      const previewContent = previewPanel.querySelector('.min-h-screen[style*="background-color"]');
       
-      // Clone the entire preview container to get the exact HTML
-      const clonedContainer = previewContainer.cloneNode(true) as HTMLElement;
+      if (!previewContent) {
+        console.error("Preview content not found");
+        return;
+      }
       
-      // Remove all interactive editor elements (buttons, borders, etc.)
+      console.log("Found actual preview content:", previewContent);
+      
+      // Clone only the actual preview content (not the editor interface)
+      const clonedContainer = previewContent.cloneNode(true) as HTMLElement;
+      
+      // Remove all interactive editor elements (floating menus, drop zones, etc.)
       const elementsToRemove = clonedContainer.querySelectorAll(
-        '.absolute, .cursor-pointer, [onclick], [ondblclick], [class*="ring-"], [class*="border-dashed"], [class*="hover:"], .z-10, .transition-colors'
+        '.absolute, .cursor-pointer, [onclick], [ondblclick], [class*="ring-"], [class*="border-dashed"], [class*="hover:"], .z-10, .transition-colors, [data-editor], .editor-element'
       );
       
       elementsToRemove.forEach(el => el.remove());
       
-      // Remove all editor-specific event handlers and classes
+      // Remove ALL editor-specific event handlers and interactive classes
       const allElements = clonedContainer.querySelectorAll('*');
       allElements.forEach(el => {
-        // Remove event handlers
+        // Remove ALL event handlers
         el.removeAttribute('onclick');
         el.removeAttribute('ondblclick');
         el.removeAttribute('onmouseover');
         el.removeAttribute('onmouseout');
+        el.removeAttribute('onmouseenter');
+        el.removeAttribute('onmouseleave');
+        el.removeAttribute('data-editor');
         
-        // Remove editor classes
+        // Remove ALL editor-specific classes
         const classesToRemove = [
           'cursor-pointer', 'ring-2', 'ring-primary', 'transition-colors',
-          'hover:ring-2', 'hover:ring-primary', 'z-10', 'border-dashed'
+          'hover:ring-2', 'hover:ring-primary', 'z-10', 'border-dashed',
+          'hover:bg-gray-100', 'group', 'relative'
         ];
         
         classesToRemove.forEach(className => {
@@ -372,6 +384,11 @@ export default function EditPage() {
             el.classList.remove(className);
           }
         });
+        
+        // Remove any click handlers that might be attached
+        if (el.onclick) {
+          el.onclick = null;
+        }
       });
       
       // Get the exact HTML from the screen
