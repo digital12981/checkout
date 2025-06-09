@@ -388,18 +388,6 @@ export class For4PaymentsAPI {
 
       console.log("All authentication methods failed");
       return false;
-      
-      // Test with minimal valid data
-      const testData = {
-        name: "Test User",
-        email: "test@example.com",
-        cpf: "12345678901",
-        phone: "11999999999",
-        amount: 1.00 // R$ 1.00 for testing
-      };
-
-      await this.createPixPayment(testData);
-      return true;
     } catch (error) {
       console.error("For4Payments connection test failed:", error);
       return false;
