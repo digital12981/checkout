@@ -63,7 +63,8 @@ export default function CheckoutHtml() {
   // Debug logging
   console.log("Page data received:", page);
   console.log("PreviewHtml exists:", !!(page as any).previewHtml);
-  console.log("PreviewHtml content:", (page as any).previewHtml);
+  console.log("PreviewHtml length:", (page as any).previewHtml?.length);
+  console.log("Has FORM_PLACEHOLDER:", (page as any).previewHtml?.includes('{{FORM_PLACEHOLDER}}'));
 
   // If we have saved HTML, use it EXACTLY as is
   if ((page as any).previewHtml && (page as any).previewHtml.trim()) {
