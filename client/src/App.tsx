@@ -5,8 +5,6 @@ import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import Dashboard from "@/pages/dashboard";
 import CheckoutFinal from "@/pages/checkout-final";
-import CheckoutTest from "@/pages/checkout-test";
-import CheckoutSimple from "@/pages/checkout-simple";
 import EditPage from "@/pages/edit-page";
 import HtmlEditor from "@/pages/html-editor";
 import NotFound from "@/pages/not-found";
@@ -20,8 +18,6 @@ function Router() {
       <Route path="/pages/edit/:id" component={EditPage} />
       <Route path="/pages/html-edit/:id" component={HtmlEditor} />
       <Route path="/checkout/:id" component={CheckoutFinal} />
-      <Route path="/checkout-test/:id" component={CheckoutTest} />
-      <Route path="/checkout-simple/:id" component={CheckoutSimple} />
       <Route path="/pagamento/:id" component={CheckoutFinal} />
       <Route component={NotFound} />
     </Switch>
