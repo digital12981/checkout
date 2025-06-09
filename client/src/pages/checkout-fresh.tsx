@@ -158,14 +158,14 @@ export default function CheckoutFresh() {
             <label class="block text-sm font-medium text-gray-700 mb-1">CPF</label>
             <input type="text" name="customerCpf" required maxlength="14" placeholder="000.000.000-00"
                    class="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                   oninput="formatCpfInput(this)" />
+                   oninput="window.formatCpfInput(this)" />
           </div>
           
           <div>
             <label class="block text-sm font-medium text-gray-700 mb-1">Telefone</label>
             <input type="tel" name="customerPhone" required placeholder="(11) 99999-9999"
                    class="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                   oninput="formatPhoneInput(this)" />
+                   oninput="window.formatPhoneInput(this)" />
           </div>
           
           <button type="submit" id="submit-btn"
@@ -204,7 +204,7 @@ export default function CheckoutFresh() {
             input.value = value.substring(0,15);
           };
 
-          async function handleFormSubmit(event) {
+          window.handleFormSubmit = async function(event) {
             event.preventDefault();
             const submitBtn = document.getElementById('submit-btn');
             submitBtn.disabled = true;
