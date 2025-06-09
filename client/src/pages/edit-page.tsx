@@ -103,6 +103,7 @@ export default function EditPage() {
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const [currentTab, setCurrentTab] = useState("config");
+  const [previewTab, setPreviewTab] = useState("preview");
   const [customElements, setCustomElements] = useState<CustomElement[]>([]);
   const [editingElement, setEditingElement] = useState<string | null>(null);
   const [capturedHTML, setCapturedHTML] = useState<string>("");
@@ -773,7 +774,7 @@ export default function EditPage() {
         </div>
 
         <div className="flex-1 bg-gray-50 overflow-auto">
-          <Tabs value="preview" className="h-full">
+          <Tabs value={previewTab} onValueChange={setPreviewTab} className="h-full">
             <TabsList className="m-4">
               <TabsTrigger value="preview">
                 <Eye className="w-4 h-4 mr-2" />
