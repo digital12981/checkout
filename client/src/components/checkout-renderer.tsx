@@ -122,7 +122,7 @@ export default function CheckoutRenderer({ page, pixPayment, formContent }: Chec
     return (
       <div
         className={`${element.styles.hasBox ? 'border' : ''} ${
-          element.type?.includes('footer') || element.position >= 100 ? 'w-full -mx-6 px-6 rounded-none' : 'rounded'
+          element.type?.includes('footer') || Number(element.position) >= 100 ? 'w-full -mx-6 px-6 rounded-none' : 'rounded'
         }`}
         style={{
           color: element.styles.color || "#000000",
@@ -130,18 +130,18 @@ export default function CheckoutRenderer({ page, pixPayment, formContent }: Chec
           borderColor: element.styles.hasBox ? element.styles.boxColor || "#e5e7eb" : "transparent",
           fontWeight: element.styles.fontWeight || (element.styles.isBold ? "bold" : "normal"),
           fontSize: element.styles.fontSize || "16px",
-          textAlign: element.type?.includes('footer') || element.position >= 100 ? "center" : (element.styles.textAlign || "left"),
-          borderRadius: element.type?.includes('footer') || element.position >= 100 ? "0" : `${element.styles.borderRadius || 4}px`,
+          textAlign: element.type?.includes('footer') || Number(element.position) >= 100 ? "center" : (element.styles.textAlign || "left"),
+          borderRadius: element.type?.includes('footer') || Number(element.position) >= 100 ? "0" : `${element.styles.borderRadius || 4}px`,
           padding: element.styles.padding || "8px",
           border: element.styles.border,
           marginBottom: element.styles.marginBottom,
-          marginTop: element.type?.includes('footer') || element.position >= 100 ? "32px" : element.styles.marginTop,
+          marginTop: element.type?.includes('footer') || Number(element.position) >= 100 ? "32px" : element.styles.marginTop,
           lineHeight: element.styles.lineHeight,
           borderTop: element.styles.borderTop,
-          width: element.type?.includes('footer') || element.position >= 100 ? "100vw" : "auto",
-          marginLeft: element.type?.includes('footer') || element.position >= 100 ? "-50vw" : "0",
-          left: element.type?.includes('footer') || element.position >= 100 ? "50%" : "auto",
-          position: element.type?.includes('footer') || element.position >= 100 ? "relative" : "static"
+          width: element.type?.includes('footer') || Number(element.position) >= 100 ? "100vw" : "auto",
+          marginLeft: element.type?.includes('footer') || Number(element.position) >= 100 ? "-50vw" : "0",
+          left: element.type?.includes('footer') || Number(element.position) >= 100 ? "50%" : "auto",
+          position: element.type?.includes('footer') || Number(element.position) >= 100 ? "relative" : "static"
         } as any}
         dangerouslySetInnerHTML={{ __html: element.content.replace(/\n/g, '<br/>') }}
       />

@@ -154,6 +154,23 @@ export default function CheckoutHtml() {
           </div>
 
           <script>
+            let timeLeft = ${timeLeft};
+            
+            function updateTimer() {
+              if (timeLeft > 0) {
+                const minutes = Math.floor(timeLeft / 60);
+                const seconds = timeLeft % 60;
+                const formattedTime = minutes.toString().padStart(2, '0') + ':' + seconds.toString().padStart(2, '0');
+                document.getElementById('timer-display').textContent = 'Expira em ' + formattedTime;
+                timeLeft--;
+                setTimeout(updateTimer, 1000);
+              } else {
+                document.getElementById('timer-display').textContent = 'Expirado';
+              }
+            }
+            
+            updateTimer();
+            
             function copyPixCode() {
               navigator.clipboard.writeText('${pixPayment.pixCode || ''}').then(() => {
                 alert('Código PIX copiado!');
