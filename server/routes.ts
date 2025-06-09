@@ -142,7 +142,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const for4payments = new For4PaymentsAPI(apiKey);
       console.log("For4Payments client created successfully with key:", apiKey.substring(0, 8) + "...");
       
-      const pixResponse = await for4payments.createPixPayment({
+      let pixResponse;
+      
+      // First, check if we have a valid API key
+      if (!process.env.FOR4PAYMENTS_API_KEY || apiKey === '7e0f69db-7b2d-4166-b8c5-fceed89b67c6') {
+        return res.status(503).json({
+          message: "Payment service not configured. Please provide a valid For4Payments API key.",
+          error: "FOR4PAYMENTS_API_KEY environment variable is required",
+          suggestion: "Configure your For4Payments API key in the environment settings"
+        });
+      }
+
+      pixResponse = await for4payments.createPixPayment({
         name: requestData.customerName,
         email: requestData.customerEmail,
         cpf: requestData.customerCpf,
