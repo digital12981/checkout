@@ -436,8 +436,13 @@ export default function Checkout() {
             <Button
               type="button"
               onClick={copyPixCode}
-              className="w-full px-4 py-2"
-              style={{ backgroundColor: page.accentColor }}
+              className="w-full px-4 py-2 shadow-lg transform transition-all duration-150 active:scale-95"
+              style={{
+                backgroundColor: '#48AD45',
+                borderRadius: '4px',
+                boxShadow: '0 4px 8px rgba(72, 173, 69, 0.3), 0 2px 4px rgba(0, 0, 0, 0.1)',
+                border: '1px solid rgba(255, 255, 255, 0.2)'
+              }}
             >
               <Copy className="w-4 h-4 mr-2" />
               Copiar Código PIX

@@ -1,4 +1,7 @@
-import { QrCode, ShoppingBag } from "lucide-react";
+import { QrCode, ShoppingBag, Copy, Check } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { useState, useEffect } from "react";
+import { formatCurrency } from "@/lib/utils";
 
 interface CustomElement {
   id: string;

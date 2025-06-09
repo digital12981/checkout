@@ -1,6 +1,6 @@
 import { QrCode, ShoppingBag, Copy, Check } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { formatCurrency } from "@/lib/utils";
 
 interface CustomElement {
@@ -58,6 +58,31 @@ interface CheckoutRendererProps {
 
 export default function CheckoutRenderer({ page, pixPayment, formContent }: CheckoutRendererProps) {
   const [copied, setCopied] = useState(false);
+  const [timeLeft, setTimeLeft] = useState(15 * 60); // 15 minutes in seconds
+
+  // Timer functionality
+  useEffect(() => {
+    if (pixPayment && timeLeft > 0) {
+      const timer = setInterval(() => {
+        setTimeLeft(prev => {
+          if (prev <= 1) {
+            clearInterval(timer);
+            return 0;
+          }
+          return prev - 1;
+        });
+      }, 1000);
+
+      return () => clearInterval(timer);
+    }
+  }, [pixPayment, timeLeft]);
+
+  // Format time as MM:SS
+  const formatTime = (seconds: number) => {
+    const minutes = Math.floor(seconds / 60);
+    const remainingSeconds = seconds % 60;
+    return `${minutes.toString().padStart(2, '0')}:${remainingSeconds.toString().padStart(2, '0')}`;
+  };
   
   // Parse custom elements exactly like in the editor
   let customElements: CustomElement[] = [];
@@ -237,7 +262,7 @@ export default function CheckoutRenderer({ page, pixPayment, formContent }: Chec
                     <div className="animate-spin h-4 w-4 border-2 border-yellow-600 border-t-transparent rounded-full"></div>
                   </div>
                   <div className="text-xl font-bold text-yellow-800">
-                    Expira em 15:00
+                    Expira em {formatTime(timeLeft)}
                   </div>
                 </div>
               </div>
@@ -292,8 +317,13 @@ export default function CheckoutRenderer({ page, pixPayment, formContent }: Chec
                   />
                   <Button
                     onClick={handleCopyCode}
-                    className="w-full"
-                    style={{ backgroundColor: page.accentColor }}
+                    className="w-full shadow-lg transform transition-all duration-150 active:scale-95"
+                    style={{
+                      backgroundColor: '#48AD45',
+                      borderRadius: '4px',
+                      boxShadow: '0 4px 8px rgba(72, 173, 69, 0.3), 0 2px 4px rgba(0, 0, 0, 0.1)',
+                      border: '1px solid rgba(255, 255, 255, 0.2)'
+                    }}
                   >
                     {copied ? <Check className="w-4 h-4 mr-2" /> : <Copy className="w-4 h-4 mr-2" />}
                     {copied ? "Copiado!" : "Copiar Código PIX"}
