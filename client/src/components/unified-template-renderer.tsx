@@ -163,6 +163,7 @@ export default function UnifiedTemplateRenderer({
   return (
     <div 
       className="min-h-screen w-full"
+      data-capture-target="preview-content"
       style={{ backgroundColor: page.backgroundColor }}
     >
       {/* Header */}

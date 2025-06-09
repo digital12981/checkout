@@ -332,23 +332,15 @@ export default function EditPage() {
       // Wait for React to fully render the preview, then capture the ACTUAL HTML
       await new Promise(resolve => setTimeout(resolve, 500));
       
-      // Find the actual preview content inside the preview panel
-      const previewPanel = document.querySelector('.flex-1.bg-gray-50.overflow-auto');
-      
-      if (!previewPanel) {
-        console.error("Preview panel not found");
-        return;
-      }
-      
-      // Look for the min-h-screen div INSIDE the preview panel (the actual page content)
-      const previewContent = previewPanel.querySelector('.min-h-screen[style*="background-color"]');
+      // Find the specific preview content using the data attribute
+      const previewContent = document.querySelector('[data-capture-target="preview-content"]');
       
       if (!previewContent) {
-        console.error("Preview content not found");
+        console.error("Preview content with capture target not found");
         return;
       }
       
-      console.log("Found actual preview content:", previewContent);
+      console.log("Found preview content with capture target:", previewContent);
       
       // Clone only the actual preview content (not the editor interface)
       const clonedContainer = previewContent.cloneNode(true) as HTMLElement;
@@ -386,8 +378,8 @@ export default function EditPage() {
         });
         
         // Remove any click handlers that might be attached
-        if (el.onclick) {
-          el.onclick = null;
+        if ((el as any).onclick) {
+          (el as any).onclick = null;
         }
       });
       
