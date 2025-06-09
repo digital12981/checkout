@@ -283,7 +283,7 @@ export default function CheckoutHtml() {
         </script>
       `;
       
-      finalHtml = finalHtml.replace('{{FORM_PLACEHOLDER}}', formContent);
+      finalHtml = finalHtml.replace('<!-- FORM_PLACEHOLDER -->', formContent);
     }
 
     // Return the exact HTML with no React wrapper
