@@ -212,9 +212,9 @@ export default function CheckoutFinal() {
     finalHtml = finalHtml.replace('{{FORM_PLACEHOLDER}}', formHtml);
   }
   
-  // Add footer if missing
+  // Add footer at the very end if missing
   if (!finalHtml.includes('<footer')) {
-    finalHtml = finalHtml.replace('</div>', `</div>
+    finalHtml += `
     
     <!-- Footer -->
     <footer class="w-full py-6 px-6 border-t border-gray-200 bg-gray-50">
@@ -237,7 +237,7 @@ export default function CheckoutFinal() {
           Seus dados estão protegidos e a transação é processada com segurança
         </div>
       </div>
-    </footer>`);
+    </footer>`;
   }
   
   // If we have a PIX payment, show the payment interface instead
