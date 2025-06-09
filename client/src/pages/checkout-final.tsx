@@ -131,84 +131,112 @@ export default function CheckoutFinal() {
 
   const page = pageQuery.data as any;
 
-  // Generate the HTML template
-  let finalHtml = `<!DOCTYPE html>
-<html lang="pt-BR">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>${page.productName} - Pagamento PIX</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <style>
-        .pix-container { max-width: 400px; margin: 0 auto; }
-        .qr-code-container { background: white; padding: 20px; border-radius: 12px; margin: 20px 0; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
-        .timer-display { font-size: 1.5rem; font-weight: bold; color: #e11d48; text-align: center; margin: 20px 0; }
-        .pix-code-display { background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 15px; font-family: monospace; word-break: break-all; margin: 15px 0; }
-    </style>
-</head>
-<body style="background-color: ${page.backgroundColor}; color: ${page.textColor}; font-family: system-ui, -apple-system, sans-serif;">
-    <div class="min-h-screen flex items-center justify-center p-4">
-        <div class="pix-container w-full">
-            ${page.showLogo && page.logoUrl ? `
-                <div class="text-center mb-8">
-                    <img src="${page.logoUrl}" alt="Logo" class="mx-auto" style="height: ${page.logoSize}px;" />
-                </div>
-            ` : ''}
-            
-            <div class="bg-white rounded-lg shadow-lg p-8" style="border-top: 4px solid ${page.primaryColor};">
-                <h1 class="text-2xl font-bold text-center mb-2" style="color: ${page.primaryColor};">
-                    ${page.customTitle || page.productName}
-                </h1>
-                
-                <p class="text-gray-600 text-center mb-6">
-                    ${page.customSubtitle || page.productDescription}
-                </p>
-                
-                <div class="text-center mb-6">
-                    <div class="text-3xl font-bold" style="color: ${page.primaryColor};">
-                        R$ ${page.price}
-                    </div>
-                </div>
-
-                <form data-react-form="true" class="space-y-4">
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-1">Nome completo</label>
-                        <input type="text" name="customerName" required class="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500" />
-                    </div>
-                    
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-1">Email</label>
-                        <input type="email" name="customerEmail" required class="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500" />
-                    </div>
-                    
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-1">CPF</label>
-                        <input type="text" name="customerCpf" required maxlength="14" placeholder="000.000.000-00" class="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500" />
-                    </div>
-                    
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-1">Telefone</label>
-                        <input type="tel" name="customerPhone" required placeholder="(11) 99999-9999" class="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500" />
-                    </div>
-                    
-                    <button type="submit" class="w-full text-white py-3 px-6 rounded-md font-semibold hover:opacity-90 transition-colors disabled:opacity-50 flex items-center justify-center gap-2" style="background-color: ${page.accentColor || '#10B981'};" ${isSubmitting ? 'disabled' : ''}>
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path>
-                        </svg>
-                        ${isSubmitting ? 'Processando...' : (page.customButtonText || 'Pagar com PIX')}
-                    </button>
-                </form>
-                
-                ${page.customInstructions ? `
-                    <div class="mt-6 p-4 bg-blue-50 rounded-md border border-blue-200">
-                        <p class="text-sm text-blue-800">${page.customInstructions}</p>
-                    </div>
-                ` : ''}
+  // Use the original page design from the database
+  let finalHtml = page.previewHtml || `<div class="min-h-screen w-full" style="background-color: ${page.backgroundColor};">
+      <!-- Header -->
+      <div class="w-full p-6 text-white text-center flex flex-col justify-center" style="background-color: ${page.primaryColor}; height: ${page.headerHeight}px;">
+        ${page.showLogo && page.logoUrl ? `
+          <div class="mb-4 flex justify-center">
+            <img src="${page.logoUrl}" alt="Logo" class="object-contain rounded" style="width: ${page.logoSize}px; height: ${page.logoSize}px;" />
+          </div>
+        ` : ''}
+        
+        <h1 class="text-2xl font-bold mb-2">${page.customTitle || page.productName}</h1>
+        <p class="text-lg opacity-90">${page.customSubtitle || page.productDescription}</p>
+      </div>
+      
+      <!-- Main Content -->
+      <div class="flex-1 p-6">
+        <!-- Price Display -->
+        <div class="max-w-md mx-auto mb-6">
+          <div class="bg-white border border-gray-200 rounded-lg p-6 text-center">
+            <div class="text-3xl font-bold mb-2" style="color: ${page.primaryColor};">
+              R$ ${page.price}
             </div>
+            <p class="text-gray-600">Valor da ${page.productName}</p>
+          </div>
         </div>
-    </div>
-</body>
-</html>`;
+        
+        <!-- Form Area -->
+        <div class="max-w-md mx-auto mb-6">
+          <div class="bg-white border border-gray-200 rounded-lg p-6">
+            <form data-react-form="true" class="space-y-4">
+              <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">Nome completo</label>
+                <input type="text" name="customerName" required 
+                       class="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500" />
+              </div>
+              
+              <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">Email</label>
+                <input type="email" name="customerEmail" required 
+                       class="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500" />
+              </div>
+              
+              <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">CPF</label>
+                <input type="text" name="customerCpf" required maxlength="14" placeholder="000.000.000-00"
+                       class="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500" />
+              </div>
+              
+              <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">Telefone</label>
+                <input type="tel" name="customerPhone" required placeholder="(11) 99999-9999"
+                       class="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500" />
+              </div>
+              
+              <button type="submit"
+                      class="w-full text-white py-3 px-6 rounded-md font-semibold hover:opacity-90 transition-colors disabled:opacity-50 flex items-center justify-center gap-2"
+                      style="background-color: ${page.accentColor};" ${isSubmitting ? 'disabled' : ''}>
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path>
+                </svg>
+                ${isSubmitting ? 'Processando...' : (page.customButtonText || 'Pagar com PIX')}
+              </button>
+            </form>
+          </div>
+        </div>
+        
+        ${page.customInstructions ? `
+        <div class="max-w-md mx-auto mb-6">
+          <div class="bg-blue-50 border border-blue-200 rounded-lg p-4">
+            <div class="text-sm text-blue-800 whitespace-pre-line">${page.customInstructions}</div>
+          </div>
+        </div>
+        ` : ''}
+      </div>
+      
+      <!-- Default Footer -->
+      <footer class="w-full py-6 px-6 border-t border-gray-200 bg-gray-50">
+        <div class="max-w-md mx-auto text-center">
+          <div class="flex items-center justify-center space-x-6 text-sm text-gray-600 mb-3">
+            <span class="flex items-center space-x-1">
+              <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                <path fill-rule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clip-rule="evenodd" />
+              </svg>
+              <span>Pagamento Seguro</span>
+            </span>
+            <span class="flex items-center space-x-1">
+              <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                <path fill-rule="evenodd" d="M6.267 3.455a3.066 3.066 0 001.745-.723 3.066 3.066 0 013.976 0 3.066 3.066 0 001.745.723 3.066 3.066 0 012.812 2.812c.051.643.304 1.254.723 1.745a3.066 3.066 0 010 3.976 3.066 3.066 0 00-.723 1.745 3.066 3.066 0 01-2.812 2.812 3.066 3.066 0 00-1.745.723 3.066 3.066 0 01-3.976 0 3.066 3.066 0 00-1.745-.723 3.066 3.066 0 01-2.812-2.812 3.066 3.066 0 00-.723-1.745 3.066 3.066 0 010-3.976 3.066 3.066 0 00.723-1.745 3.066 3.066 0 012.812-2.812zm7.44 5.252a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
+              </svg>
+              <span>Processamento Imediato</span>
+            </span>
+          </div>
+          <div class="text-xs text-gray-500">
+            Seus dados estão protegidos e a transação é processada com segurança
+          </div>
+        </div>
+      </footer>
+    </div>`;
+  
+  // If no payment exists, modify the original template to add React form handling
+  if (!pixPayment) {
+    finalHtml = finalHtml.replace(
+      /data-react-form="true"/g, 
+      'data-react-form="true"'
+    );
+  }
 
   // If we have a PIX payment, show the payment interface instead
   if (pixPayment) {
