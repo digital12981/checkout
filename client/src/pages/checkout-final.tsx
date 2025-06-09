@@ -66,7 +66,79 @@ export default function CheckoutFinal() {
     }
   }, [pixPayment, timeLeft]);
 
+  // Always run useEffect for form handling
+  useEffect(() => {
+    if (!pixPayment && pageQuery.data) {
+      console.log('Setting up form handlers for checkout form');
+      
+      const setupForm = () => {
+        const form = document.querySelector('form[data-react-form]') || document.querySelector('form');
+        console.log('Form found:', form);
+        
+        if (form) {
+          console.log('Attaching React event handlers to form');
+          
+          const handleSubmit = async (event: Event) => {
+            console.log('Form submit event triggered');
+            event.preventDefault();
+            event.stopPropagation();
+            
+            if (isSubmitting) {
+              console.log('Already submitting, ignoring');
+              return;
+            }
+            
+            setIsSubmitting(true);
+            
+            const formData = new FormData(form as HTMLFormElement);
+            console.log('Form data extracted:', {
+              customerName: formData.get('customerName'),
+              customerEmail: formData.get('customerEmail'),
+              customerCpf: formData.get('customerCpf'),
+              customerPhone: formData.get('customerPhone')
+            });
+            
+            try {
+              await createPaymentMutation.mutateAsync(formData);
+            } catch (error) {
+              console.error('Payment submission failed:', error);
+            } finally {
+              setIsSubmitting(false);
+            }
+          };
 
+          const handleCpfInput = (event: Event) => {
+            const input = event.target as HTMLInputElement;
+            input.value = formatCpf(input.value);
+          };
+
+          const handlePhoneInput = (event: Event) => {
+            const input = event.target as HTMLInputElement;
+            input.value = formatPhone(input.value);
+          };
+
+          form.addEventListener('submit', handleSubmit);
+          
+          const cpfInput = form.querySelector('input[name="customerCpf"]');
+          const phoneInput = form.querySelector('input[name="customerPhone"]');
+          
+          if (cpfInput) cpfInput.addEventListener('input', handleCpfInput);
+          if (phoneInput) phoneInput.addEventListener('input', handlePhoneInput);
+
+          return () => {
+            form.removeEventListener('submit', handleSubmit);
+            if (cpfInput) cpfInput.removeEventListener('input', handleCpfInput);
+            if (phoneInput) phoneInput.removeEventListener('input', handlePhoneInput);
+          };
+        } else {
+          console.error('Form not found, retrying...');
+          setTimeout(setupForm, 100);
+        }
+      };
+      
+      setupForm();
+    }
+  }, [pixPayment, pageQuery.data, isSubmitting, createPaymentMutation]);
 
   const formatTime = (seconds: number) => {
     const minutes = Math.floor(seconds / 60);
@@ -183,14 +255,6 @@ export default function CheckoutFinal() {
       </footer>
     </div>`;
   
-  // If no payment exists, modify the original template to add React form handling
-  if (!pixPayment) {
-    finalHtml = finalHtml.replace(
-      /data-react-form="true"/g, 
-      'data-react-form="true"'
-    );
-  }
-
   // If we have a PIX payment, show the payment interface instead
   if (pixPayment) {
     finalHtml = `<div class="min-h-screen w-full" style="background-color: ${page.backgroundColor};">
@@ -295,82 +359,6 @@ export default function CheckoutFinal() {
       </footer>
     </div>`;
   }
-
-  // Add event handlers for the form after HTML is ready
-  useEffect(() => {
-    if (!pixPayment && pageQuery.data) {
-      console.log('Setting up form handlers for checkout form');
-      
-      // Wait for DOM to be ready
-      const setupForm = () => {
-        const form = document.querySelector('form[data-react-form]') || document.querySelector('form');
-        console.log('Form found:', form);
-        console.log('All forms on page:', document.querySelectorAll('form'));
-        
-        if (form) {
-          console.log('Attaching React event handlers to form');
-          
-          const handleSubmit = async (event: Event) => {
-            console.log('Form submit event triggered');
-            event.preventDefault();
-            event.stopPropagation();
-            
-            if (isSubmitting) {
-              console.log('Already submitting, ignoring');
-              return;
-            }
-            
-            setIsSubmitting(true);
-            
-            const formData = new FormData(form as HTMLFormElement);
-            console.log('Form data extracted:', {
-              customerName: formData.get('customerName'),
-              customerEmail: formData.get('customerEmail'),
-              customerCpf: formData.get('customerCpf'),
-              customerPhone: formData.get('customerPhone')
-            });
-            
-            try {
-              await createPaymentMutation.mutateAsync(formData);
-            } catch (error) {
-              console.error('Payment submission failed:', error);
-            } finally {
-              setIsSubmitting(false);
-            }
-          };
-
-          const handleCpfInput = (event: Event) => {
-            const input = event.target as HTMLInputElement;
-            input.value = formatCpf(input.value);
-          };
-
-          const handlePhoneInput = (event: Event) => {
-            const input = event.target as HTMLInputElement;
-            input.value = formatPhone(input.value);
-          };
-
-          form.addEventListener('submit', handleSubmit);
-          
-          const cpfInput = form.querySelector('input[name="customerCpf"]');
-          const phoneInput = form.querySelector('input[name="customerPhone"]');
-          
-          if (cpfInput) cpfInput.addEventListener('input', handleCpfInput);
-          if (phoneInput) phoneInput.addEventListener('input', handlePhoneInput);
-
-          return () => {
-            form.removeEventListener('submit', handleSubmit);
-            if (cpfInput) cpfInput.removeEventListener('input', handleCpfInput);
-            if (phoneInput) phoneInput.removeEventListener('input', handlePhoneInput);
-          };
-        } else {
-          console.error('Form not found, retrying...');
-          setTimeout(setupForm, 100);
-        }
-      };
-      
-      setupForm();
-    }
-  }, [pixPayment, pageQuery.data, isSubmitting, createPaymentMutation]);
 
   return <div dangerouslySetInnerHTML={{ __html: finalHtml }} />;
 }
