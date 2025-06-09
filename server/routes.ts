@@ -10,7 +10,11 @@ const createPixPaymentRequestSchema = z.object({
   paymentPageId: z.number(),
   customerName: z.string().min(1),
   customerEmail: z.string().email(),
-  customerCpf: z.string().min(11),
+  customerCpf: z.string().min(10).transform((cpf) => {
+    // Remove any formatting and pad with zeros if needed
+    const cleanCpf = cpf.replace(/\D/g, '');
+    return cleanCpf.padStart(11, '0');
+  }),
   customerPhone: z.string().optional(),
 });
 
