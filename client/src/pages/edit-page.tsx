@@ -355,7 +355,7 @@ export default function EditPage() {
           for (let i = 0; i < allScreens.length; i++) {
             const screen = allScreens[i];
             // Check if this screen is in the preview area and not in editor
-            if (screen.style.backgroundColor && !screen.closest('.editor-panel')) {
+            if ((screen as HTMLElement).style.backgroundColor && !screen.closest('.editor-panel')) {
               previewContent = screen;
               console.log("Found preview content via fallback method:", previewContent);
               break;
@@ -415,18 +415,30 @@ export default function EditPage() {
       // Get the exact HTML from the screen
       let capturedHTML = clonedContainer.outerHTML;
       
-      // Replace any form content with placeholder
-      capturedHTML = capturedHTML.replace(
-        /<div[^>]*class="[^"]*space-y-4[^"]*"[^>]*>[\s\S]*?<\/div>/gi,
-        '<div class="w-full max-w-md"><!-- FORM_PLACEHOLDER --></div>'
-      );
+      // Remove specific duplicated form elements that are causing issues
+      // Remove any standalone form field labels that are floating
+      capturedHTML = capturedHTML.replace(/<div[^>]*>\s*E-mail\s*<\/div>/gi, '');
+      capturedHTML = capturedHTML.replace(/<div[^>]*>\s*CPF\s*<\/div>/gi, '');
+      capturedHTML = capturedHTML.replace(/<div[^>]*>\s*Telefone\s*<\/div>/gi, '');
       
-      // Ensure we have the FORM_PLACEHOLDER
-      if (!capturedHTML.includes('<!-- FORM_PLACEHOLDER -->')) {
-        // Add it if missing
+      // Remove duplicated form containers that are causing the bug
+      capturedHTML = capturedHTML.replace(/<div[^>]*class="[^"]*space-y-4[^"]*"[^>]*>[\s\S]*?(?=<div class="w-full max-w-md">|$)/gi, '');
+      
+      // Clean up any empty divs or malformed HTML
+      capturedHTML = capturedHTML.replace(/<div[^>]*>\s*<\/div>/gi, '');
+      capturedHTML = capturedHTML.replace(/\s+/g, ' ');
+      
+      // Replace the main form area with placeholder, but keep it clean
+      if (capturedHTML.includes('bg-white') && capturedHTML.includes('border')) {
         capturedHTML = capturedHTML.replace(
-          /<div class="w-full max-w-md">[\s\S]*?<\/div>/gi,
-          '<div class="w-full max-w-md"><!-- FORM_PLACEHOLDER --></div>'
+          /<div[^>]*class="[^"]*bg-white[^"]*border[^"]*"[^>]*>[\s\S]*?<\/div>/gi,
+          '<div class="bg-white border border-gray-200 rounded-lg p-6 max-w-md mx-auto">{{FORM_PLACEHOLDER}}</div>'
+        );
+      } else {
+        // Fallback: add form placeholder in a standard location
+        capturedHTML = capturedHTML.replace(
+          /<div class="flex-1 p-6">/,
+          '<div class="flex-1 p-6"><div class="bg-white border border-gray-200 rounded-lg p-6 max-w-md mx-auto">{{FORM_PLACEHOLDER}}</div>'
         );
       }
       
