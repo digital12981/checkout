@@ -66,37 +66,21 @@ export default function CheckoutFinal() {
     }
   }, [pixPayment, timeLeft]);
 
-  // Always run useEffect for form handling
+  // Form handling setup - run only once when page loads
   useEffect(() => {
     if (!pixPayment && pageQuery.data) {
-      console.log('Setting up form handlers for checkout form');
-      
-      const setupForm = () => {
+      const timeoutId = setTimeout(() => {
         const form = document.querySelector('form[data-react-form]') || document.querySelector('form');
-        console.log('Form found:', form);
         
         if (form) {
-          console.log('Attaching React event handlers to form');
-          
           const handleSubmit = async (event: Event) => {
-            console.log('Form submit event triggered');
             event.preventDefault();
             event.stopPropagation();
             
-            if (isSubmitting) {
-              console.log('Already submitting, ignoring');
-              return;
-            }
-            
+            if (isSubmitting) return;
             setIsSubmitting(true);
             
             const formData = new FormData(form as HTMLFormElement);
-            console.log('Form data extracted:', {
-              customerName: formData.get('customerName'),
-              customerEmail: formData.get('customerEmail'),
-              customerCpf: formData.get('customerCpf'),
-              customerPhone: formData.get('customerPhone')
-            });
             
             try {
               await createPaymentMutation.mutateAsync(formData);
@@ -124,61 +108,37 @@ export default function CheckoutFinal() {
           
           if (cpfInput) cpfInput.addEventListener('input', handleCpfInput);
           if (phoneInput) phoneInput.addEventListener('input', handlePhoneInput);
-
-          return () => {
-            form.removeEventListener('submit', handleSubmit);
-            if (cpfInput) cpfInput.removeEventListener('input', handleCpfInput);
-            if (phoneInput) phoneInput.removeEventListener('input', handlePhoneInput);
-          };
-        } else {
-          console.error('Form not found, retrying...');
-          setTimeout(setupForm, 100);
         }
-      };
+      }, 500);
       
-      setupForm();
+      return () => clearTimeout(timeoutId);
     }
-  }, [pixPayment, pageQuery.data, isSubmitting, createPaymentMutation]);
+  }, [!!pageQuery.data && !pixPayment]);
 
-  // Timer effect for form page
+  // Timer effect for form page - simplified approach
   useEffect(() => {
     if (!pixPayment && pageQuery.data) {
-      let intervalId: NodeJS.Timeout;
+      const intervalId = setInterval(() => {
+        setTimeLeft(prev => {
+          const newTime = Math.max(0, prev - 1);
+          const minutes = Math.floor(newTime / 60);
+          const seconds = newTime % 60;
+          const formattedTime = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+          
+          // Update DOM element if it exists
+          const timerElement = document.getElementById('countdown-timer');
+          if (timerElement) {
+            timerElement.textContent = formattedTime;
+            if (newTime <= 0) {
+              timerElement.style.color = '#DC2626';
+            }
+          }
+          
+          return newTime;
+        });
+      }, 1000);
       
-      const startTimer = () => {
-        const timerElement = document.getElementById('countdown-timer');
-        if (timerElement) {
-          intervalId = setInterval(() => {
-            setTimeLeft(prev => {
-              const newTime = Math.max(0, prev - 1);
-              const minutes = Math.floor(newTime / 60);
-              const seconds = newTime % 60;
-              const formattedTime = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
-              
-              const currentTimerElement = document.getElementById('countdown-timer');
-              if (currentTimerElement) {
-                currentTimerElement.textContent = formattedTime;
-                if (newTime <= 0) {
-                  currentTimerElement.style.color = '#DC2626';
-                  clearInterval(intervalId);
-                }
-              }
-              
-              return newTime;
-            });
-          }, 1000);
-        }
-      };
-
-      // Aguardar um pouco para garantir que o DOM foi renderizado
-      const timeoutId = setTimeout(startTimer, 500);
-      
-      return () => {
-        clearTimeout(timeoutId);
-        if (intervalId) {
-          clearInterval(intervalId);
-        }
-      };
+      return () => clearInterval(intervalId);
     }
   }, [pixPayment, pageQuery.data]);
 
