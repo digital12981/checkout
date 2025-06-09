@@ -45,7 +45,7 @@ export default function CheckoutFinal() {
         customerEmail,
         customerCpf: customerCpf.replace(/\D/g, ""),
         customerPhone,
-        amount: pageQuery.data?.price || "0",
+        amount: (pageQuery.data as any)?.price || "0",
       };
 
       console.log("Sending payment data:", paymentData);
@@ -177,7 +177,7 @@ export default function CheckoutFinal() {
 
   // Form view
   return (
-    <div className="min-h-screen w-full" style={{ backgroundColor: page.backgroundColor }}>
+    <div className="min-h-screen w-full overflow-auto" style={{ backgroundColor: page.backgroundColor }}>
       {/* Header */}
       <div className="w-full p-6 text-white text-center flex flex-col justify-center" style={{ backgroundColor: page.primaryColor, height: `${page.headerHeight}px` }}>
         {page.showLogo && page.logoUrl && (
@@ -190,10 +190,10 @@ export default function CheckoutFinal() {
       </div>
       
       {/* Main Content */}
-      <div className="flex-1 p-6">
+      <div className="p-6 relative z-10">
         {/* Form Area */}
-        <div className="max-w-md mx-auto mb-6">
-          <div className="bg-white border border-gray-200 rounded-lg p-6">
+        <div className="max-w-md mx-auto mb-6 relative" style={{ pointerEvents: 'auto' }}>
+          <div className="bg-white border border-gray-200 rounded-lg p-6 relative z-20" style={{ pointerEvents: 'auto' }}>
             {/* Status Compacto */}
             <div className="bg-amber-50 p-3 mb-4 text-center" style={{ borderRadius: '4px' }}>
               <div className="flex items-center justify-center mb-2">
@@ -224,50 +224,63 @@ export default function CheckoutFinal() {
                   setIsSubmitting(false);
                 }
               }}
-              className="space-y-4"
+              className="space-y-4 relative z-30"
+              style={{ pointerEvents: 'auto' }}
             >
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Nome completo</label>
+              <div className="relative">
+                <label htmlFor="customerName" className="block text-sm font-medium text-gray-700 mb-1">Nome completo</label>
                 <input 
+                  id="customerName"
                   type="text" 
                   name="customerName" 
                   required 
-                  className="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500" 
+                  autoComplete="name"
+                  onFocus={() => console.log('Name field focused')}
+                  onClick={() => console.log('Name field clicked')}
+                  style={{ zIndex: 20, position: 'relative', pointerEvents: 'auto' }}
+                  className="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white cursor-text" 
                 />
               </div>
               
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Email</label>
+              <div className="relative">
+                <label htmlFor="customerEmail" className="block text-sm font-medium text-gray-700 mb-1">Email</label>
                 <input 
+                  id="customerEmail"
                   type="email" 
                   name="customerEmail" 
                   required 
-                  className="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500" 
+                  autoComplete="email"
+                  style={{ zIndex: 20, position: 'relative' }}
+                  className="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white" 
                 />
               </div>
               
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">CPF</label>
+              <div className="relative">
+                <label htmlFor="customerCpf" className="block text-sm font-medium text-gray-700 mb-1">CPF</label>
                 <input 
+                  id="customerCpf"
                   type="text" 
                   name="customerCpf" 
                   required 
                   maxLength={14} 
                   placeholder="000.000.000-00"
                   onChange={(e) => e.target.value = formatCpf(e.target.value)}
-                  className="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500" 
+                  style={{ zIndex: 20, position: 'relative' }}
+                  className="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white" 
                 />
               </div>
               
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Telefone</label>
+              <div className="relative">
+                <label htmlFor="customerPhone" className="block text-sm font-medium text-gray-700 mb-1">Telefone</label>
                 <input 
+                  id="customerPhone"
                   type="tel" 
                   name="customerPhone" 
                   required 
                   placeholder="(11) 99999-9999"
                   onChange={(e) => e.target.value = formatPhone(e.target.value)}
-                  className="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500" 
+                  style={{ zIndex: 20, position: 'relative' }}
+                  className="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white" 
                 />
               </div>
               
