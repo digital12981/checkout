@@ -3,7 +3,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
@@ -408,82 +408,76 @@ export default function Checkout() {
     </div>
   ) : null;
 
-  // If we have saved preview HTML, use it directly and inject form functionality
+  // Use saved preview HTML if available
   if (page.previewHtml && page.previewHtml.trim()) {
     console.log("Using saved preview HTML for checkout");
     
-    // Create a container with the exact saved HTML and add form functionality
-    const containerRef = useRef<HTMLDivElement>(null);
+    // Replace the FORM_PLACEHOLDER with actual form content
+    let checkoutHtml = page.previewHtml;
     
-    useEffect(() => {
-      if (containerRef.current && !pixPayment) {
-        // Find where to inject the form content
-        const formContainer = containerRef.current.querySelector('.w-full.max-w-md');
+    if (!pixPayment && !page.skipForm) {
+      // Replace placeholder with actual form
+      const formHtml = `
+        <form class="space-y-4" onsubmit="handleFormSubmit(event)">
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-2">Nome Completo</label>
+            <input type="text" name="customerName" placeholder="Digite seu nome completo" 
+                   class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" required />
+          </div>
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-2">Email</label>
+            <input type="email" name="customerEmail" placeholder="Digite seu email" 
+                   class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" required />
+          </div>
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-2">CPF</label>
+            <input type="text" name="customerCpf" placeholder="Digite seu CPF" 
+                   class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" required />
+          </div>
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-2">Telefone</label>
+            <input type="text" name="customerPhone" placeholder="Digite seu telefone" 
+                   class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" required />
+          </div>
+          <button type="submit" 
+                  class="w-full text-white flex items-center justify-center space-x-2 px-4 py-2 rounded-md font-medium"
+                  style="background-color: ${page.accentColor}">
+            ${page.customButtonText || 'Pagar com PIX'}
+          </button>
+        </form>
         
-        if (formContainer && !page.skipForm) {
-          // Inject the interactive form
-          const formElement = document.createElement('div');
-          formElement.innerHTML = `
-            <form id="checkout-form" class="space-y-4">
-              <div>
-                <label class="block text-sm font-medium text-gray-700 mb-2">Nome Completo</label>
-                <input type="text" name="customerName" placeholder="Digite seu nome completo" 
-                       class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" required />
-              </div>
-              <div>
-                <label class="block text-sm font-medium text-gray-700 mb-2">Email</label>
-                <input type="email" name="customerEmail" placeholder="Digite seu email" 
-                       class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" required />
-              </div>
-              <div>
-                <label class="block text-sm font-medium text-gray-700 mb-2">CPF</label>
-                <input type="text" name="customerCpf" placeholder="Digite seu CPF" 
-                       class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" required />
-              </div>
-              <div>
-                <label class="block text-sm font-medium text-gray-700 mb-2">Telefone</label>
-                <input type="text" name="customerPhone" placeholder="Digite seu telefone" 
-                       class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" required />
-              </div>
-              <button type="submit" 
-                      class="w-full text-white flex items-center justify-center space-x-2 px-4 py-2 rounded-md font-medium"
-                      style="background-color: ${page.accentColor}">
-                Pagar com PIX
-              </button>
-            </form>
-          `;
-          
-          // Add form submission handler
-          const form = formElement.querySelector('form');
-          if (form) {
-            form.addEventListener('submit', async (e) => {
-              e.preventDefault();
-              const formData = new FormData(form);
-              const data = Object.fromEntries(formData);
+        <script>
+          async function handleFormSubmit(event) {
+            event.preventDefault();
+            const formData = new FormData(event.target);
+            const data = Object.fromEntries(formData);
+            
+            try {
+              const response = await fetch('/api/pix-payments', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                  ...data,
+                  pageId: ${page.id},
+                  amount: '${page.price}'
+                })
+              });
               
-              try {
-                const response = await fetch('/api/pix-payments', {
-                  method: 'POST',
-                  headers: { 'Content-Type': 'application/json' },
-                  body: JSON.stringify({
-                    ...data,
-                    pageId: page.id,
-                    amount: page.price.toString()
-                  })
-                });
-                
-                if (response.ok) {
-                  window.location.reload();
-                }
-              } catch (error) {
-                console.error('Payment submission error:', error);
+              if (response.ok) {
+                window.location.reload();
               }
-            });
+            } catch (error) {
+              console.error('Payment error:', error);
+            }
           }
-          
-          formContainer.appendChild(formElement);
-        } else if (page.skipForm) {
-          // Auto-submit for skip form
+        </script>
+      `;
+      
+      checkoutHtml = checkoutHtml.replace('<!-- FORM_PLACEHOLDER -->', formHtml);
+    } else if (page.skipForm && !pixPayment) {
+      // Auto-submit script for skip form
+      const autoSubmitScript = `
+        <script>
           setTimeout(async () => {
             try {
               const response = await fetch('/api/pix-payments', {
@@ -494,8 +488,8 @@ export default function Checkout() {
                   customerEmail: 'cliente@exemplo.com',
                   customerCpf: '00000000000',
                   customerPhone: '(11) 99999-9999',
-                  pageId: page.id,
-                  amount: page.price.toString()
+                  pageId: ${page.id},
+                  amount: '${page.price}'
                 })
               });
               
@@ -506,15 +500,14 @@ export default function Checkout() {
               console.error('Auto-payment error:', error);
             }
           }, 1000);
-        }
-      }
-    }, [page, pixPayment]);
+        </script>
+      `;
+      
+      checkoutHtml = checkoutHtml.replace('<!-- FORM_PLACEHOLDER -->', autoSubmitScript);
+    }
     
     return (
-      <div 
-        ref={containerRef}
-        dangerouslySetInnerHTML={{ __html: page.previewHtml }} 
-      />
+      <div dangerouslySetInnerHTML={{ __html: checkoutHtml }} />
     );
   }
 

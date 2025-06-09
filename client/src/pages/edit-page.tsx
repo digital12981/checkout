@@ -233,34 +233,80 @@ export default function EditPage() {
   });
 
   const capturePreviewHTML = () => {
-    const previewElement = document.getElementById('checkout-preview');
-    console.log("Preview element found:", !!previewElement);
+    // Generate the exact HTML structure that should be used in checkout
+    // Based on the current form data and custom elements
     
-    if (!previewElement) {
-      console.log("No preview element found with ID 'checkout-preview'");
-      return "";
-    }
+    const generateCleanHTML = () => {
+      const headerHTML = `
+        <div class="w-full p-6 text-white text-center flex flex-col justify-center" 
+             style="background-color: ${formData.primaryColor}; height: ${formData.headerHeight}px;">
+          ${formData.showLogo && formData.logoUrl ? `
+            <div class="mb-4 flex ${formData.logoPosition === 'left' ? 'justify-start' : formData.logoPosition === 'right' ? 'justify-end' : 'justify-center'}">
+              <img src="${formData.logoUrl}" alt="Logo" class="object-contain rounded" 
+                   style="width: ${formData.logoSize}px; height: ${formData.logoSize}px;" />
+            </div>
+          ` : ''}
+          
+          ${formData.customTitle ? `<h1 class="text-2xl font-bold mb-2">${formData.customTitle}</h1>` : ''}
+          ${formData.customSubtitle ? `<p class="text-white/90 mb-4">${formData.customSubtitle}</p>` : ''}
+          <div class="text-3xl font-bold">${formatCurrency(formData.price)}</div>
+        </div>
+      `;
+      
+      // Generate custom elements HTML
+      const customElementsHTML = customElements.map(element => {
+        let elementHTML = '';
+        
+        if (element.type === 'text') {
+          const styles = {
+            color: element.styles.color || '#000000',
+            fontSize: element.styles.fontSize ? `${element.styles.fontSize}px` : '16px',
+            fontWeight: element.styles.isBold ? 'bold' : 'normal',
+            textAlign: element.styles.textAlign || 'left',
+            backgroundColor: element.styles.hasBox ? (element.styles.boxColor || '#f0f0f0') : 'transparent',
+            padding: element.styles.hasBox ? '12px' : '0',
+            borderRadius: element.styles.borderRadius ? `${element.styles.borderRadius}px` : '0',
+            marginBottom: element.styles.marginBottom || '16px',
+            marginTop: element.styles.marginTop || '0'
+          };
+          
+          const styleString = Object.entries(styles).map(([key, value]) => 
+            `${key.replace(/([A-Z])/g, '-$1').toLowerCase()}: ${value}`
+          ).join('; ');
+          
+          elementHTML = `<div style="${styleString}">${element.content.replace(/\n/g, '<br>')}</div>`;
+        } else if (element.type === 'image') {
+          const imageSize = element.styles.imageSize || 200;
+          elementHTML = `<div class="text-center mb-4">
+            <img src="${element.content}" alt="Elemento de imagem" 
+                 style="width: ${imageSize}px; height: ${imageSize}px; border-radius: ${element.styles.borderRadius || 0}px;" 
+                 class="mx-auto object-cover" />
+          </div>`;
+        }
+        
+        return elementHTML;
+      }).join('');
+      
+      const formHTML = `
+        <div class="w-full p-6 bg-white flex justify-center">
+          <div class="w-full max-w-md">
+            ${customElementsHTML}
+            <!-- FORM_PLACEHOLDER -->
+          </div>
+        </div>
+      `;
+      
+      return `
+        <div class="min-h-screen w-full" style="background-color: ${formData.backgroundColor};">
+          ${headerHTML}
+          ${formHTML}
+        </div>
+      `;
+    };
     
-    console.log("Preview element innerHTML length:", previewElement.innerHTML.length);
-    
-    // Simply return the inner HTML of the preview element without the outer div
-    // This preserves all the original HTML and Tailwind classes
-    let html = previewElement.innerHTML;
-    
-    // Remove editor-specific elements by searching for specific patterns
-    // Remove drag zones
-    html = html.replace(/<div[^>]*border-dashed[^>]*>.*?<\/div>/gis, '');
-    html = html.replace(/<div[^>]*bg-primary\/10[^>]*>.*?<\/div>/gis, '');
-    
-    // Remove absolute positioned editor elements
-    html = html.replace(/<div[^>]*absolute[^>]*>.*?<\/div>/gis, '');
-    
-    // Remove elements with ring classes
-    html = html.replace(/\s*ring-\w+/g, '');
-    html = html.replace(/\s*cursor-pointer/g, '');
-    
-    console.log("Cleaned HTML length:", html.length);
-    return html;
+    const cleanHTML = generateCleanHTML();
+    console.log("Generated clean HTML length:", cleanHTML.length);
+    return cleanHTML;
   };
 
   const onSubmit = (data: EditPageForm) => {
@@ -842,7 +888,6 @@ export default function EditPage() {
 
   const FormStepPreview = () => (
     <div 
-      id="checkout-preview"
       className="min-h-screen w-full"
       style={{ backgroundColor: formData.backgroundColor }}
       onClick={(e) => {
