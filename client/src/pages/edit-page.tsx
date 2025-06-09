@@ -932,76 +932,82 @@ export default function EditPage() {
             </TabsContent>
 
             <TabsContent value="payment" className="p-4 h-full">
-              <div className="border rounded-lg bg-white h-full overflow-auto p-6">
-                <div className="max-w-md mx-auto space-y-6">
-                  <div className="text-center">
-                    <div className="text-lg font-semibold text-gray-900 mb-2">
-                      Pagamento PIX
-                    </div>
-                    <div className="text-gray-600">
-                      Escaneie o QR Code ou copie o código PIX
-                    </div>
-                  </div>
-
-                  <div className="flex justify-center">
-                    <div className="w-64 h-64 bg-gray-100 border-2 border-dashed border-gray-300 rounded-lg flex items-center justify-center">
-                      <div className="text-center text-gray-500">
-                        <QrCode className="w-16 h-16 mx-auto mb-2" />
-                        <p className="text-sm">QR Code PIX</p>
+              <div className="border rounded-lg bg-white h-full overflow-auto">
+                <UnifiedTemplateRenderer
+                  page={{...formData, id: parseInt(id || "0")}}
+                  customElements={customElements}
+                  isEditor={true}
+                >
+                  <div className="p-6 space-y-6">
+                    <div className="text-center">
+                      <div className="text-lg font-semibold text-gray-900 mb-2">
+                        Pagamento PIX
+                      </div>
+                      <div className="text-gray-600">
+                        Escaneie o QR Code ou copie o código PIX
                       </div>
                     </div>
-                  </div>
 
-                  <div className="space-y-3">
-                    <div className="text-sm font-medium text-gray-700">
-                      Código PIX Copia e Cola:
-                    </div>
-                    <div className="flex gap-2">
-                      <input 
-                        type="text" 
-                        value="00020126580014BR.GOV.BCB.PIX0136123e4567-e12b-12d1-a456-426614174000"
-                        className="flex-1 p-3 border border-gray-300 rounded-md bg-gray-50 text-sm font-mono"
-                        readOnly
-                        disabled
-                      />
-                      <button 
-                        className="px-4 py-3 bg-gray-600 text-white rounded-md hover:bg-gray-700 flex items-center gap-2"
-                        disabled
-                      >
-                        <Copy className="w-4 h-4" />
-                        Copiar
-                      </button>
-                    </div>
-                  </div>
-
-                  <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-                    <div className="flex items-start gap-3">
-                      <Info className="w-5 h-5 text-blue-600 mt-0.5" />
-                      <div className="text-sm text-blue-800">
-                        <div className="font-medium mb-1">Instruções:</div>
-                        <ul className="space-y-1 text-xs">
-                          <li>• Abra o app do seu banco</li>
-                          <li>• Escolha a opção PIX</li>
-                          <li>• Escaneie o QR Code ou cole o código</li>
-                          <li>• Confirme o pagamento</li>
-                        </ul>
+                    <div className="flex justify-center">
+                      <div className="w-64 h-64 bg-gray-100 border-2 border-dashed border-gray-300 rounded-lg flex items-center justify-center">
+                        <div className="text-center text-gray-500">
+                          <QrCode className="w-16 h-16 mx-auto mb-2" />
+                          <p className="text-sm">QR Code PIX</p>
+                        </div>
                       </div>
                     </div>
-                  </div>
 
-                  <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
-                    <div className="flex items-center gap-2 text-yellow-800">
-                      <Clock className="w-4 h-4" />
-                      <span className="text-sm font-medium">
-                        Aguardando pagamento... Expira em 15:00
-                      </span>
+                    <div className="space-y-3">
+                      <div className="text-sm font-medium text-gray-700">
+                        Código PIX Copia e Cola:
+                      </div>
+                      <div className="space-y-2">
+                        <input 
+                          type="text" 
+                          value="00020126580014BR.GOV.BCB.PIX0136123e4567-e12b-12d1-a456-426614174000"
+                          className="w-full p-3 border border-gray-300 rounded-md bg-gray-50 text-sm font-mono"
+                          readOnly
+                          disabled
+                        />
+                        <button 
+                          className="w-full px-4 py-3 bg-gray-600 text-white rounded-md hover:bg-gray-700 flex items-center justify-center gap-2"
+                          disabled
+                        >
+                          <Copy className="w-4 h-4" />
+                          Copiar Código PIX
+                        </button>
+                      </div>
+                    </div>
+
+                    <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                      <div className="flex items-start gap-3">
+                        <Info className="w-5 h-5 text-blue-600 mt-0.5" />
+                        <div className="text-sm text-blue-800">
+                          <div className="font-medium mb-1">Instruções:</div>
+                          <ul className="space-y-1 text-xs">
+                            <li>• Abra o app do seu banco</li>
+                            <li>• Escolha a opção PIX</li>
+                            <li>• Escaneie o QR Code ou cole o código</li>
+                            <li>• Confirme o pagamento</li>
+                          </ul>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
+                      <div className="flex items-center gap-2 text-yellow-800">
+                        <Clock className="w-4 h-4" />
+                        <span className="text-sm font-medium">
+                          Aguardando pagamento... Expira em 15:00
+                        </span>
+                      </div>
+                    </div>
+
+                    <div className="text-center text-sm text-gray-600">
+                      Valor: {formatCurrency(formData.price)}
                     </div>
                   </div>
-
-                  <div className="text-center text-sm text-gray-600">
-                    Valor: {formatCurrency(formData.price)}
-                  </div>
-                </div>
+                </UnifiedTemplateRenderer>
               </div>
             </TabsContent>
           </Tabs>
