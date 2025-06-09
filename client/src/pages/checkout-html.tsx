@@ -19,19 +19,20 @@ export default function CheckoutHtml() {
 
   // Check for skip form parameter
   const urlParams = new URLSearchParams(location.split('?')[1] || '');
-  const shouldSkipForm = page?.skipForm || urlParams.get('skip') === 'true';
+  const shouldSkipForm = (page as any)?.skipForm || urlParams.get('skip') === 'true';
 
   const createPaymentMutation = useMutation({
     mutationFn: async (customerData: any) => {
-      const response = await apiRequest("/api/pix-payments", {
+      const response = await fetch("/api/pix-payments", {
         method: "POST",
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           paymentPageId: parseInt(params?.id || "0"),
           ...customerData,
-          amount: page?.price?.toString(),
+          amount: (page as any)?.price?.toString(),
         }),
       });
-      return response;
+      return response.json();
     },
     onSuccess: (payment) => {
       setPixPayment(payment);
@@ -95,7 +96,7 @@ export default function CheckoutHtml() {
           </div>
 
           <div class="text-sm text-gray-500">
-            <p>Valor: R$ ${parseFloat(page.price).toFixed(2).replace('.', ',')}</p>
+            <p>Valor: R$ ${parseFloat((page as any).price).toFixed(2).replace('.', ',')}</p>
             <p>O pagamento será confirmado automaticamente</p>
           </div>
 
