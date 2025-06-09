@@ -140,6 +140,48 @@ export default function CheckoutFinal() {
     }
   }, [pixPayment, pageQuery.data, isSubmitting, createPaymentMutation]);
 
+  // Timer effect for form page
+  useEffect(() => {
+    if (!pixPayment && pageQuery.data) {
+      let intervalId: NodeJS.Timeout;
+      
+      const startTimer = () => {
+        const timerElement = document.getElementById('countdown-timer');
+        if (timerElement) {
+          intervalId = setInterval(() => {
+            setTimeLeft(prev => {
+              const newTime = Math.max(0, prev - 1);
+              const minutes = Math.floor(newTime / 60);
+              const seconds = newTime % 60;
+              const formattedTime = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+              
+              const currentTimerElement = document.getElementById('countdown-timer');
+              if (currentTimerElement) {
+                currentTimerElement.textContent = formattedTime;
+                if (newTime <= 0) {
+                  currentTimerElement.style.color = '#DC2626';
+                  clearInterval(intervalId);
+                }
+              }
+              
+              return newTime;
+            });
+          }, 1000);
+        }
+      };
+
+      // Aguardar um pouco para garantir que o DOM foi renderizado
+      const timeoutId = setTimeout(startTimer, 500);
+      
+      return () => {
+        clearTimeout(timeoutId);
+        if (intervalId) {
+          clearInterval(intervalId);
+        }
+      };
+    }
+  }, [pixPayment, pageQuery.data]);
+
   const formatTime = (seconds: number) => {
     const minutes = Math.floor(seconds / 60);
     const remainingSeconds = seconds % 60;
@@ -171,47 +213,8 @@ export default function CheckoutFinal() {
           </svg>
           <span class="text-sm font-medium text-amber-600">Aguardando dados...</span>
         </div>
-        <div id="countdown-timer" class="text-lg font-bold font-mono text-amber-700">15:00</div>
+        <div id="countdown-timer" class="text-lg font-bold font-mono text-amber-700">${formatTime(timeLeft)}</div>
       </div>
-      
-      <script>
-        // Cronômetro funcional para formulário
-        let formTimeRemaining = 15 * 60; // 15 minutos em segundos
-        let formTimerInterval;
-        
-        function updateFormTimer() {
-          const timer = document.getElementById('countdown-timer');
-          if (timer) {
-            if (formTimeRemaining > 0) {
-              const minutes = Math.floor(formTimeRemaining / 60);
-              const seconds = formTimeRemaining % 60;
-              timer.textContent = minutes.toString().padStart(2, '0') + ':' + seconds.toString().padStart(2, '0');
-              formTimeRemaining--;
-            } else {
-              timer.textContent = '00:00';
-              timer.style.color = '#DC2626'; // Vermelho quando expira
-              clearInterval(formTimerInterval);
-            }
-          }
-        }
-        
-        // Iniciar cronômetro quando a página carregar
-        document.addEventListener('DOMContentLoaded', function() {
-          formTimerInterval = setInterval(updateFormTimer, 1000);
-          updateFormTimer(); // Primeira atualização imediata
-        });
-        
-        // Se o DOM já está pronto, iniciar imediatamente
-        if (document.readyState === 'loading') {
-          document.addEventListener('DOMContentLoaded', function() {
-            formTimerInterval = setInterval(updateFormTimer, 1000);
-            updateFormTimer();
-          });
-        } else {
-          formTimerInterval = setInterval(updateFormTimer, 1000);
-          updateFormTimer();
-        }
-      </script>
 
       <form data-react-form="true" class="space-y-4">
         <div>
