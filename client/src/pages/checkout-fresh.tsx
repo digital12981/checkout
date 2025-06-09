@@ -141,7 +141,7 @@ export default function CheckoutFresh() {
     } else {
       // Customer Form View - always show form when no payment exists
       const formContent = `
-        <form id="checkout-form" class="space-y-4" onsubmit="return handleFormSubmit(event);">
+        <form id="checkout-form" class="space-y-4" onsubmit="return window.handleFormSubmit(event);">
           <div>
             <label class="block text-sm font-medium text-gray-700 mb-1">Nome completo</label>
             <input type="text" name="customerName" required 
