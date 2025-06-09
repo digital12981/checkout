@@ -412,11 +412,74 @@ export default function Checkout() {
   if (page.previewHtml && page.previewHtml.trim()) {
     console.log("Using saved preview HTML for checkout");
     
-    // Replace the FORM_PLACEHOLDER with actual form content
+    // Replace the FORM_PLACEHOLDER with actual content
     let checkoutHtml = page.previewHtml;
     
-    if (!pixPayment && !page.skipForm) {
-      // Replace placeholder with actual form
+    if (pixPayment) {
+      // Show PIX payment information
+      const pixPaymentHtml = `
+        <div>
+          <h3 class="font-semibold text-gray-800 mb-4 text-center">
+            Pagamento PIX
+          </h3>
+
+          <div class="text-center mb-6">
+            <div class="w-48 h-48 bg-white border-2 border-gray-200 rounded-lg mx-auto flex items-center justify-center mb-4">
+              ${pixPayment.pixQrCode ? `
+                <img src="${pixPayment.pixQrCode}" alt="QR Code PIX" class="w-40 h-40 object-contain" />
+              ` : `
+                <div class="w-40 h-40 bg-black/10 rounded flex items-center justify-center">
+                  <svg class="w-16 h-16 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h2M4 4h4m4 0h4m0 0h4m-4 0v4M4 8h4m0 0v4m0 0h4m0 0v4"></path>
+                  </svg>
+                </div>
+              `}
+            </div>
+            <p class="text-sm text-gray-600">
+              Escaneie o QR Code com seu app do banco
+            </p>
+          </div>
+
+          ${pixPayment.pixCode ? `
+            <div class="mb-6">
+              <label class="block text-sm font-medium text-gray-700 mb-2">
+                Ou copie o código PIX:
+              </label>
+              <div class="flex">
+                <input
+                  type="text"
+                  value="${pixPayment.pixCode}"
+                  readonly
+                  class="flex-1 px-3 py-2 border border-gray-300 rounded-l-md bg-gray-50 text-sm"
+                />
+                <button
+                  type="button"
+                  onclick="navigator.clipboard.writeText('${pixPayment.pixCode}')"
+                  class="px-4 py-2 rounded-r-md text-white font-medium"
+                  style="background-color: ${page.accentColor}">
+                  Copiar
+                </button>
+              </div>
+            </div>
+          ` : ''}
+
+          <div class="text-center">
+            <div class="inline-flex items-center space-x-2 text-yellow-600 bg-yellow-50 px-4 py-2 rounded-lg">
+              <svg class="w-4 h-4 animate-pulse" fill="currentColor" viewBox="0 0 20 20">
+                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z" clip-rule="evenodd"></path>
+              </svg>
+              <span class="text-sm font-medium">Aguardando pagamento...</span>
+            </div>
+            <p class="text-xs text-gray-600 mt-2">
+              O pagamento será confirmado automaticamente
+            </p>
+          </div>
+        </div>
+      `;
+      
+      checkoutHtml = checkoutHtml.replace('<!-- FORM_PLACEHOLDER -->', pixPaymentHtml);
+    } else if (!page.skipForm) {
+      // Show form for payment
       const formHtml = `
         <form class="space-y-4" onsubmit="handleFormSubmit(event)">
           <div>
@@ -442,7 +505,10 @@ export default function Checkout() {
           <button type="submit" 
                   class="w-full text-white flex items-center justify-center space-x-2 px-4 py-2 rounded-md font-medium"
                   style="background-color: ${page.accentColor}">
-            ${page.customButtonText || 'Pagar com PIX'}
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h2M4 4h4m4 0h4m0 0h4m-4 0v4M4 8h4m0 0v4m0 0h4m0 0v4"></path>
+            </svg>
+            <span>${page.customButtonText || 'Pagar com PIX'}</span>
           </button>
         </form>
         
@@ -474,9 +540,18 @@ export default function Checkout() {
       `;
       
       checkoutHtml = checkoutHtml.replace('<!-- FORM_PLACEHOLDER -->', formHtml);
-    } else if (page.skipForm && !pixPayment) {
+    } else {
       // Auto-submit script for skip form
       const autoSubmitScript = `
+        <div class="text-center py-8">
+          <div class="inline-flex items-center space-x-2 text-blue-600">
+            <svg class="animate-spin w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
+            </svg>
+            <span class="text-sm font-medium">Processando pagamento...</span>
+          </div>
+        </div>
+        
         <script>
           setTimeout(async () => {
             try {
