@@ -60,9 +60,14 @@ export default function CheckoutHtml() {
     return <div className="flex items-center justify-center min-h-screen">Página não encontrada</div>;
   }
 
+  // Debug logging
+  console.log("Page data received:", page);
+  console.log("PreviewHtml exists:", !!(page as any).previewHtml);
+  console.log("PreviewHtml content:", (page as any).previewHtml);
+
   // If we have saved HTML, use it EXACTLY as is
-  if (page.previewHtml && page.previewHtml.trim()) {
-    let finalHtml = page.previewHtml;
+  if ((page as any).previewHtml && (page as any).previewHtml.trim()) {
+    let finalHtml = (page as any).previewHtml;
 
     // Replace FORM_PLACEHOLDER with actual content
     if (pixPayment) {
@@ -180,12 +185,12 @@ export default function CheckoutHtml() {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
-                  paymentPageId: ${page.id},
+                  paymentPageId: ${(page as any).id},
                   customerName: formData.get('customerName'),
                   customerEmail: formData.get('customerEmail'),
                   customerCpf: formData.get('customerCpf').replace(/\\D/g, ''),
                   customerPhone: formData.get('customerPhone'),
-                  amount: '${page.price}'
+                  amount: '${(page as any).price}'
                 })
               });
               
