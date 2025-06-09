@@ -124,6 +124,7 @@ export default function EditPage() {
   const [aiStatus, setAiStatus] = useState<string>("");
   const [templateSnapshot, setTemplateSnapshot] = useState<any>(null);
   const [previewKey, setPreviewKey] = useState(0);
+  const previewRef = useRef<HTMLDivElement>(null);
   const { toast } = useToast();
   const queryClient = useQueryClient();
   

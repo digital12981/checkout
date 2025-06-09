@@ -40,6 +40,9 @@ export const paymentPages = pgTable("payment_pages", {
   // Rendered template structure (saved HTML structure)
   templateStructure: text("template_structure"),
   
+  // Preview HTML (exact HTML from editor preview)
+  previewHtml: text("preview_html"),
+  
   // Skip form option
   skipForm: boolean("skip_form").default(false),
   
