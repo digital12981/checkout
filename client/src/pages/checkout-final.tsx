@@ -66,81 +66,65 @@ export default function CheckoutFinal() {
     }
   }, [pixPayment, timeLeft]);
 
-  // Form handling setup - run only once when page loads
+  // Setup form handlers only once
   useEffect(() => {
-    if (!pixPayment && pageQuery.data) {
+    if (!pixPayment && pageQuery.isSuccess) {
       const timeoutId = setTimeout(() => {
-        const form = document.querySelector('form[data-react-form]') || document.querySelector('form');
-        
-        if (form) {
+        const form = document.querySelector('form[data-react-form]');
+        if (form && !form.hasAttribute('data-handlers-attached')) {
+          form.setAttribute('data-handlers-attached', 'true');
+          
           const handleSubmit = async (event: Event) => {
             event.preventDefault();
-            event.stopPropagation();
-            
             if (isSubmitting) return;
             setIsSubmitting(true);
             
             const formData = new FormData(form as HTMLFormElement);
-            
             try {
               await createPaymentMutation.mutateAsync(formData);
-            } catch (error) {
-              console.error('Payment submission failed:', error);
             } finally {
               setIsSubmitting(false);
             }
           };
 
-          const handleCpfInput = (event: Event) => {
-            const input = event.target as HTMLInputElement;
-            input.value = formatCpf(input.value);
+          const handleCpfInput = (e: Event) => {
+            (e.target as HTMLInputElement).value = formatCpf((e.target as HTMLInputElement).value);
           };
 
-          const handlePhoneInput = (event: Event) => {
-            const input = event.target as HTMLInputElement;
-            input.value = formatPhone(input.value);
+          const handlePhoneInput = (e: Event) => {
+            (e.target as HTMLInputElement).value = formatPhone((e.target as HTMLInputElement).value);
           };
 
           form.addEventListener('submit', handleSubmit);
-          
-          const cpfInput = form.querySelector('input[name="customerCpf"]');
-          const phoneInput = form.querySelector('input[name="customerPhone"]');
-          
-          if (cpfInput) cpfInput.addEventListener('input', handleCpfInput);
-          if (phoneInput) phoneInput.addEventListener('input', handlePhoneInput);
+          form.querySelector('input[name="customerCpf"]')?.addEventListener('input', handleCpfInput);
+          form.querySelector('input[name="customerPhone"]')?.addEventListener('input', handlePhoneInput);
         }
-      }, 500);
+      }, 300);
       
       return () => clearTimeout(timeoutId);
     }
-  }, [!!pageQuery.data && !pixPayment]);
+  }, [pixPayment, pageQuery.isSuccess]);
 
-  // Timer effect for form page - simplified approach
+  // Timer for form countdown
   useEffect(() => {
-    if (!pixPayment && pageQuery.data) {
+    if (!pixPayment) {
       const intervalId = setInterval(() => {
         setTimeLeft(prev => {
           const newTime = Math.max(0, prev - 1);
-          const minutes = Math.floor(newTime / 60);
-          const seconds = newTime % 60;
-          const formattedTime = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
-          
-          // Update DOM element if it exists
-          const timerElement = document.getElementById('countdown-timer');
-          if (timerElement) {
-            timerElement.textContent = formattedTime;
-            if (newTime <= 0) {
-              timerElement.style.color = '#DC2626';
-            }
+          const timer = document.getElementById('countdown-timer');
+          if (timer) {
+            const mins = Math.floor(newTime / 60);
+            const secs = newTime % 60;
+            timer.textContent = `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+            if (newTime <= 0) timer.style.color = '#DC2626';
           }
-          
           return newTime;
         });
       }, 1000);
       
       return () => clearInterval(intervalId);
     }
-  }, [pixPayment, pageQuery.data]);
+  }, [pixPayment]);
 
   const formatTime = (seconds: number) => {
     const minutes = Math.floor(seconds / 60);
