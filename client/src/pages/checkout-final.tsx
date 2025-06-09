@@ -224,12 +224,25 @@ export default function CheckoutFinal() {
           }
 
           document.addEventListener('DOMContentLoaded', function() {
+            console.log('DOM loaded, searching for form...');
             const form = document.querySelector('form');
+            console.log('Form found:', form);
+            
             if (form) {
+              console.log('Adding event listener to form');
               form.addEventListener('submit', async function(event) {
+                console.log('Form submit event triggered');
                 event.preventDefault();
+                event.stopPropagation();
                 
                 const submitBtn = form.querySelector('button[type="submit"]');
+                console.log('Submit button found:', submitBtn);
+                
+                if (!submitBtn) {
+                  console.error('Submit button not found');
+                  return;
+                }
+                
                 const originalHtml = submitBtn.innerHTML;
                 submitBtn.disabled = true;
                 submitBtn.textContent = 'Processando...';
@@ -244,21 +257,28 @@ export default function CheckoutFinal() {
                   amount: '${(page as any).price}'
                 };
                 
+                console.log('Form data prepared:', data);
+                
                 try {
+                  console.log('Sending request to API...');
                   const response = await fetch('/api/pix-payments', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(data)
                   });
                   
+                  console.log('Response received:', response.status);
                   const result = await response.json();
+                  console.log('Response data:', result);
                   
                   if (response.ok && result.id) {
+                    console.log('Payment successful, reloading page...');
                     window.location.reload();
                   } else {
                     throw new Error(result.message || 'Erro ao processar pagamento');
                   }
                 } catch (error) {
+                  console.error('Payment error:', error);
                   alert('Erro ao processar pagamento: ' + error.message);
                   submitBtn.disabled = false;
                   submitBtn.innerHTML = originalHtml;
