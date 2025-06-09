@@ -5,28 +5,48 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1" />
   </head>
   <body>
+    <div id="test-area" style="position: fixed; top: 10px; right: 10px; background: white; padding: 10px; border: 2px solid red; z-index: 99999;">
+      <h3>Teste de Input</h3>
+      <input type="text" placeholder="Teste aqui" style="padding: 5px; margin: 5px;">
+      <button onclick="alert('Botão funcionou!')">Testar</button>
+    </div>
     <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>
     <script>
-      // Ensure all interactions work properly
-      document.addEventListener('DOMContentLoaded', function() {
-        // Force enable pointer events and user selection
-        const style = document.createElement('style');
-        style.textContent = `
-          * { 
-            pointer-events: auto !important; 
-            user-select: auto !important;
-            -webkit-user-select: auto !important;
-            -moz-user-select: auto !important;
-            -ms-user-select: auto !important;
-          }
-          input, textarea, select, button {
-            pointer-events: auto !important;
-            -webkit-user-select: auto !important;
-          }
-        `;
-        document.head.appendChild(style);
+      // Emergency input test
+      window.addEventListener('load', function() {
+        console.log('Page loaded - testing input');
+        
+        // Remove any potentially blocking styles
+        const allElements = document.querySelectorAll('*');
+        allElements.forEach(el => {
+          el.style.pointerEvents = 'auto';
+          el.style.userSelect = 'auto';
+        });
+
+        // Test input functionality
+        const testInput = document.querySelector('#test-area input');
+        if (testInput) {
+          testInput.addEventListener('input', function(e) {
+            console.log('Test input working:', e.target.value);
+          });
+          testInput.addEventListener('click', function() {
+            console.log('Test input clicked');
+          });
+          testInput.addEventListener('focus', function() {
+            console.log('Test input focused');
+          });
+        }
       });
+
+      // Override any potential event blocking
+      document.addEventListener('click', function(e) {
+        console.log('Click detected on:', e.target.tagName);
+      }, true);
+
+      document.addEventListener('input', function(e) {
+        console.log('Input detected:', e.target.value);
+      }, true);
     </script>
   </body>
 </html>
