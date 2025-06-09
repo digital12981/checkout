@@ -284,45 +284,50 @@ export default function EditPage() {
   };
 
   const onSubmit = (data: EditPageForm) => {
-    // Capture the exact HTML from the preview
-    const previewHtml = capturePreviewHTML();
-    
-    // Capture the current template structure from the preview with current customElements state
-    const captureTemplateStructure = () => {
-      return {
-        formData: {
-          ...data,
-          customTitle: data.customTitle?.trim() || "",
-          customSubtitle: data.customSubtitle?.trim() || "",
-        },
-        customElements: customElements, // Use current state, not form data
-        renderSettings: {
-          showLogo: data.showLogo,
-          logoUrl: data.logoUrl,
-          logoPosition: data.logoPosition,
-          logoSize: data.logoSize,
-          headerHeight: data.headerHeight,
-          primaryColor: data.primaryColor,
-          accentColor: data.accentColor,
-          backgroundColor: data.backgroundColor,
-          textColor: data.textColor,
-        }
+    // Wait a bit for the preview to render completely before capturing
+    setTimeout(() => {
+      // Capture the exact HTML from the preview
+      const previewHtml = capturePreviewHTML();
+      console.log("Captured HTML length:", previewHtml.length);
+      
+      // Capture the current template structure from the preview with current customElements state
+      const captureTemplateStructure = () => {
+        return {
+          formData: {
+            ...data,
+            customTitle: data.customTitle?.trim() || "",
+            customSubtitle: data.customSubtitle?.trim() || "",
+          },
+          customElements: customElements, // Use current state, not form data
+          renderSettings: {
+            showLogo: data.showLogo,
+            logoUrl: data.logoUrl,
+            logoPosition: data.logoPosition,
+            logoSize: data.logoSize,
+            headerHeight: data.headerHeight,
+            primaryColor: data.primaryColor,
+            accentColor: data.accentColor,
+            backgroundColor: data.backgroundColor,
+            textColor: data.textColor,
+          }
+        };
       };
-    };
 
-    // Update custom elements in form data and save template structure
-    const templateStructure = captureTemplateStructure();
-    const updatedData = {
-      ...data,
-      customTitle: data.customTitle?.trim() || "",
-      customSubtitle: data.customSubtitle?.trim() || "",
-      customElements: JSON.stringify(customElements), // Use current state
-      templateStructure: JSON.stringify(templateStructure),
-      previewHtml: previewHtml // Save the exact HTML from preview
-    };
-    
-    console.log("Saving template with elements:", customElements.length);
-    updatePageMutation.mutate(updatedData);
+      // Update custom elements in form data and save template structure
+      const templateStructure = captureTemplateStructure();
+      const updatedData = {
+        ...data,
+        customTitle: data.customTitle?.trim() || "",
+        customSubtitle: data.customSubtitle?.trim() || "",
+        customElements: JSON.stringify(customElements), // Use current state
+        templateStructure: JSON.stringify(templateStructure),
+        previewHtml: previewHtml // Save the exact HTML from preview
+      };
+      
+      console.log("Saving template with elements:", customElements.length);
+      console.log("Preview HTML captured:", previewHtml ? "YES" : "NO");
+      updatePageMutation.mutate(updatedData);
+    }, 100); // Small delay to ensure preview is rendered
   };
 
   // Element manipulation functions
