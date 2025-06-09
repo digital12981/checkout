@@ -358,7 +358,9 @@ export class For4PaymentsAPI {
         { name: "Direct Key", headers: { 'Authorization': this.secretKey, 'Content-Type': 'application/json' } },
         { name: "X-API-Key", headers: { 'X-API-Key': this.secretKey, 'Content-Type': 'application/json' } },
         { name: "API-Key", headers: { 'API-Key': this.secretKey, 'Content-Type': 'application/json' } }
-      ];
+      ].filter(method => 
+        Object.values(method.headers).every(value => typeof value === 'string')
+      );
 
       for (const method of authMethods) {
         try {

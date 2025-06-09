@@ -172,9 +172,26 @@ export async function registerRoutes(app: Express): Promise<Server> {
       if (error instanceof z.ZodError) {
         return res.status(400).json({ message: "Invalid data", errors: error.errors });
       }
-      res.status(500).json({ 
-        message: "Failed to create PIX payment", 
-        error: error instanceof Error ? error.message : "Unknown error"
+      // Provide specific error messages for different scenarios
+      let errorMessage = "Failed to create PIX payment";
+      let statusCode = 500;
+      
+      if (error instanceof Error) {
+        if (error.message.includes("authentication") || error.message.includes("Unauthorized") || error.message.includes("For4Payments")) {
+          errorMessage = "Payment service authentication error. Please verify your For4Payments API key is valid and active.";
+          statusCode = 503; // Service Unavailable
+        } else if (error.message.includes("Connection") || error.message.includes("fetch")) {
+          errorMessage = "Payment service temporarily unavailable. Please try again in a few moments.";
+          statusCode = 503;
+        } else {
+          errorMessage = error.message;
+        }
+      }
+      
+      res.status(statusCode).json({ 
+        message: errorMessage,
+        error: error instanceof Error ? error.message : "Unknown error",
+        suggestion: statusCode === 503 ? "Please check your API key configuration or contact support if the issue persists." : undefined
       });
     }
   });
