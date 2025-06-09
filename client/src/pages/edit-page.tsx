@@ -330,17 +330,46 @@ export default function EditPage() {
       console.log("Starting HTML capture process...");
       
       // Wait for React to fully render the preview, then capture the ACTUAL HTML
-      await new Promise(resolve => setTimeout(resolve, 500));
+      await new Promise(resolve => setTimeout(resolve, 1000));
       
-      // Find the specific preview content using the data attribute
-      const previewContent = document.querySelector('[data-capture-target="preview-content"]');
+      // Debug: Log all elements to see what's available
+      console.log("All elements with data-capture-target:", document.querySelectorAll('[data-capture-target]'));
+      console.log("All min-h-screen elements:", document.querySelectorAll('.min-h-screen'));
+      
+      // Try multiple selectors to find the preview content
+      let previewContent = document.querySelector('[data-capture-target="preview-content"]');
       
       if (!previewContent) {
-        console.error("Preview content with capture target not found");
+        console.log("Primary selector failed, trying alternative selectors...");
+        
+        // Try to find within the Preview tab
+        const previewTab = document.querySelector('[role="tabpanel"][data-state="active"]');
+        if (previewTab) {
+          previewContent = previewTab.querySelector('.min-h-screen');
+          console.log("Found preview content in active tab:", previewContent);
+        }
+        
+        // Last resort: find any min-h-screen with style attribute
+        if (!previewContent) {
+          const allScreens = document.querySelectorAll('.min-h-screen[style]');
+          for (let i = 0; i < allScreens.length; i++) {
+            const screen = allScreens[i];
+            // Check if this screen is in the preview area and not in editor
+            if (screen.style.backgroundColor && !screen.closest('.editor-panel')) {
+              previewContent = screen;
+              console.log("Found preview content via fallback method:", previewContent);
+              break;
+            }
+          }
+        }
+      }
+      
+      if (!previewContent) {
+        console.error("Could not find preview content with any method");
         return;
       }
       
-      console.log("Found preview content with capture target:", previewContent);
+      console.log("Found preview content:", previewContent);
       
       // Clone only the actual preview content (not the editor interface)
       const clonedContainer = previewContent.cloneNode(true) as HTMLElement;
