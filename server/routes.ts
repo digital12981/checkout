@@ -47,7 +47,33 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post("/api/payment-pages", async (req, res) => {
     try {
       const data = insertPaymentPageSchema.parse(req.body);
-      const page = await storage.createPaymentPage(data);
+      
+      // Get page 7 as template base
+      const templatePage = await storage.getPaymentPage(7);
+      if (!templatePage) {
+        return res.status(500).json({ message: "Base template not found" });
+      }
+      
+      // Merge template data with new page data, preserving customizations
+      const newPageData = {
+        ...data,
+        // Use template styling and structure as defaults
+        primaryColor: data.primaryColor || templatePage.primaryColor,
+        accentColor: data.accentColor || templatePage.accentColor,
+        backgroundColor: data.backgroundColor || templatePage.backgroundColor,
+        textColor: data.textColor || templatePage.textColor,
+        logoPosition: data.logoPosition || templatePage.logoPosition,
+        logoSize: data.logoSize || templatePage.logoSize,
+        headerHeight: data.headerHeight || templatePage.headerHeight,
+        showLogo: data.showLogo !== undefined ? data.showLogo : templatePage.showLogo,
+        skipForm: data.skipForm !== undefined ? data.skipForm : templatePage.skipForm,
+        customElements: data.customElements || templatePage.customElements,
+        templateStructure: data.templateStructure || templatePage.templateStructure,
+        template: templatePage.template,
+        status: 'active'
+      };
+      
+      const page = await storage.createPaymentPage(newPageData);
       res.status(201).json(page);
     } catch (error) {
       if (error instanceof z.ZodError) {
