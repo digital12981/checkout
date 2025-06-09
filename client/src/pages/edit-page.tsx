@@ -232,7 +232,45 @@ export default function EditPage() {
     },
   });
 
+  const capturePreviewHTML = () => {
+    const previewElement = document.getElementById('checkout-preview');
+    if (!previewElement) return "";
+    
+    // Clone the preview element to manipulate without affecting the original
+    const clone = previewElement.cloneNode(true) as HTMLElement;
+    
+    // Remove all editor-specific elements
+    const editorElements = clone.querySelectorAll('.ring-2, .ring-primary, .absolute, [class*="border-dashed"], [class*="bg-primary/10"], [class*="cursor-pointer"]');
+    editorElements.forEach(el => el.remove());
+    
+    // Remove drag and drop zones
+    const dropZones = clone.querySelectorAll('[class*="border-dashed"]');
+    dropZones.forEach(el => el.remove());
+    
+    // Remove floating menus and editor controls
+    const floatingMenus = clone.querySelectorAll('.absolute');
+    floatingMenus.forEach(el => el.remove());
+    
+    // Remove editor event handlers
+    const interactiveElements = clone.querySelectorAll('[onclick], [ondoubleclick]');
+    interactiveElements.forEach(el => {
+      el.removeAttribute('onclick');
+      el.removeAttribute('ondoubleclick');
+    });
+    
+    // Remove editor-specific classes
+    const allElements = clone.querySelectorAll('*');
+    allElements.forEach(el => {
+      el.classList.remove('cursor-pointer', 'ring-2', 'ring-primary');
+    });
+    
+    return clone.innerHTML;
+  };
+
   const onSubmit = (data: EditPageForm) => {
+    // Capture the exact HTML from the preview
+    const previewHtml = capturePreviewHTML();
+    
     // Capture the current template structure from the preview with current customElements state
     const captureTemplateStructure = () => {
       return {
@@ -263,7 +301,8 @@ export default function EditPage() {
       customTitle: data.customTitle?.trim() || "",
       customSubtitle: data.customSubtitle?.trim() || "",
       customElements: JSON.stringify(customElements), // Use current state
-      templateStructure: JSON.stringify(templateStructure)
+      templateStructure: JSON.stringify(templateStructure),
+      previewHtml: previewHtml // Save the exact HTML from preview
     };
     
     console.log("Saving template with elements:", customElements.length);
@@ -802,6 +841,7 @@ export default function EditPage() {
 
   const FormStepPreview = () => (
     <div 
+      id="checkout-preview"
       className="min-h-screen w-full"
       style={{ backgroundColor: formData.backgroundColor }}
       onClick={(e) => {

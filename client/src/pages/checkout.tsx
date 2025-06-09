@@ -408,6 +408,17 @@ export default function Checkout() {
     </div>
   ) : null;
 
+  // If we have saved preview HTML, use it directly
+  if (page.previewHtml) {
+    return (
+      <div 
+        className="min-h-screen w-full"
+        dangerouslySetInnerHTML={{ __html: page.previewHtml }}
+      />
+    );
+  }
+
+  // Fallback to unified renderer if no preview HTML exists
   return (
     <UnifiedTemplateRenderer 
       page={page} 
