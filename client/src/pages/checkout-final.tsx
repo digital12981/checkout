@@ -87,48 +87,49 @@ export default function CheckoutFinal() {
     }
   }, [pixPayment]);
 
-  // Form setup effect - runs once after DOM is ready
+  // Form setup effect - simplified to avoid conflicts
   useEffect(() => {
     if (!pixPayment && pageQuery.data) {
       const setupTimeout = setTimeout(() => {
-        const form = document.querySelector('form[data-react-form]');
-        if (form && !form.dataset.initialized) {
-          form.dataset.initialized = 'true';
+        const form = document.querySelector('form[data-react-form]') as HTMLFormElement;
+        if (form && !form.getAttribute('data-setup-complete')) {
+          form.setAttribute('data-setup-complete', 'true');
           
-          form.addEventListener('submit', async (e) => {
+          const handleSubmit = async (e: Event) => {
             e.preventDefault();
             if (isSubmitting) return;
             setIsSubmitting(true);
             try {
-              const formData = new FormData(form as HTMLFormElement);
+              const formData = new FormData(form);
               await createPaymentMutation.mutateAsync(formData);
             } finally {
               setIsSubmitting(false);
             }
-          });
+          };
 
-          const cpfInput = form.querySelector('input[name="customerCpf"]') as HTMLInputElement;
-          const phoneInput = form.querySelector('input[name="customerPhone"]') as HTMLInputElement;
+          const handleCpfInput = (e: Event) => {
+            const target = e.target as HTMLInputElement;
+            target.value = formatCpf(target.value);
+          };
+
+          const handlePhoneInput = (e: Event) => {
+            const target = e.target as HTMLInputElement;
+            target.value = formatPhone(target.value);
+          };
+
+          form.addEventListener('submit', handleSubmit);
           
-          if (cpfInput) {
-            cpfInput.addEventListener('input', (e) => {
-              const target = e.target as HTMLInputElement;
-              target.value = formatCpf(target.value);
-            });
-          }
+          const cpfInput = form.querySelector('input[name="customerCpf"]');
+          const phoneInput = form.querySelector('input[name="customerPhone"]');
           
-          if (phoneInput) {
-            phoneInput.addEventListener('input', (e) => {
-              const target = e.target as HTMLInputElement;
-              target.value = formatPhone(target.value);
-            });
-          }
+          if (cpfInput) cpfInput.addEventListener('input', handleCpfInput);
+          if (phoneInput) phoneInput.addEventListener('input', handlePhoneInput);
         }
-      }, 500);
+      }, 300);
       
       return () => clearTimeout(setupTimeout);
     }
-  }, [pageQuery.data, pixPayment]);
+  }, [!!pageQuery.data && !pixPayment]);
 
   const formatTime = (seconds: number) => {
     const minutes = Math.floor(seconds / 60);
