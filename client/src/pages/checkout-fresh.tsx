@@ -1,14 +1,10 @@
 import { useState, useEffect } from "react";
-import { useRoute, useLocation } from "wouter";
-import { useQuery, useMutation } from "@tanstack/react-query";
-import { apiRequest } from "@/lib/queryClient";
-import { formatCpf } from "@/lib/utils";
+import { useRoute } from "wouter";
+import { useQuery } from "@tanstack/react-query";
 
-export default function CheckoutHtml() {
+export default function CheckoutFresh() {
   const [, params] = useRoute("/checkout/:id");
-  const [location] = useLocation();
   const [pixPayment, setPixPayment] = useState<any>(null);
-  const [isLoading, setIsLoading] = useState(false);
   const [timeLeft, setTimeLeft] = useState(15 * 60); // 15 minutes in seconds
 
   // Timer functionality
@@ -42,41 +38,6 @@ export default function CheckoutHtml() {
 
   const page = pageQuery.data;
 
-  // Check for skip form parameter
-  const urlParams = new URLSearchParams(location.split('?')[1] || '');
-  const shouldSkipForm = (page as any)?.skipForm || urlParams.get('skip') === 'true';
-
-  const createPaymentMutation = useMutation({
-    mutationFn: async (customerData: any) => {
-      const response = await fetch("/api/pix-payments", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          paymentPageId: parseInt(params?.id || "0"),
-          ...customerData,
-          amount: (page as any)?.price?.toString(),
-        }),
-      });
-      return response.json();
-    },
-    onSuccess: (payment) => {
-      setPixPayment(payment);
-    },
-  });
-
-  // Auto-submit for skip form
-  useEffect(() => {
-    if (shouldSkipForm && page && !pixPayment && !isLoading) {
-      setIsLoading(true);
-      createPaymentMutation.mutate({
-        customerName: "Cliente Direto",
-        customerEmail: "cliente@exemplo.com",
-        customerCpf: "00000000000",
-        customerPhone: "(11) 99999-9999",
-      });
-    }
-  }, [shouldSkipForm, page, pixPayment, isLoading]);
-
   if (pageQuery.isLoading) {
     return <div className="flex items-center justify-center min-h-screen">Carregando...</div>;
   }
@@ -85,20 +46,12 @@ export default function CheckoutHtml() {
     return <div className="flex items-center justify-center min-h-screen">Página não encontrada</div>;
   }
 
-  // Debug logging
-  console.log("Page data received:", page);
-  console.log("PreviewHtml exists:", !!(page as any).previewHtml);
-  console.log("PreviewHtml length:", (page as any).previewHtml?.length);
-  console.log("Has FORM_PLACEHOLDER:", (page as any).previewHtml?.includes('FORM_PLACEHOLDER'));
-
-  // If we have saved HTML, use it EXACTLY as is
+  // Always use saved HTML from database
   if ((page as any).previewHtml && (page as any).previewHtml.trim()) {
-    console.log("USING SAVED HTML FROM DATABASE");
     let finalHtml = (page as any).previewHtml;
 
     // Replace form content with PIX interface when payment exists
     if (pixPayment) {
-      // PIX Payment View
       const pixContent = `
         <div class="space-y-6 text-center">
           <div class="text-lg font-semibold text-gray-800 mb-4">
@@ -180,26 +133,15 @@ export default function CheckoutHtml() {
         </div>
       `;
       
-      // Replace either FORM_PLACEHOLDER or the entire form content
-      if (finalHtml.includes('<!-- FORM_PLACEHOLDER -->')) {
-        finalHtml = finalHtml.replace('<!-- FORM_PLACEHOLDER -->', pixContent);
-      } else {
-        // Find and replace the form content directly
-        const formRegex = /<form[^>]*>[\s\S]*?<\/form>/;
-        if (formRegex.test(finalHtml)) {
-          finalHtml = finalHtml.replace(formRegex, pixContent);
-        } else {
-          // Fallback: replace content within the white container
-          const containerMatch = finalHtml.match(/(<div class="bg-white[^>]*>)([\s\S]*?)(<\/div>)/);
-          if (containerMatch) {
-            finalHtml = finalHtml.replace(containerMatch[0], containerMatch[1] + pixContent + containerMatch[3]);
-          }
-        }
+      // Replace form content directly
+      const formRegex = /<form[^>]*>[\s\S]*?<\/form>/;
+      if (formRegex.test(finalHtml)) {
+        finalHtml = finalHtml.replace(formRegex, pixContent);
       }
     } else {
-      // Customer Form View
+      // Customer Form View - always show form when no payment exists
       const formContent = `
-        <form id="checkout-form" class="space-y-4" onsubmit="if(window.handleFormSubmit) return window.handleFormSubmit(event); return false;">
+        <form id="checkout-form" class="space-y-4" onsubmit="return handleFormSubmit(event);">
           <div>
             <label class="block text-sm font-medium text-gray-700 mb-1">Nome completo</label>
             <input type="text" name="customerName" required 
@@ -216,14 +158,14 @@ export default function CheckoutHtml() {
             <label class="block text-sm font-medium text-gray-700 mb-1">CPF</label>
             <input type="text" name="customerCpf" required maxlength="14" placeholder="000.000.000-00"
                    class="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                   oninput="if(window.formatCpfInput) window.formatCpfInput(this)" />
+                   oninput="formatCpfInput(this)" />
           </div>
           
           <div>
             <label class="block text-sm font-medium text-gray-700 mb-1">Telefone</label>
             <input type="tel" name="customerPhone" required placeholder="(11) 99999-9999"
                    class="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                   oninput="if(window.formatPhoneInput) window.formatPhoneInput(this)" />
+                   oninput="formatPhoneInput(this)" />
           </div>
           
           <button type="submit" id="submit-btn"
@@ -292,34 +234,21 @@ export default function CheckoutHtml() {
             } catch (error) {
               alert('Erro ao processar pagamento. Tente novamente.');
               submitBtn.disabled = false;
-              submitBtn.textContent = 'Pagar com PIX';
+              submitBtn.innerHTML = '<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path></svg>${(page as any).customButtonText || 'Pagar com PIX'}';
             }
           }
         </script>
       `;
       
-      finalHtml = finalHtml.replace('<!-- FORM_PLACEHOLDER -->', formContent);
+      // Replace form content directly
+      const formRegex = /<form[^>]*>[\s\S]*?<\/form>/;
+      if (formRegex.test(finalHtml)) {
+        finalHtml = finalHtml.replace(formRegex, formContent);
+      }
     }
 
-    // Return the exact HTML with no React wrapper
     return <div dangerouslySetInnerHTML={{ __html: finalHtml }} />;
   }
 
-  // Fallback if no HTML is saved
-  return (
-    <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-      <div className="bg-white p-8 rounded-lg shadow-lg max-w-md w-full text-center">
-        <h2 className="text-xl font-semibold mb-4">Template não encontrado</h2>
-        <p className="text-gray-600 mb-4">
-          Esta página ainda não possui um template HTML definido.
-        </p>
-        <a 
-          href={`/pages/html-edit/${params?.id}`}
-          className="inline-block bg-blue-600 text-white px-6 py-2 rounded hover:bg-blue-700"
-        >
-          Criar Template
-        </a>
-      </div>
-    </div>
-  );
+  return <div className="flex items-center justify-center min-h-screen">Template não encontrado</div>;
 }
