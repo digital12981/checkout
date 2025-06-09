@@ -408,51 +408,113 @@ export default function Checkout() {
     </div>
   ) : null;
 
-  // If we have saved preview HTML, use it directly but inject the form content
+  // If we have saved preview HTML, use it directly and inject form functionality
   if (page.previewHtml && page.previewHtml.trim()) {
-    // Parse the saved HTML and inject interactive form content
-    let checkoutHtml = page.previewHtml;
+    console.log("Using saved preview HTML for checkout");
     
-    // For skip form pages, inject a hidden form that auto-submits
-    if (page.skipForm) {
-      const autoForm = `
-        <form id="auto-form" style="display: none;">
-          <input type="hidden" name="customerName" value="Cliente PIX" />
-          <input type="hidden" name="customerEmail" value="cliente@exemplo.com" />
-          <input type="hidden" name="customerCpf" value="00000000000" />
-          <input type="hidden" name="customerPhone" value="(11) 99999-9999" />
-        </form>
-        <script>
-          // Auto-submit the form after 1 second
-          setTimeout(() => {
-            const form = document.getElementById('auto-form');
-            if (form) {
+    // Create a container with the exact saved HTML and add form functionality
+    const containerRef = useRef<HTMLDivElement>(null);
+    
+    useEffect(() => {
+      if (containerRef.current && !pixPayment) {
+        // Find where to inject the form content
+        const formContainer = containerRef.current.querySelector('.w-full.max-w-md');
+        
+        if (formContainer && !page.skipForm) {
+          // Inject the interactive form
+          const formElement = document.createElement('div');
+          formElement.innerHTML = `
+            <form id="checkout-form" class="space-y-4">
+              <div>
+                <label class="block text-sm font-medium text-gray-700 mb-2">Nome Completo</label>
+                <input type="text" name="customerName" placeholder="Digite seu nome completo" 
+                       class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" required />
+              </div>
+              <div>
+                <label class="block text-sm font-medium text-gray-700 mb-2">Email</label>
+                <input type="email" name="customerEmail" placeholder="Digite seu email" 
+                       class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" required />
+              </div>
+              <div>
+                <label class="block text-sm font-medium text-gray-700 mb-2">CPF</label>
+                <input type="text" name="customerCpf" placeholder="Digite seu CPF" 
+                       class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" required />
+              </div>
+              <div>
+                <label class="block text-sm font-medium text-gray-700 mb-2">Telefone</label>
+                <input type="text" name="customerPhone" placeholder="Digite seu telefone" 
+                       class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" required />
+              </div>
+              <button type="submit" 
+                      class="w-full text-white flex items-center justify-center space-x-2 px-4 py-2 rounded-md font-medium"
+                      style="background-color: ${page.accentColor}">
+                Pagar com PIX
+              </button>
+            </form>
+          `;
+          
+          // Add form submission handler
+          const form = formElement.querySelector('form');
+          if (form) {
+            form.addEventListener('submit', async (e) => {
+              e.preventDefault();
               const formData = new FormData(form);
               const data = Object.fromEntries(formData);
               
-              // Submit the payment
-              fetch('/api/pix-payments', {
+              try {
+                const response = await fetch('/api/pix-payments', {
+                  method: 'POST',
+                  headers: { 'Content-Type': 'application/json' },
+                  body: JSON.stringify({
+                    ...data,
+                    pageId: page.id,
+                    amount: page.price.toString()
+                  })
+                });
+                
+                if (response.ok) {
+                  window.location.reload();
+                }
+              } catch (error) {
+                console.error('Payment submission error:', error);
+              }
+            });
+          }
+          
+          formContainer.appendChild(formElement);
+        } else if (page.skipForm) {
+          // Auto-submit for skip form
+          setTimeout(async () => {
+            try {
+              const response = await fetch('/api/pix-payments', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
-                  ...data,
-                  pageId: ${page.id},
-                  amount: '${page.price}'
+                  customerName: 'Cliente PIX',
+                  customerEmail: 'cliente@exemplo.com',
+                  customerCpf: '00000000000',
+                  customerPhone: '(11) 99999-9999',
+                  pageId: page.id,
+                  amount: page.price.toString()
                 })
-              })
-              .then(res => res.json())
-              .then(payment => {
-                window.location.reload();
               });
+              
+              if (response.ok) {
+                window.location.reload();
+              }
+            } catch (error) {
+              console.error('Auto-payment error:', error);
             }
           }, 1000);
-        </script>
-      `;
-      checkoutHtml = checkoutHtml.replace('</body>', autoForm + '</body>');
-    }
+        }
+      }
+    }, [page, pixPayment]);
     
     return (
-      <div dangerouslySetInnerHTML={{ __html: checkoutHtml }} />
+      <div 
+        ref={containerRef}
+        dangerouslySetInnerHTML={{ __html: page.previewHtml }} 
+      />
     );
   }
 

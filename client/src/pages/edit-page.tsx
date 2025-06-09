@@ -234,53 +234,33 @@ export default function EditPage() {
 
   const capturePreviewHTML = () => {
     const previewElement = document.getElementById('checkout-preview');
-    if (!previewElement) return "";
+    console.log("Preview element found:", !!previewElement);
     
-    // Clone the preview element to capture clean HTML
-    const clone = previewElement.cloneNode(true) as HTMLElement;
+    if (!previewElement) {
+      console.log("No preview element found with ID 'checkout-preview'");
+      return "";
+    }
     
-    // Remove ALL editor-specific elements and attributes
-    const removeEditorElements = (element: Element) => {
-      // Remove editor-specific elements
-      const editorSelectors = [
-        '.ring-2', '.ring-primary', '.absolute', 
-        '[class*="border-dashed"]', '[class*="bg-primary/10"]',
-        '[class*="cursor-pointer"]', '[class*="z-10"]',
-        '[class*="transition-colors"]'
-      ];
-      
-      editorSelectors.forEach(selector => {
-        const elements = element.querySelectorAll(selector);
-        elements.forEach(el => el.remove());
-      });
-      
-      // Remove editor event handlers and attributes
-      const allElements = element.querySelectorAll('*');
-      allElements.forEach(el => {
-        // Remove editor-specific attributes
-        el.removeAttribute('onclick');
-        el.removeAttribute('ondoubleclick');
-        el.removeAttribute('data-*');
-        
-        // Remove editor-specific classes
-        const classList = Array.from(el.classList);
-        classList.forEach(className => {
-          if (className.includes('cursor-pointer') || 
-              className.includes('ring-') || 
-              className.includes('border-dashed') ||
-              className.includes('bg-primary/10') ||
-              className.includes('transition-colors') ||
-              className.includes('z-10')) {
-            el.classList.remove(className);
-          }
-        });
-      });
-    };
+    console.log("Preview element innerHTML length:", previewElement.innerHTML.length);
     
-    removeEditorElements(clone);
+    // Simply return the inner HTML of the preview element without the outer div
+    // This preserves all the original HTML and Tailwind classes
+    let html = previewElement.innerHTML;
     
-    // Return the complete HTML structure with all Tailwind classes intact
-    return clone.outerHTML;
+    // Remove editor-specific elements by searching for specific patterns
+    // Remove drag zones
+    html = html.replace(/<div[^>]*border-dashed[^>]*>.*?<\/div>/gis, '');
+    html = html.replace(/<div[^>]*bg-primary\/10[^>]*>.*?<\/div>/gis, '');
+    
+    // Remove absolute positioned editor elements
+    html = html.replace(/<div[^>]*absolute[^>]*>.*?<\/div>/gis, '');
+    
+    // Remove elements with ring classes
+    html = html.replace(/\s*ring-\w+/g, '');
+    html = html.replace(/\s*cursor-pointer/g, '');
+    
+    console.log("Cleaned HTML length:", html.length);
+    return html;
   };
 
   const onSubmit = (data: EditPageForm) => {
