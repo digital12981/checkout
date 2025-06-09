@@ -36,50 +36,90 @@
     </style>
   </head>
   <body>
-    <div id="test-area" style="position: fixed; top: 10px; right: 10px; background: white; padding: 10px; border: 2px solid red; z-index: 99999;">
-      <h3>Teste Custom Input</h3>
-      <div id="custom-input" style="border: 1px solid #ccc; padding: 5px; min-height: 20px; background: white; cursor: text;" contenteditable="true">
-        Clique aqui para testar
+    <div id="test-area" style="position: fixed; top: 10px; right: 10px; background: white; padding: 10px; border: 2px solid red; z-index: 99999; max-width: 300px;">
+      <h3>Virtual Keyboard Test</h3>
+      <div id="virtual-display" style="border: 1px solid #ccc; padding: 8px; min-height: 30px; background: #f9f9f9; margin: 5px 0; font-family: monospace;">
+        Digite usando o teclado virtual abaixo:
       </div>
-      <button onclick="alert('Custom input: ' + document.getElementById('custom-input').textContent)">Testar</button>
+      <div id="virtual-keyboard" style="display: grid; grid-template-columns: repeat(10, 1fr); gap: 2px; font-size: 10px;">
+        <!-- Numbers -->
+        <button onclick="addChar('1')" style="padding: 5px;">1</button>
+        <button onclick="addChar('2')" style="padding: 5px;">2</button>
+        <button onclick="addChar('3')" style="padding: 5px;">3</button>
+        <button onclick="addChar('4')" style="padding: 5px;">4</button>
+        <button onclick="addChar('5')" style="padding: 5px;">5</button>
+        <button onclick="addChar('6')" style="padding: 5px;">6</button>
+        <button onclick="addChar('7')" style="padding: 5px;">7</button>
+        <button onclick="addChar('8')" style="padding: 5px;">8</button>
+        <button onclick="addChar('9')" style="padding: 5px;">9</button>
+        <button onclick="addChar('0')" style="padding: 5px;">0</button>
+        <!-- Letters -->
+        <button onclick="addChar('A')" style="padding: 5px;">A</button>
+        <button onclick="addChar('B')" style="padding: 5px;">B</button>
+        <button onclick="addChar('C')" style="padding: 5px;">C</button>
+        <button onclick="addChar('D')" style="padding: 5px;">D</button>
+        <button onclick="addChar('E')" style="padding: 5px;">E</button>
+        <button onclick="addChar('F')" style="padding: 5px;">F</button>
+        <button onclick="addChar('G')" style="padding: 5px;">G</button>
+        <button onclick="addChar('H')" style="padding: 5px;">H</button>
+        <button onclick="addChar('I')" style="padding: 5px;">I</button>
+        <button onclick="addChar('J')" style="padding: 5px;">J</button>
+        <button onclick="addChar('K')" style="padding: 5px;">K</button>
+        <button onclick="addChar('L')" style="padding: 5px;">L</button>
+        <button onclick="addChar('M')" style="padding: 5px;">M</button>
+        <button onclick="addChar('N')" style="padding: 5px;">N</button>
+        <button onclick="addChar('O')" style="padding: 5px;">O</button>
+        <button onclick="addChar('P')" style="padding: 5px;">P</button>
+        <button onclick="addChar('Q')" style="padding: 5px;">Q</button>
+        <button onclick="addChar('R')" style="padding: 5px;">R</button>
+        <button onclick="addChar('S')" style="padding: 5px;">S</button>
+        <button onclick="addChar('T')" style="padding: 5px;">T</button>
+        <!-- Special -->
+        <button onclick="addChar(' ')" style="padding: 5px; grid-column: span 3;">ESPAÇO</button>
+        <button onclick="addChar('@')" style="padding: 5px;">@</button>
+        <button onclick="addChar('.')" style="padding: 5px;">.</button>
+        <button onclick="addChar('-')" style="padding: 5px;">-</button>
+        <button onclick="addChar('(')" style="padding: 5px;">(</button>
+        <button onclick="addChar(')')" style="padding: 5px;">)</button>
+        <button onclick="clearText()" style="padding: 5px; background: #ff6b6b; color: white;">LIMPAR</button>
+        <button onclick="testSubmit()" style="padding: 5px; background: #51cf66; color: white; grid-column: span 2;">TESTAR</button>
+      </div>
     </div>
     <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>
     <script>
-      // Emergency input test
-      window.addEventListener('load', function() {
-        console.log('Page loaded - testing input');
-        
-        // Remove any potentially blocking styles
-        const allElements = document.querySelectorAll('*');
-        allElements.forEach(el => {
-          el.style.pointerEvents = 'auto';
-          el.style.userSelect = 'auto';
-        });
-
-        // Test input functionality
-        const testInput = document.querySelector('#test-area input');
-        if (testInput) {
-          testInput.addEventListener('input', function(e) {
-            console.log('Test input working:', e.target.value);
-          });
-          testInput.addEventListener('click', function() {
-            console.log('Test input clicked');
-          });
-          testInput.addEventListener('focus', function() {
-            console.log('Test input focused');
-          });
+      let virtualInput = '';
+      
+      function addChar(char) {
+        virtualInput += char;
+        document.getElementById('virtual-display').textContent = virtualInput;
+        console.log('Virtual input:', virtualInput);
+      }
+      
+      function clearText() {
+        virtualInput = '';
+        document.getElementById('virtual-display').textContent = 'Digite usando o teclado virtual abaixo:';
+        console.log('Virtual input cleared');
+      }
+      
+      function testSubmit() {
+        if (virtualInput.trim()) {
+          alert('Virtual keyboard funcionou! Texto: ' + virtualInput);
+          console.log('Virtual keyboard test successful:', virtualInput);
+        } else {
+          alert('Digite algo primeiro usando o teclado virtual');
         }
+      }
+
+      // Test if click events work at all
+      window.addEventListener('load', function() {
+        console.log('Page loaded - virtual keyboard ready');
+        
+        // Test click detection
+        document.addEventListener('click', function(e) {
+          console.log('Click detected on:', e.target.tagName, e.target.textContent);
+        }, true);
       });
-
-      // Override any potential event blocking
-      document.addEventListener('click', function(e) {
-        console.log('Click detected on:', e.target.tagName);
-      }, true);
-
-      document.addEventListener('input', function(e) {
-        console.log('Input detected:', e.target.value);
-      }, true);
     </script>
   </body>
 </html>
