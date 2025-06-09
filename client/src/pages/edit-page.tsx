@@ -233,102 +233,91 @@ export default function EditPage() {
   });
 
   const capturePreviewHTML = () => {
-    // Generate the exact HTML structure that should be used in checkout
-    // Based on the current form data and custom elements
-    
-    const generateCleanHTML = () => {
-      // Header section with logo, title, subtitle and price
-      const headerContent = [];
-      
-      if (formData.showLogo && formData.logoUrl) {
-        const logoAlignment = formData.logoPosition === 'left' ? 'justify-start' : 
-                            formData.logoPosition === 'right' ? 'justify-end' : 'justify-center';
-        headerContent.push(`
-          <div class="mb-4 flex ${logoAlignment}">
-            <img src="${formData.logoUrl}" alt="Logo" class="object-contain rounded" 
-                 style="width: ${formData.logoSize}px; height: ${formData.logoSize}px;" />
-          </div>
-        `);
-      }
-      
-      if (formData.customTitle && formData.customTitle.trim()) {
-        headerContent.push(`<h1 class="text-2xl font-bold mb-2">${formData.customTitle}</h1>`);
-      }
-      
-      if (formData.customSubtitle && formData.customSubtitle.trim()) {
-        headerContent.push(`<p class="text-white/90 mb-4">${formData.customSubtitle}</p>`);
-      }
-      
-      headerContent.push(`<div class="text-3xl font-bold">${formatCurrency(formData.price)}</div>`);
-      
-      const headerHTML = `
-        <div class="w-full p-6 text-white text-center flex flex-col justify-center" 
-             style="background-color: ${formData.primaryColor}; height: ${formData.headerHeight}px;">
-          ${headerContent.join('')}
-        </div>
-      `;
-      
-      // Generate custom elements HTML
-      const customElementsHTML = customElements.map(element => {
-        if (element.type === 'text') {
-          const styles = {
-            color: element.styles.color || '#000000',
-            fontSize: element.styles.fontSize ? `${element.styles.fontSize}px` : '16px',
-            fontWeight: element.styles.isBold ? 'bold' : 'normal',
-            textAlign: element.styles.textAlign || 'left',
-            backgroundColor: element.styles.hasBox ? (element.styles.boxColor || '#f0f0f0') : 'transparent',
-            padding: element.styles.hasBox ? '12px' : '0',
-            borderRadius: element.styles.borderRadius ? `${element.styles.borderRadius}px` : '0',
-            marginBottom: element.styles.marginBottom || '16px',
-            marginTop: element.styles.marginTop || '0'
-          };
+    // Wait for React to render completely, then capture the ACTUAL rendered HTML
+    return new Promise<string>((resolve) => {
+      setTimeout(() => {
+        try {
+          // Find the preview container element
+          const previewContainer = document.querySelector('.flex-1.bg-gray-50');
           
-          const styleString = Object.entries(styles).map(([key, value]) => 
-            `${key.replace(/([A-Z])/g, '-$1').toLowerCase()}: ${value}`
-          ).join('; ');
+          if (!previewContainer) {
+            console.log("Preview container not found");
+            resolve("");
+            return;
+          }
           
-          return `<div style="${styleString}">${element.content.replace(/\n/g, '<br>')}</div>`;
-        } else if (element.type === 'image') {
-          const imageSize = element.styles.imageSize || 200;
-          return `<div class="text-center mb-4">
-            <img src="${element.content}" alt="Elemento de imagem" 
-                 style="width: ${imageSize}px; height: ${imageSize}px; border-radius: ${element.styles.borderRadius || 0}px;" 
-                 class="mx-auto object-cover" />
-          </div>`;
+          // Get the first child which contains the actual preview
+          const previewContent = previewContainer.firstElementChild;
+          
+          if (!previewContent) {
+            console.log("Preview content not found");
+            resolve("");
+            return;
+          }
+          
+          // Clone the element to avoid modifying the original
+          const clone = previewContent.cloneNode(true) as HTMLElement;
+          
+          // Remove all editor-specific elements
+          const editorsElements = clone.querySelectorAll(
+            '.absolute, .ring-2, .cursor-pointer, [class*="border-dashed"], [class*="bg-primary/10"], .transition-colors, .z-10'
+          );
+          editorsElements.forEach(el => el.remove());
+          
+          // Remove editor event handlers
+          const allElements = clone.querySelectorAll('*');
+          allElements.forEach(el => {
+            el.removeAttribute('onclick');
+            el.removeAttribute('ondoubleclick');
+            el.removeAttribute('onmouseover');
+            el.removeAttribute('onmouseout');
+            
+            // Remove editor-specific classes
+            const classList = Array.from(el.classList);
+            classList.forEach(className => {
+              if (className.includes('cursor-pointer') || 
+                  className.includes('ring-') || 
+                  className.includes('border-dashed') ||
+                  className.includes('bg-primary/10') ||
+                  className.includes('transition-colors') ||
+                  className.includes('hover:') ||
+                  className.includes('z-10')) {
+                el.classList.remove(className);
+              }
+            });
+          });
+          
+          // Get the clean HTML and add a form placeholder
+          let cleanHTML = clone.outerHTML;
+          
+          // Replace form elements with placeholder for dynamic content injection
+          cleanHTML = cleanHTML.replace(
+            /<form[\s\S]*?<\/form>/gi,
+            '<!-- FORM_PLACEHOLDER -->'
+          );
+          
+          // Also look for form inputs and replace them
+          cleanHTML = cleanHTML.replace(
+            /<div[^>]*class="[^"]*space-y-4[^"]*"[\s\S]*?<button[\s\S]*?<\/button>[\s\S]*?<\/div>/gi,
+            '<!-- FORM_PLACEHOLDER -->'
+          );
+          
+          console.log("Captured actual HTML length:", cleanHTML.length);
+          console.log("Captured HTML preview:", cleanHTML.substring(0, 500));
+          resolve(cleanHTML);
+          
+        } catch (error) {
+          console.error("Error capturing preview HTML:", error);
+          resolve("");
         }
-        return '';
-      }).join('');
-      
-      const formHTML = `
-        <div class="w-full p-6 bg-white flex justify-center">
-          <div class="w-full max-w-md">
-            ${customElementsHTML}
-            <!-- FORM_PLACEHOLDER -->
-          </div>
-        </div>
-      `;
-      
-      const fullHTML = `
-        <div class="min-h-screen w-full" style="background-color: ${formData.backgroundColor};">
-          ${headerHTML}
-          ${formHTML}
-        </div>
-      `;
-      
-      console.log("Full generated HTML:", fullHTML);
-      return fullHTML;
-    };
-    
-    const cleanHTML = generateCleanHTML();
-    console.log("Generated clean HTML length:", cleanHTML.length);
-    return cleanHTML;
+      }, 200); // Give React time to render
+    });
   };
 
-  const onSubmit = (data: EditPageForm) => {
-    // Wait a bit for the preview to render completely before capturing
-    setTimeout(() => {
+  const onSubmit = async (data: EditPageForm) => {
+    try {
       // Capture the exact HTML from the preview
-      const previewHtml = capturePreviewHTML();
+      const previewHtml = await capturePreviewHTML();
       console.log("Captured HTML length:", previewHtml.length);
       
       // Capture the current template structure from the preview with current customElements state
@@ -368,7 +357,9 @@ export default function EditPage() {
       console.log("Saving template with elements:", customElements.length);
       console.log("Preview HTML captured:", previewHtml ? "YES" : "NO");
       updatePageMutation.mutate(updatedData);
-    }, 100); // Small delay to ensure preview is rendered
+    } catch (error) {
+      console.error("Error capturing preview HTML:", error);
+    }
   };
 
   // Element manipulation functions
