@@ -163,11 +163,11 @@ export default function CheckoutFinal() {
   if (finalHtml.includes('{{FORM_PLACEHOLDER}}')) {
     const formHtml = `
       <!-- Status Compacto -->
-      <div class="bg-amber-50 p-3 mb-4 text-center" style="border-radius: 4px;">
+      <div class="bg-amber-50 border border-amber-300 rounded-md p-3 mb-4 text-center">
         <div class="flex items-center justify-center mb-2">
           <svg class="animate-spin h-4 w-4 mr-2 text-amber-500" fill="none" viewBox="0 0 24 24">
             <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 714 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
           </svg>
           <span class="text-sm font-medium text-amber-600">Aguardando pagamento...</span>
         </div>
@@ -175,29 +175,28 @@ export default function CheckoutFinal() {
       </div>
       
       <script>
-        // Cronômetro funcional de 15 minutos
+        // Cronômetro funcional
         let timeRemaining = 15 * 60; // 15 minutos em segundos
         
-        function updateCountdown() {
+        function updateTimer() {
           const timer = document.getElementById('countdown-timer');
-          if (timer) {
-            if (timeRemaining > 0) {
-              const minutes = Math.floor(timeRemaining / 60);
-              const seconds = timeRemaining % 60;
-              timer.textContent = minutes.toString().padStart(2, '0') + ':' + seconds.toString().padStart(2, '0');
-              timeRemaining--;
-            } else {
+          if (timer && timeRemaining > 0) {
+            const minutes = Math.floor(timeRemaining / 60);
+            const seconds = timeRemaining % 60;
+            timer.textContent = minutes.toString().padStart(2, '0') + ':' + seconds.toString().padStart(2, '0');
+            timeRemaining--;
+            
+            if (timeRemaining <= 0) {
               timer.textContent = '00:00';
               timer.style.color = '#DC2626'; // Vermelho quando expira
             }
           }
         }
         
-        // Iniciar cronômetro imediatamente
-        updateCountdown();
-        setInterval(updateCountdown, 1000);
+        // Atualizar a cada segundo
+        setInterval(updateTimer, 1000);
+        updateTimer(); // Primeira atualização imediata
       </script>
-      </div>
 
       <form data-react-form="true" class="space-y-4">
         <div>
@@ -284,7 +283,7 @@ export default function CheckoutFinal() {
       <div class="flex-1 p-6">
         <!-- Status Compacto -->
         <div class="max-w-md mx-auto mb-6">
-          <div class="bg-amber-50 p-3 text-center" style="border-radius: 4px;">
+          <div class="bg-amber-50 border border-amber-300 rounded-md p-3 text-center">
             <div class="flex items-center justify-center mb-2">
               <svg class="animate-spin h-4 w-4 mr-2 text-amber-500" fill="none" viewBox="0 0 24 24">
                 <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
@@ -297,27 +296,26 @@ export default function CheckoutFinal() {
         </div>
         
         <script>
-          // Cronômetro funcional sincronizado com React state
+          // Sincronizar cronômetro com React state
           let paymentTimeLeft = ${timeLeft};
           
           function updatePaymentTimer() {
             const timer = document.getElementById('payment-timer');
-            if (timer) {
-              if (paymentTimeLeft > 0) {
-                const minutes = Math.floor(paymentTimeLeft / 60);
-                const seconds = paymentTimeLeft % 60;
-                timer.textContent = minutes.toString().padStart(2, '0') + ':' + seconds.toString().padStart(2, '0');
-                paymentTimeLeft--;
-              } else {
+            if (timer && paymentTimeLeft > 0) {
+              const minutes = Math.floor(paymentTimeLeft / 60);
+              const seconds = paymentTimeLeft % 60;
+              timer.textContent = minutes.toString().padStart(2, '0') + ':' + seconds.toString().padStart(2, '0');
+              paymentTimeLeft--;
+              
+              if (paymentTimeLeft <= 0) {
                 timer.textContent = '00:00';
                 timer.style.color = '#DC2626';
               }
             }
           }
           
-          // Iniciar cronômetro imediatamente
-          updatePaymentTimer();
           setInterval(updatePaymentTimer, 1000);
+          updatePaymentTimer();
         </script>
 
         <!-- Payment Status -->
