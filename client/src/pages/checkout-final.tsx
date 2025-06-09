@@ -205,86 +205,87 @@ export default function CheckoutFinal() {
       
       return <div dangerouslySetInnerHTML={{ __html: finalHtml }} />;
     } else {
-      // Customer Form - Replace with React component
-      const formRegex = /<form[^>]*>[\s\S]*?<\/form>/;
+      // Customer Form - Add JavaScript event handlers to existing HTML
+      const formContent = `
+        <script>
+          function formatCpf(input) {
+            let value = input.value.replace(/[^0-9]/g, '');
+            if (value.length >= 3) value = value.substring(0,3) + '.' + value.substring(3);
+            if (value.length >= 7) value = value.substring(0,7) + '.' + value.substring(7);
+            if (value.length >= 11) value = value.substring(0,11) + '-' + value.substring(11,13);
+            input.value = value.substring(0,14);
+          }
+
+          function formatPhone(input) {
+            let value = input.value.replace(/[^0-9]/g, '');
+            if (value.length >= 2) value = '(' + value.substring(0,2) + ') ' + value.substring(2);
+            if (value.length >= 10) value = value.substring(0,10) + '-' + value.substring(10);
+            input.value = value.substring(0,15);
+          }
+
+          document.addEventListener('DOMContentLoaded', function() {
+            const form = document.querySelector('form');
+            if (form) {
+              form.addEventListener('submit', async function(event) {
+                event.preventDefault();
+                
+                const submitBtn = form.querySelector('button[type="submit"]');
+                const originalHtml = submitBtn.innerHTML;
+                submitBtn.disabled = true;
+                submitBtn.textContent = 'Processando...';
+
+                const formData = new FormData(form);
+                const data = {
+                  paymentPageId: ${(page as any).id},
+                  customerName: formData.get('customerName'),
+                  customerEmail: formData.get('customerEmail'),
+                  customerCpf: formData.get('customerCpf').replace(/[^0-9]/g, ''),
+                  customerPhone: formData.get('customerPhone'),
+                  amount: '${(page as any).price}'
+                };
+                
+                try {
+                  const response = await fetch('/api/pix-payments', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(data)
+                  });
+                  
+                  const result = await response.json();
+                  
+                  if (response.ok && result.id) {
+                    window.location.reload();
+                  } else {
+                    throw new Error(result.message || 'Erro ao processar pagamento');
+                  }
+                } catch (error) {
+                  alert('Erro ao processar pagamento: ' + error.message);
+                  submitBtn.disabled = false;
+                  submitBtn.innerHTML = originalHtml;
+                }
+              });
+              
+              // Add formatting to inputs
+              const cpfInput = form.querySelector('input[name="customerCpf"]');
+              if (cpfInput) {
+                cpfInput.addEventListener('input', function() {
+                  formatCpf(this);
+                });
+              }
+              
+              const phoneInput = form.querySelector('input[name="customerPhone"]');
+              if (phoneInput) {
+                phoneInput.addEventListener('input', function() {
+                  formatPhone(this);
+                });
+              }
+            }
+          });
+        </script>
+      `;
       
-      if (formRegex.test(finalHtml)) {
-        const formMatch = finalHtml.match(formRegex);
-        if (formMatch) {
-          const formStartIndex = finalHtml.indexOf(formMatch[0]);
-          const formEndIndex = formStartIndex + formMatch[0].length;
-          
-          const beforeForm = finalHtml.substring(0, formStartIndex);
-          const afterForm = finalHtml.substring(formEndIndex);
-          
-          return (
-            <div>
-              <div dangerouslySetInnerHTML={{ __html: beforeForm }} />
-              
-              <form className="space-y-4" onSubmit={handleFormSubmit}>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Nome completo</label>
-                  <input 
-                    type="text" 
-                    name="customerName" 
-                    required 
-                    className="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500" 
-                  />
-                </div>
-                
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Email</label>
-                  <input 
-                    type="email" 
-                    name="customerEmail" 
-                    required 
-                    className="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500" 
-                  />
-                </div>
-                
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">CPF</label>
-                  <input 
-                    type="text" 
-                    name="customerCpf" 
-                    required 
-                    maxLength={14}
-                    placeholder="000.000.000-00"
-                    className="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                    onChange={(e) => e.target.value = formatCpf(e.target.value)}
-                  />
-                </div>
-                
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Telefone</label>
-                  <input 
-                    type="tel" 
-                    name="customerPhone" 
-                    required 
-                    placeholder="(11) 99999-9999"
-                    className="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                    onChange={(e) => e.target.value = formatPhone(e.target.value)}
-                  />
-                </div>
-                
-                <button 
-                  type="submit" 
-                  disabled={isSubmitting || createPaymentMutation.isPending}
-                  className="w-full text-white py-3 px-6 rounded-md font-semibold hover:opacity-90 transition-colors disabled:opacity-50 flex items-center justify-center gap-2"
-                  style={{ backgroundColor: (page as any).accentColor || '#10B981' }}
-                >
-                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path>
-                  </svg>
-                  {isSubmitting || createPaymentMutation.isPending ? 'Processando...' : ((page as any).customButtonText || 'Pagar com PIX')}
-                </button>
-              </form>
-              
-              <div dangerouslySetInnerHTML={{ __html: afterForm }} />
-            </div>
-          );
-        }
-      }
+      // Add the script to the end of the HTML
+      finalHtml = finalHtml + formContent;
     }
 
     return <div dangerouslySetInnerHTML={{ __html: finalHtml }} />;
