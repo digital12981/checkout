@@ -40,15 +40,7 @@ export default function CheckoutHtml() {
     enabled: !!params?.id,
   });
 
-  const pixPaymentsQuery = useQuery({
-    queryKey: [`/api/pix-payments`, 'pageId', params?.id],
-    queryFn: () => fetch(`/api/pix-payments?pageId=${params?.id}`).then(res => res.json()),
-    enabled: !!params?.id,
-    refetchInterval: 1000, // Check every second for new payments
-  });
-
   const page = pageQuery.data;
-  const recentPixPayment = pixPaymentsQuery.data?.[0];
 
   // Check for skip form parameter
   const urlParams = new URLSearchParams(location.split('?')[1] || '');
