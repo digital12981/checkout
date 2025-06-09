@@ -167,35 +167,50 @@ export default function CheckoutFinal() {
         <div class="flex items-center justify-center mb-2">
           <svg class="animate-spin h-4 w-4 mr-2 text-amber-500" fill="none" viewBox="0 0 24 24">
             <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 714 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
           </svg>
-          <span class="text-sm font-medium text-amber-600">Aguardando pagamento...</span>
+          <span class="text-sm font-medium text-amber-600">Aguardando dados...</span>
         </div>
         <div id="countdown-timer" class="text-lg font-bold font-mono text-amber-700">15:00</div>
       </div>
       
       <script>
-        // Cronômetro funcional
-        let timeRemaining = 15 * 60; // 15 minutos em segundos
+        // Cronômetro funcional para formulário
+        let formTimeRemaining = 15 * 60; // 15 minutos em segundos
+        let formTimerInterval;
         
-        function updateTimer() {
+        function updateFormTimer() {
           const timer = document.getElementById('countdown-timer');
-          if (timer && timeRemaining > 0) {
-            const minutes = Math.floor(timeRemaining / 60);
-            const seconds = timeRemaining % 60;
-            timer.textContent = minutes.toString().padStart(2, '0') + ':' + seconds.toString().padStart(2, '0');
-            timeRemaining--;
-            
-            if (timeRemaining <= 0) {
+          if (timer) {
+            if (formTimeRemaining > 0) {
+              const minutes = Math.floor(formTimeRemaining / 60);
+              const seconds = formTimeRemaining % 60;
+              timer.textContent = minutes.toString().padStart(2, '0') + ':' + seconds.toString().padStart(2, '0');
+              formTimeRemaining--;
+            } else {
               timer.textContent = '00:00';
               timer.style.color = '#DC2626'; // Vermelho quando expira
+              clearInterval(formTimerInterval);
             }
           }
         }
         
-        // Atualizar a cada segundo
-        setInterval(updateTimer, 1000);
-        updateTimer(); // Primeira atualização imediata
+        // Iniciar cronômetro quando a página carregar
+        document.addEventListener('DOMContentLoaded', function() {
+          formTimerInterval = setInterval(updateFormTimer, 1000);
+          updateFormTimer(); // Primeira atualização imediata
+        });
+        
+        // Se o DOM já está pronto, iniciar imediatamente
+        if (document.readyState === 'loading') {
+          document.addEventListener('DOMContentLoaded', function() {
+            formTimerInterval = setInterval(updateFormTimer, 1000);
+            updateFormTimer();
+          });
+        } else {
+          formTimerInterval = setInterval(updateFormTimer, 1000);
+          updateFormTimer();
+        }
       </script>
 
       <form data-react-form="true" class="space-y-4">
@@ -268,15 +283,15 @@ export default function CheckoutFinal() {
   if (pixPayment) {
     finalHtml = `<div class="min-h-screen w-full" style="background-color: ${page.backgroundColor};">
       <!-- Header -->
-      <div class="w-full p-6 text-white text-center flex flex-col justify-center" style="background-color: ${page.primaryColor}; height: ${page.headerHeight}px;">
+      <div class="w-full px-4 py-4 text-white text-center flex flex-col justify-center" style="background-color: ${page.primaryColor}; min-height: ${Math.max(page.headerHeight - 40, 180)}px;">
         ${page.showLogo && page.logoUrl ? `
-          <div class="mb-4 flex justify-center">
-            <img src="${page.logoUrl}" alt="Logo" class="object-contain rounded" style="width: ${page.logoSize}px; height: ${page.logoSize}px;" />
+          <div class="mb-3 flex justify-center">
+            <img src="${page.logoUrl}" alt="Logo" class="object-contain rounded" style="width: ${Math.min(page.logoSize, 80)}px; height: ${Math.min(page.logoSize, 80)}px;" />
           </div>
         ` : ''}
         
-        <h1 class="text-2xl font-bold mb-2">Pagamento PIX Gerado</h1>
-        <p class="text-lg opacity-90">Escaneie o QR Code ou copie o código PIX para finalizar</p>
+        <h1 class="text-lg sm:text-xl md:text-2xl font-bold mb-2 leading-tight">Pagamento PIX Gerado</h1>
+        <p class="text-sm sm:text-base md:text-lg opacity-90 leading-snug px-2">Escaneie o QR Code ou copie o código PIX para finalizar</p>
       </div>
       
       <!-- Main Content -->
