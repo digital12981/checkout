@@ -146,9 +146,10 @@ export default function CheckoutHtml() {
                    oninput="formatPhoneInput(this)" />
           </div>
           
-          <button type="submit" class="w-full bg-green-600 text-white py-3 px-6 rounded-md font-semibold hover:bg-green-700 transition-colors disabled:opacity-50" 
-                  id="submit-btn">
-            Pagar com PIX
+          <button type="submit" id="submit-btn"
+                  class="w-full text-white py-3 px-6 rounded-md font-semibold hover:opacity-90 transition-colors disabled:opacity-50"
+                  style="background-color: ${(page as any).accentColor || '#10B981'};">
+            ${(page as any).customButtonText || 'Pagar com PIX'}
           </button>
         </form>
 

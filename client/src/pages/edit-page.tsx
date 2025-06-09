@@ -325,127 +325,91 @@ export default function EditPage() {
     });
   };
 
-  const onSubmit = (data: EditPageForm) => {
-    // Create a complete checkout page structure using UnifiedTemplateRenderer logic
-    const generateCheckoutHTML = () => {
-      const pageData = {
-        ...data,
-        id: page?.id || 0,
-        productName: data.productName || "",
-        productDescription: data.productDescription || "",
-        price: data.price?.toString() || "0",
-        customTitle: data.customTitle?.trim() || "",
-        customSubtitle: data.customSubtitle?.trim() || "",
-        customButtonText: data.customButtonText || "Pagar com PIX",
-        customInstructions: data.customInstructions || "",
-        primaryColor: data.primaryColor || "#3B82F6",
-        accentColor: data.accentColor || "#10B981",
-        backgroundColor: data.backgroundColor || "#F8FAFC",
-        textColor: data.textColor || "#1F2937",
-        logoUrl: data.logoUrl || "",
-        logoPosition: data.logoPosition || "center",
-        logoSize: data.logoSize || 64,
-        headerHeight: data.headerHeight || 96,
-        skipForm: data.skipForm || false,
-        showLogo: data.showLogo || false,
-        status: "active",
-        createdAt: new Date(),
-        updatedAt: new Date()
-      };
-
-      // Use React to render the UnifiedTemplateRenderer to a string
-      // This ensures we get the exact same output as the preview
-      const templateHTML = `
-        <div class="min-h-screen w-full" style="background-color: ${pageData.backgroundColor};">
-          <!-- Header -->
-          <div class="w-full p-6 text-white text-center flex flex-col justify-center" 
-               style="background-color: ${pageData.primaryColor}; height: ${pageData.headerHeight}px;">
-            ${pageData.showLogo && pageData.logoUrl ? `
-              <div class="mb-4 flex ${pageData.logoPosition === 'left' ? 'justify-start' : pageData.logoPosition === 'right' ? 'justify-end' : 'justify-center'}">
-                <img src="${pageData.logoUrl}" alt="Logo" class="object-contain rounded" 
-                     style="width: ${pageData.logoSize}px; height: ${pageData.logoSize}px;" />
-              </div>
-            ` : ''}
-            
-            ${pageData.customTitle ? `<h1 class="text-2xl font-bold mb-2">${pageData.customTitle}</h1>` : `<h1 class="text-2xl font-bold mb-2">${pageData.productName}</h1>`}
-            ${pageData.customSubtitle ? `<p class="text-white/90 mb-4">${pageData.customSubtitle}</p>` : ''}
-            <div class="text-3xl font-bold">R$ ${parseFloat(pageData.price).toFixed(2).replace('.', ',')}</div>
-          </div>
-          
-          <!-- Content Area -->
-          <div class="w-full p-6 bg-white flex justify-center">
-            <div class="w-full max-w-md">
-              ${customElements.map(element => {
-                if (element.type === 'text') {
-                  const styles = [
-                    `color: ${element.styles.color || '#000000'}`,
-                    `font-size: ${element.styles.fontSize || 16}px`,
-                    `font-weight: ${element.styles.isBold ? 'bold' : 'normal'}`,
-                    `text-align: ${element.styles.textAlign || 'left'}`,
-                    `background-color: ${element.styles.hasBox ? (element.styles.boxColor || '#f0f0f0') : 'transparent'}`,
-                    `padding: ${element.styles.hasBox ? '12px' : '0'}`,
-                    `border-radius: ${element.styles.borderRadius || 0}px`,
-                    `margin-bottom: ${element.styles.marginBottom || '16px'}`,
-                    `margin-top: ${element.styles.marginTop || '0'}`
-                  ].join('; ');
-                  
-                  return `<div style="${styles}">${element.content.replace(/\n/g, '<br>')}</div>`;
-                } else if (element.type === 'image') {
-                  const imageSize = element.styles.imageSize || 200;
-                  return `<div class="text-center mb-4">
-                    <img src="${element.content}" alt="Elemento de imagem" 
-                         style="width: ${imageSize}px; height: ${imageSize}px; border-radius: ${element.styles.borderRadius || 0}px;" 
-                         class="mx-auto object-cover" />
-                  </div>`;
-                }
-                return '';
-              }).join('')}
-              
-              <!-- FORM_PLACEHOLDER -->
-            </div>
-          </div>
-        </div>
-      `;
-
-      return templateHTML;
-    };
-
-    const previewHtml = generateCheckoutHTML();
-    console.log("Generated checkout HTML length:", previewHtml.length);
-
-    // Capture the current template structure
-    const templateStructure = {
-      formData: {
-        ...data,
-        customTitle: data.customTitle?.trim() || "",
-        customSubtitle: data.customSubtitle?.trim() || "",
-      },
-      customElements: customElements,
-      renderSettings: {
-        showLogo: data.showLogo,
-        logoUrl: data.logoUrl,
-        logoPosition: data.logoPosition,
-        logoSize: data.logoSize,
-        headerHeight: data.headerHeight,
-        primaryColor: data.primaryColor,
-        accentColor: data.accentColor,
-        backgroundColor: data.backgroundColor,
-        textColor: data.textColor,
+  const onSubmit = async (data: EditPageForm) => {
+    try {
+      console.log("Starting HTML capture process...");
+      
+      // Wait for React to fully render the preview, then capture the ACTUAL HTML
+      await new Promise(resolve => setTimeout(resolve, 500));
+      
+      // Find the preview container that is actually visible on screen
+      const previewContainer = document.querySelector('[id*="preview"], .min-h-screen');
+      
+      if (!previewContainer) {
+        console.error("Preview container not found");
+        return;
       }
-    };
-
-    const updatedData = {
-      ...data,
-      customTitle: data.customTitle?.trim() || "",
-      customSubtitle: data.customSubtitle?.trim() || "",
-      customElements: JSON.stringify(customElements),
-      templateStructure: JSON.stringify(templateStructure),
-      previewHtml: previewHtml
-    };
-    
-    console.log("Saving template with elements:", customElements.length);
-    console.log("Preview HTML generated:", previewHtml ? "YES" : "NO");
-    updatePageMutation.mutate(updatedData);
+      
+      console.log("Found preview container:", previewContainer);
+      
+      // Clone the entire preview container to get the exact HTML
+      const clonedContainer = previewContainer.cloneNode(true) as HTMLElement;
+      
+      // Remove all interactive editor elements (buttons, borders, etc.)
+      const elementsToRemove = clonedContainer.querySelectorAll(
+        '.absolute, .cursor-pointer, [onclick], [ondblclick], [class*="ring-"], [class*="border-dashed"], [class*="hover:"], .z-10, .transition-colors'
+      );
+      
+      elementsToRemove.forEach(el => el.remove());
+      
+      // Remove all editor-specific event handlers and classes
+      const allElements = clonedContainer.querySelectorAll('*');
+      allElements.forEach(el => {
+        // Remove event handlers
+        el.removeAttribute('onclick');
+        el.removeAttribute('ondblclick');
+        el.removeAttribute('onmouseover');
+        el.removeAttribute('onmouseout');
+        
+        // Remove editor classes
+        const classesToRemove = [
+          'cursor-pointer', 'ring-2', 'ring-primary', 'transition-colors',
+          'hover:ring-2', 'hover:ring-primary', 'z-10', 'border-dashed'
+        ];
+        
+        classesToRemove.forEach(className => {
+          if (el.classList) {
+            el.classList.remove(className);
+          }
+        });
+      });
+      
+      // Get the exact HTML from the screen
+      let capturedHTML = clonedContainer.outerHTML;
+      
+      // Replace any form content with placeholder
+      capturedHTML = capturedHTML.replace(
+        /<div[^>]*class="[^"]*space-y-4[^"]*"[^>]*>[\s\S]*?<\/div>/gi,
+        '<div class="w-full max-w-md"><!-- FORM_PLACEHOLDER --></div>'
+      );
+      
+      // Ensure we have the FORM_PLACEHOLDER
+      if (!capturedHTML.includes('<!-- FORM_PLACEHOLDER -->')) {
+        // Add it if missing
+        capturedHTML = capturedHTML.replace(
+          /<div class="w-full max-w-md">[\s\S]*?<\/div>/gi,
+          '<div class="w-full max-w-md"><!-- FORM_PLACEHOLDER --></div>'
+        );
+      }
+      
+      console.log("Captured exact HTML length:", capturedHTML.length);
+      console.log("HTML contains form placeholder:", capturedHTML.includes('FORM_PLACEHOLDER'));
+      
+      // Save with the exact captured HTML
+      const updatedData = {
+        ...data,
+        customTitle: data.customTitle?.trim() || "",
+        customSubtitle: data.customSubtitle?.trim() || "",
+        customElements: JSON.stringify(customElements),
+        previewHtml: capturedHTML // This is the EXACT HTML from the screen
+      };
+      
+      console.log("Saving page with EXACT captured HTML");
+      updatePageMutation.mutate(updatedData);
+      
+    } catch (error) {
+      console.error("Error capturing exact HTML:", error);
+    }
   };
 
   // Element manipulation functions
