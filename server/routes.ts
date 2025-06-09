@@ -144,11 +144,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       let pixResponse;
       
-      // First, check if we have a valid API key
-      if (!process.env.FOR4PAYMENTS_API_KEY || apiKey === '7e0f69db-7b2d-4166-b8c5-fceed89b67c6') {
+      // Check if we have a configured API key
+      if (!apiKey || apiKey.length < 30) {
         return res.status(503).json({
           message: "Payment service not configured. Please provide a valid For4Payments API key.",
-          error: "FOR4PAYMENTS_API_KEY environment variable is required",
+          error: "Valid FOR4PAYMENTS_API_KEY is required",
           suggestion: "Configure your For4Payments API key in the environment settings"
         });
       }

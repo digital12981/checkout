@@ -197,7 +197,7 @@ export class For4PaymentsAPI {
         paymentMethod: "PIX",
         amount: amountInCents,
         items: [{
-          title: "Caixa com 25",
+          title: "Receitas de Bolos",
           quantity: 1,
           unitPrice: amountInCents,
           tangible: false
