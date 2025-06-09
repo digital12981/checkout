@@ -10,6 +10,7 @@ import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
 import { formatCurrency, formatCpf, copyToClipboard } from "@/lib/utils";
 import { QrCode, Copy, Clock } from "lucide-react";
+import UnifiedTemplateRenderer from "@/components/unified-template-renderer";
 
 const customerFormSchema = z.object({
   customerName: z.string().min(2, "Nome deve ter pelo menos 2 caracteres"),
@@ -269,289 +270,149 @@ export default function Checkout() {
     );
   };
 
-  return (
-    <div 
-      className="min-h-screen w-full"
-      style={{ backgroundColor: customStyles.backgroundColor }}
-    >
-      {/* Header */}
-      <div 
-        className="w-full p-6 text-white text-center flex flex-col justify-center"
-        style={{ 
-          backgroundColor: customStyles.primaryColor,
-          height: `${page.headerHeight || 120}px`
-        }}
-      >
-        {/* Top custom elements - exactly like editor */}
-        {customElements
-          .filter((el: any) => el.position === "top" || (typeof el.position === "number" && el.position >= 0 && el.position < 10))
-          .sort((a: any, b: any) => {
-            const posA = typeof a.position === "string" ? 0 : a.position;
-            const posB = typeof b.position === "string" ? 0 : b.position;
-            return posA - posB;
-          })
-          .map((element: any) => (
-            <div key={element.id} className="mb-4">
-              {renderCustomElement(element)}
-            </div>
-          ))}
+  // Render form content for the unified renderer
+  const formContent = !pixPayment && !page.skipForm ? (
+    <Form {...form}>
+      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+        <FormField
+          control={form.control}
+          name="customerName"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Nome Completo</FormLabel>
+              <FormControl>
+                <Input placeholder="Digite seu nome completo" {...field} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
 
-        {/* Logo display from template or page settings */}
-        {(() => {
-          const showLogo = templateData?.renderSettings?.showLogo ?? page.showLogo ?? false;
-          const logoUrl = templateData?.renderSettings?.logoUrl ?? page.logoUrl;
-          const logoPosition = templateData?.renderSettings?.logoPosition ?? page.logoPosition ?? 'center';
-          const logoSize = templateData?.renderSettings?.logoSize ?? page.logoSize ?? 64;
-          
-          if (showLogo && logoUrl) {
-            return (
-              <div className={`mb-4 flex ${logoPosition === 'left' ? 'justify-start' : logoPosition === 'right' ? 'justify-end' : 'justify-center'}`}>
-                <img 
-                  src={logoUrl} 
-                  alt="Logo" 
-                  className="object-contain rounded"
-                  style={{ width: `${logoSize}px`, height: `${logoSize}px` }}
+        <FormField
+          control={form.control}
+          name="customerEmail"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Email</FormLabel>
+              <FormControl>
+                <Input type="email" placeholder="Digite seu email" {...field} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        <FormField
+          control={form.control}
+          name="customerCpf"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>CPF</FormLabel>
+              <FormControl>
+                <Input 
+                  placeholder="Digite seu CPF" 
+                  {...field}
+                  onChange={(e) => field.onChange(formatCpf(e.target.value))}
                 />
-              </div>
-            );
-          }
-          return null;
-        })()}
-
-        {/* Header custom elements after logo */}
-        {customElements
-          .filter((el: any) => el.position >= -10 && el.position < 0)
-          .sort((a: any, b: any) => a.position - b.position)
-          .map((element: any) => (
-            <div key={element.id}>
-              {renderCustomElement(element)}
-            </div>
-          ))}
-
-        {/* Title and subtitle from template or page settings */}
-        {(() => {
-          const title = templateData?.formData?.customTitle ?? page.customTitle;
-          const subtitle = templateData?.formData?.customSubtitle ?? page.customSubtitle;
-          const price = templateData?.formData?.price ?? page.price;
-          
-          return (
-            <>
-              {title && title.trim() && (
-                <h1 className="text-2xl font-bold mb-2">
-                  {title}
-                </h1>
-              )}
-              
-              {subtitle && subtitle.trim() && (
-                <p className="text-white/90 mb-4">
-                  {subtitle}
-                </p>
-              )}
-              
-              <div className="text-3xl font-bold">
-                {formatCurrency(price)}
-              </div>
-            </>
-          );
-        })()}
-      </div>
-
-      {/* Form area */}
-      <div className="w-full p-6 bg-white flex justify-center">
-        <div className="w-full max-w-md">
-          {/* Render middle elements - exactly like editor */}
-          {customElements
-            .filter((el: any) => el.position === "middle" || (typeof el.position === "number" && el.position >= 10 && el.position < 100))
-            .sort((a: any, b: any) => {
-              const posA = typeof a.position === "string" ? 50 : a.position;
-              const posB = typeof b.position === "string" ? 50 : b.position;
-              return posA - posB;
-            })
-            .map((element: any) => (
-              <div key={element.id} className="mb-4">
-                {renderCustomElement(element)}
-              </div>
-            ))}
-
-          {/* Content/Form area */}
-          {!pixPayment && !page.skipForm && (
-          <Form {...form}>
-            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-              <FormField
-                control={form.control}
-                name="customerName"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Nome Completo</FormLabel>
-                    <FormControl>
-                      <Input placeholder="Digite seu nome completo" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={form.control}
-                name="customerEmail"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Email</FormLabel>
-                    <FormControl>
-                      <Input type="email" placeholder="Digite seu email" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={form.control}
-                name="customerCpf"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>CPF</FormLabel>
-                    <FormControl>
-                      <Input 
-                        placeholder="Digite seu CPF" 
-                        {...field}
-                        onChange={(e) => field.onChange(formatCpf(e.target.value))}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={form.control}
-                name="customerPhone"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Telefone</FormLabel>
-                    <FormControl>
-                      <Input placeholder="Digite seu telefone" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <Button 
-                type="submit" 
-                className="w-full text-white flex items-center justify-center space-x-2"
-                disabled={createPaymentMutation.isPending}
-                style={{ backgroundColor: customStyles.accentColor }}
-              >
-                <QrCode className="w-5 h-5" />
-                <span>
-                  {createPaymentMutation.isPending ? "Gerando PIX..." : (page.customButtonText || "Pagar com PIX")}
-                </span>
-              </Button>
-            </form>
-          </Form>
+              </FormControl>
+              <FormMessage />
+            </FormItem>
           )}
+        />
 
-          {/* PIX Payment Display */}
-          {pixPayment && (
-            <div>
-              <h3 className="font-semibold text-neutral-800 mb-4 text-center">
-                Pagamento PIX
-              </h3>
+        <FormField
+          control={form.control}
+          name="customerPhone"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Telefone</FormLabel>
+              <FormControl>
+                <Input placeholder="Digite seu telefone" {...field} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
 
-              <div className="text-center mb-6">
-                <div className="w-48 h-48 bg-white border-2 border-neutral-200 rounded-lg mx-auto flex items-center justify-center mb-4">
-                  {pixPayment.pixQrCode ? (
-                    <img 
-                      src={pixPayment.pixQrCode} 
-                      alt="QR Code PIX" 
-                      className="w-40 h-40 object-contain"
-                    />
-                  ) : (
-                    <div className="w-40 h-40 bg-black/10 rounded flex items-center justify-center">
-                      <QrCode className="w-16 h-16 text-neutral-400" />
-                    </div>
-                  )}
-                </div>
-                <p className="text-sm text-neutral-600">
-                  Escaneie o QR Code com seu app do banco
-                </p>
-              </div>
+        <Button 
+          type="submit" 
+          className="w-full text-white flex items-center justify-center space-x-2"
+          disabled={createPaymentMutation.isPending}
+          style={{ backgroundColor: page.accentColor }}
+        >
+          <QrCode className="w-5 h-5" />
+          <span>
+            {createPaymentMutation.isPending ? "Gerando PIX..." : (page.customButtonText || "Pagar com PIX")}
+          </span>
+        </Button>
+      </form>
+    </Form>
+  ) : pixPayment ? (
+    <div>
+      <h3 className="font-semibold text-neutral-800 mb-4 text-center">
+        Pagamento PIX
+      </h3>
 
-              {pixPayment.pixCode && (
-                <div className="mb-6">
-                  <label className="block text-sm font-medium text-neutral-700 mb-2">
-                    Ou copie o código PIX:
-                  </label>
-                  <div className="flex">
-                    <input
-                      type="text"
-                      value={pixPayment.pixCode}
-                      readOnly
-                      className="flex-1 px-3 py-2 border border-neutral-300 rounded-l-md bg-neutral-50 text-sm"
-                    />
-                    <Button
-                      type="button"
-                      onClick={copyPixCode}
-                      className="px-4 py-2 rounded-l-none"
-                      style={{ backgroundColor: customStyles.accentColor }}
-                    >
-                      <Copy className="w-4 h-4" />
-                    </Button>
-                  </div>
-                </div>
-              )}
-
-              <div className="text-center">
-                <div className="inline-flex items-center space-x-2 text-yellow-600 bg-yellow-50 px-4 py-2 rounded-lg">
-                  <Clock className="w-4 h-4 animate-pulse" />
-                  <span className="text-sm font-medium">Aguardando pagamento...</span>
-                </div>
-                <p className="text-xs text-neutral-600 mt-2">
-                  O pagamento será confirmado automaticamente
-                </p>
-              </div>
+      <div className="text-center mb-6">
+        <div className="w-48 h-48 bg-white border-2 border-neutral-200 rounded-lg mx-auto flex items-center justify-center mb-4">
+          {pixPayment.pixQrCode ? (
+            <img 
+              src={pixPayment.pixQrCode} 
+              alt="QR Code PIX" 
+              className="w-40 h-40 object-contain"
+            />
+          ) : (
+            <div className="w-40 h-40 bg-black/10 rounded flex items-center justify-center">
+              <QrCode className="w-16 h-16 text-neutral-400" />
             </div>
           )}
-
-          {/* Bottom custom elements - exactly like editor */}
-          {customElements
-            .filter((el: any) => el.position === "bottom" || (typeof el.position === "number" && el.position >= 100 && el.position < 1000))
-            .sort((a: any, b: any) => {
-              const posA = typeof a.position === "string" ? 100 : a.position;
-              const posB = typeof b.position === "string" ? 100 : b.position;
-              return posA - posB;
-            })
-            .map((element: any) => (
-              <div key={element.id} className="mt-4">
-                {renderCustomElement(element)}
-              </div>
-            ))}
         </div>
+        <p className="text-sm text-neutral-600">
+          Escaneie o QR Code com seu app do banco
+        </p>
       </div>
 
-      {/* Footer elements (position 1000+) rendered outside card for full width */}
-      <div className="w-full mt-6">
-        {customElements
-          .filter((el: any) => el.position >= 100)
-          .sort((a: any, b: any) => a.position - b.position)
-          .map((element: any) => (
-            <div 
-              key={element.id} 
-              className="w-full"
-              style={{
-                backgroundColor: customStyles.primaryColor,
-                color: "#ffffff",
-                textAlign: "center",
-                padding: "20px",
-                fontSize: "14px",
-                borderTop: `1px solid ${customStyles.primaryColor}`
-              }}
+      {pixPayment.pixCode && (
+        <div className="mb-6">
+          <label className="block text-sm font-medium text-neutral-700 mb-2">
+            Ou copie o código PIX:
+          </label>
+          <div className="flex">
+            <input
+              type="text"
+              value={pixPayment.pixCode}
+              readOnly
+              className="flex-1 px-3 py-2 border border-neutral-300 rounded-l-md bg-neutral-50 text-sm"
+            />
+            <Button
+              type="button"
+              onClick={copyPixCode}
+              className="px-4 py-2 rounded-l-none"
+              style={{ backgroundColor: page.accentColor }}
             >
-              <div dangerouslySetInnerHTML={{ __html: element.content.replace(/\n/g, '<br/>') }} />
-            </div>
-          ))}
+              <Copy className="w-4 h-4" />
+            </Button>
+          </div>
+        </div>
+      )}
+
+      <div className="text-center">
+        <div className="inline-flex items-center space-x-2 text-yellow-600 bg-yellow-50 px-4 py-2 rounded-lg">
+          <Clock className="w-4 h-4 animate-pulse" />
+          <span className="text-sm font-medium">Aguardando pagamento...</span>
+        </div>
+        <p className="text-xs text-neutral-600 mt-2">
+          O pagamento será confirmado automaticamente
+        </p>
       </div>
     </div>
+  ) : null;
+
+  return (
+    <UnifiedTemplateRenderer 
+      page={page} 
+      customElements={customElements}
+      children={formContent}
+    />
   );
 }
