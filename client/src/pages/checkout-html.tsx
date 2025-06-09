@@ -184,7 +184,7 @@ export default function CheckoutHtml() {
     } else {
       // Customer Form View
       const formContent = `
-        <form id="checkout-form" class="space-y-4" onsubmit="handleFormSubmit(event)">
+        <form id="checkout-form" class="space-y-4" onsubmit="if(window.handleFormSubmit) return window.handleFormSubmit(event); return false;">
           <div>
             <label class="block text-sm font-medium text-gray-700 mb-1">Nome completo</label>
             <input type="text" name="customerName" required 
