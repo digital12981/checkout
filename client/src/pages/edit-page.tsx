@@ -133,32 +133,33 @@ export default function EditPage() {
       skipForm: false,
       showLogo: true,
     },
+    mode: "onChange",
   });
 
   useEffect(() => {
     if (page) {
       form.reset({
-        productName: page.productName,
-        productDescription: page.productDescription,
-        price: page.price,
-        customTitle: page.customTitle || "",
-        customSubtitle: page.customSubtitle || "",
-        customButtonText: page.customButtonText || "",
-        customInstructions: page.customInstructions || "",
-        primaryColor: page.primaryColor,
-        accentColor: page.accentColor,
-        backgroundColor: page.backgroundColor,
-        textColor: page.textColor,
-        logoUrl: page.logoUrl || "",
-        logoPosition: page.logoPosition as "left" | "center" | "right",
-        logoSize: page.logoSize,
-        headerHeight: page.headerHeight,
-        skipForm: page.skipForm,
-        showLogo: page.showLogo ?? true,
+        productName: (page as any).productName,
+        productDescription: (page as any).productDescription,
+        price: (page as any).price,
+        customTitle: (page as any).customTitle || "",
+        customSubtitle: (page as any).customSubtitle || "",
+        customButtonText: (page as any).customButtonText || "",
+        customInstructions: (page as any).customInstructions || "",
+        primaryColor: (page as any).primaryColor,
+        accentColor: (page as any).accentColor,
+        backgroundColor: (page as any).backgroundColor,
+        textColor: (page as any).textColor,
+        logoUrl: (page as any).logoUrl || "",
+        logoPosition: (page as any).logoPosition as "left" | "center" | "right",
+        logoSize: (page as any).logoSize,
+        headerHeight: (page as any).headerHeight,
+        skipForm: (page as any).skipForm,
+        showLogo: (page as any).showLogo ?? true,
       });
 
       try {
-        const elements = JSON.parse(page.customElements || "[]");
+        const elements = JSON.parse((page as any).customElements || "[]");
         setCustomElements(elements);
       } catch {
         setCustomElements([]);
@@ -277,50 +278,18 @@ export default function EditPage() {
   const capturePreviewHTML = () => {
     console.log("Capturing HTML from preview...");
     
-    setTimeout(() => {
-      const previewPanel = document.querySelector('[role="tabpanel"][data-state="active"]');
-      const previewContent = previewPanel?.querySelector('.min-h-screen') as HTMLElement;
-      
-      if (previewContent) {
-        const cloned = previewContent.cloneNode(true) as HTMLElement;
-        
-        // Remove editor attributes
-        const cleanElement = (element: Element) => {
-          element.removeAttribute('data-editor');
-          element.removeAttribute('onclick');
-          element.removeAttribute('ondblclick');
-          element.removeAttribute('draggable');
-          
-          const editorClasses = ['cursor-pointer', 'ring-2', 'ring-primary', 'hover:ring-2', 'transition-colors', 'z-10', 'border-dashed'];
-          editorClasses.forEach(cls => element.classList?.remove(cls));
-          
-          Array.from(element.children).forEach(cleanElement);
-        };
-        
-        cleanElement(cloned);
-        
-        let html = cloned.outerHTML;
-        html = html.replace(
-          /<div[^>]*class="[^"]*bg-white[^"]*border[^"]*border-gray-200[^"]*rounded-lg[^"]*p-6[^"]*max-w-md[^"]*mx-auto[^"]*"[^>]*>[\s\S]*?<\/div>/,
-          '<div class="bg-white border border-gray-200 rounded-lg p-6 max-w-md mx-auto">{{FORM_PLACEHOLDER}}</div>'
-        );
-        
-        setCapturedHTML(html);
-        console.log("HTML captured successfully:", html.length, "chars");
-        
-        toast({
-          title: "HTML Capturado",
-          description: `${html.length} caracteres capturados do preview`,
-        });
-      } else {
-        console.error("Preview content not found");
-        toast({
-          title: "Erro",
-          description: "Não foi possível capturar o HTML do preview",
-          variant: "destructive",
-        });
-      }
-    }, 500);
+    // Generate HTML directly from current form data and elements
+    const currentFormData = form.getValues();
+    const pageDataWithId = {...currentFormData, id: parseInt(id || "0")};
+    const generatedHTML = generateCleanHTML(pageDataWithId, customElements);
+    
+    setCapturedHTML(generatedHTML);
+    console.log("HTML generated successfully:", generatedHTML.length, "chars");
+    
+    toast({
+      title: "HTML Capturado",
+      description: `${generatedHTML.length} caracteres gerados do preview atual`,
+    });
   };
 
   const onSubmit = async (data: EditPageForm) => {
@@ -329,7 +298,8 @@ export default function EditPage() {
       
       if (!finalHTML || finalHTML.length < 500) {
         console.log("Using generated HTML");
-        finalHTML = generateCleanHTML(data, customElements);
+        const dataWithId = {...data, id: parseInt(id || "0")};
+        finalHTML = generateCleanHTML(dataWithId, customElements);
       } else {
         console.log("Using captured HTML from preview");
       }
@@ -794,11 +764,20 @@ export default function EditPage() {
                 <Eye className="w-4 h-4 mr-2" />
                 Preview
               </TabsTrigger>
+              <TabsTrigger value="form">
+                <ShoppingBag className="w-4 h-4 mr-2" />
+                Formulário
+              </TabsTrigger>
+              <TabsTrigger value="payment">
+                <QrCode className="w-4 h-4 mr-2" />
+                Pagamento
+              </TabsTrigger>
             </TabsList>
+            
             <TabsContent value="preview" className="p-4 h-full">
               <div className="border rounded-lg bg-white h-full overflow-auto">
                 <UnifiedTemplateRenderer
-                  page={formData}
+                  page={{...formData, id: parseInt(id || "0")}}
                   customElements={customElements}
                   isEditor={true}
                 >
