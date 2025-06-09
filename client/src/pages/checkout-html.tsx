@@ -115,7 +115,7 @@ export default function CheckoutHtml() {
         </div>
       `;
       
-      finalHtml = finalHtml.replace('<!-- FORM_PLACEHOLDER -->', pixContent);
+      finalHtml = finalHtml.replace('{{FORM_PLACEHOLDER}}', pixContent);
     } else {
       // Customer Form View
       const formContent = `
@@ -209,7 +209,7 @@ export default function CheckoutHtml() {
         </script>
       `;
       
-      finalHtml = finalHtml.replace('<!-- FORM_PLACEHOLDER -->', formContent);
+      finalHtml = finalHtml.replace('{{FORM_PLACEHOLDER}}', formContent);
     }
 
     // Return the exact HTML with no React wrapper
