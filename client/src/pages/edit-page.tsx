@@ -390,8 +390,8 @@ export default function EditPage() {
           </div>
         ` : ''}
         
-        <h1 class="text-2xl font-bold mb-2">${pageData.customTitle || pageData.productName}</h1>
-        <p class="text-lg opacity-90">${pageData.customSubtitle || pageData.productDescription}</p>
+        ${pageData.customTitle ? `<h1 class="text-2xl font-bold mb-2">${pageData.customTitle}</h1>` : ''}
+        ${pageData.customSubtitle ? `<p class="text-lg opacity-90">${pageData.customSubtitle}</p>` : ''}
       </div>
       
       <!-- Main Content -->
