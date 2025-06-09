@@ -66,51 +66,13 @@ export default function CheckoutFinal() {
     }
   }, [pixPayment, timeLeft]);
 
-  // Setup form handlers only once
-  useEffect(() => {
-    if (!pixPayment && pageQuery.isSuccess) {
-      const timeoutId = setTimeout(() => {
-        const form = document.querySelector('form[data-react-form]');
-        if (form && !form.hasAttribute('data-handlers-attached')) {
-          form.setAttribute('data-handlers-attached', 'true');
-          
-          const handleSubmit = async (event: Event) => {
-            event.preventDefault();
-            if (isSubmitting) return;
-            setIsSubmitting(true);
-            
-            const formData = new FormData(form as HTMLFormElement);
-            try {
-              await createPaymentMutation.mutateAsync(formData);
-            } finally {
-              setIsSubmitting(false);
-            }
-          };
-
-          const handleCpfInput = (e: Event) => {
-            (e.target as HTMLInputElement).value = formatCpf((e.target as HTMLInputElement).value);
-          };
-
-          const handlePhoneInput = (e: Event) => {
-            (e.target as HTMLInputElement).value = formatPhone((e.target as HTMLInputElement).value);
-          };
-
-          form.addEventListener('submit', handleSubmit);
-          form.querySelector('input[name="customerCpf"]')?.addEventListener('input', handleCpfInput);
-          form.querySelector('input[name="customerPhone"]')?.addEventListener('input', handlePhoneInput);
-        }
-      }, 300);
-      
-      return () => clearTimeout(timeoutId);
-    }
-  }, [pixPayment, pageQuery.isSuccess]);
-
-  // Timer for form countdown
+  // Timer effect for form countdown
   useEffect(() => {
     if (!pixPayment) {
-      const intervalId = setInterval(() => {
+      const interval = setInterval(() => {
         setTimeLeft(prev => {
           const newTime = Math.max(0, prev - 1);
+          // Update DOM element
           const timer = document.getElementById('countdown-timer');
           if (timer) {
             const mins = Math.floor(newTime / 60);
@@ -121,10 +83,52 @@ export default function CheckoutFinal() {
           return newTime;
         });
       }, 1000);
-      
-      return () => clearInterval(intervalId);
+      return () => clearInterval(interval);
     }
   }, [pixPayment]);
+
+  // Form setup effect - runs once after DOM is ready
+  useEffect(() => {
+    if (!pixPayment && pageQuery.data) {
+      const setupTimeout = setTimeout(() => {
+        const form = document.querySelector('form[data-react-form]');
+        if (form && !form.dataset.initialized) {
+          form.dataset.initialized = 'true';
+          
+          form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            if (isSubmitting) return;
+            setIsSubmitting(true);
+            try {
+              const formData = new FormData(form as HTMLFormElement);
+              await createPaymentMutation.mutateAsync(formData);
+            } finally {
+              setIsSubmitting(false);
+            }
+          });
+
+          const cpfInput = form.querySelector('input[name="customerCpf"]') as HTMLInputElement;
+          const phoneInput = form.querySelector('input[name="customerPhone"]') as HTMLInputElement;
+          
+          if (cpfInput) {
+            cpfInput.addEventListener('input', (e) => {
+              const target = e.target as HTMLInputElement;
+              target.value = formatCpf(target.value);
+            });
+          }
+          
+          if (phoneInput) {
+            phoneInput.addEventListener('input', (e) => {
+              const target = e.target as HTMLInputElement;
+              target.value = formatPhone(target.value);
+            });
+          }
+        }
+      }, 500);
+      
+      return () => clearTimeout(setupTimeout);
+    }
+  }, [pageQuery.data, pixPayment]);
 
   const formatTime = (seconds: number) => {
     const minutes = Math.floor(seconds / 60);
@@ -157,7 +161,7 @@ export default function CheckoutFinal() {
           </svg>
           <span class="text-sm font-medium text-amber-600">Aguardando dados...</span>
         </div>
-        <div id="countdown-timer" class="text-lg font-bold font-mono text-amber-700">${formatTime(timeLeft)}</div>
+        <div id="countdown-timer" class="text-lg font-bold font-mono text-amber-700">15:00</div>
       </div>
 
       <form data-react-form="true" class="space-y-4">
