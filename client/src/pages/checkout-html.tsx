@@ -89,7 +89,7 @@ export default function CheckoutHtml() {
   console.log("Page data received:", page);
   console.log("PreviewHtml exists:", !!(page as any).previewHtml);
   console.log("PreviewHtml length:", (page as any).previewHtml?.length);
-  console.log("Has FORM_PLACEHOLDER:", (page as any).previewHtml?.includes('{{FORM_PLACEHOLDER}}'));
+  console.log("Has FORM_PLACEHOLDER:", (page as any).previewHtml?.includes('FORM_PLACEHOLDER'));
 
   // If we have saved HTML, use it EXACTLY as is
   if ((page as any).previewHtml && (page as any).previewHtml.trim()) {
@@ -180,7 +180,7 @@ export default function CheckoutHtml() {
         </div>
       `;
       
-      finalHtml = finalHtml.replace('{{FORM_PLACEHOLDER}}', pixContent);
+      finalHtml = finalHtml.replace('<!-- FORM_PLACEHOLDER -->', pixContent);
     } else {
       // Customer Form View
       const formContent = `
