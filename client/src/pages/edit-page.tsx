@@ -325,177 +325,120 @@ export default function EditPage() {
     });
   };
 
+  // Generate clean HTML directly from page data (same as UnifiedTemplateRenderer but as static HTML)
+  const generateCleanHTML = (pageData: any, elements: any[]) => {
+    // Helper function to render a single element
+    const renderElement = (element: any) => {
+      if (element.type === "image") {
+        return `<img src="${element.content}" alt="Custom element" class="mx-auto" style="width: ${element.styles?.imageSize || 200}px; border-radius: ${element.styles?.borderRadius || 8}px;" />`;
+      }
+      
+      const styles = element.styles || {};
+      const styleStr = [
+        styles.color ? `color: ${styles.color};` : '',
+        styles.backgroundColor ? `background-color: ${styles.backgroundColor};` : '',
+        styles.fontSize ? `font-size: ${styles.fontSize}px;` : '',
+        styles.textAlign ? `text-align: ${styles.textAlign};` : '',
+        styles.padding ? `padding: ${styles.padding};` : '',
+        styles.marginBottom ? `margin-bottom: ${styles.marginBottom};` : '',
+        styles.marginTop ? `margin-top: ${styles.marginTop};` : '',
+        styles.fontWeight ? `font-weight: ${styles.fontWeight};` : '',
+        styles.lineHeight ? `line-height: ${styles.lineHeight};` : '',
+        styles.border ? `border: ${styles.border};` : '',
+        styles.borderTop ? `border-top: ${styles.borderTop};` : '',
+        styles.borderRadius ? `border-radius: ${styles.borderRadius}px;` : '',
+        styles.boxShadow ? `box-shadow: ${styles.boxShadow};` : '',
+      ].filter(Boolean).join(' ');
+      
+      const classes = [
+        'mb-4',
+        styles.isBold ? 'font-bold' : '',
+        styles.hasBox ? 'p-4 rounded' : '',
+      ].filter(Boolean).join(' ');
+      
+      return `<div class="${classes}" style="${styleStr}">${element.content}</div>`;
+    };
+    
+    // Sort elements by position
+    const sortedElements = [...elements].sort((a, b) => {
+      const posA = typeof a.position === "number" ? a.position : 0;
+      const posB = typeof b.position === "number" ? b.position : 0;
+      return posA - posB;
+    });
+    
+    const topElements = sortedElements.filter(el => 
+      el.position === "top" || (typeof el.position === "number" && el.position < 10)
+    );
+    const middleElements = sortedElements.filter(el => 
+      el.position === "middle" || (typeof el.position === "number" && el.position >= 10 && el.position < 100)
+    );
+    const bottomElements = sortedElements.filter(el => 
+      el.position === "bottom" || (typeof el.position === "number" && el.position >= 100 && el.position < 1000)
+    );
+    const footerElements = sortedElements.filter(el => 
+      typeof el.position === "number" && el.position >= 1000
+    );
+    
+    return `<div class="min-h-screen w-full" style="background-color: ${pageData.backgroundColor};">
+      <!-- Header -->
+      <div class="w-full p-6 text-white text-center flex flex-col justify-center" style="background-color: ${pageData.primaryColor}; height: ${pageData.headerHeight}px;">
+        ${topElements.map(renderElement).join('')}
+        
+        ${pageData.showLogo && pageData.logoUrl ? `
+          <div class="mb-4 flex ${pageData.logoPosition === 'left' ? 'justify-start' : pageData.logoPosition === 'right' ? 'justify-end' : 'justify-center'}">
+            <img src="${pageData.logoUrl}" alt="Logo" class="object-contain rounded" style="width: ${pageData.logoSize}px; height: ${pageData.logoSize}px;" />
+          </div>
+        ` : ''}
+        
+        <h1 class="text-2xl font-bold mb-2">${pageData.customTitle || pageData.productName}</h1>
+        <p class="text-lg opacity-90">${pageData.customSubtitle || pageData.productDescription}</p>
+      </div>
+      
+      <!-- Main Content -->
+      <div class="flex-1 p-6">
+        ${middleElements.map(renderElement).join('')}
+        
+        <!-- Form Area -->
+        <div class="max-w-md mx-auto mb-6">
+          <div class="bg-white border border-gray-200 rounded-lg p-6">{{FORM_PLACEHOLDER}}</div>
+        </div>
+        
+        ${bottomElements.map(renderElement).join('')}
+      </div>
+      
+      ${footerElements.length > 0 ? `
+        <!-- Footer -->
+        <div class="p-6 text-center">
+          ${footerElements.map(renderElement).join('')}
+        </div>
+      ` : ''}
+    </div>`;
+  };
+
   const onSubmit = async (data: EditPageForm) => {
     try {
-      console.log("Starting HTML capture process...");
+      console.log("Generating clean HTML from page data...");
       
-      // Wait for React to fully render the preview, then capture the ACTUAL HTML
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      // Generate clean HTML directly from the form data and custom elements
+      const cleanHTML = generateCleanHTML(data, customElements);
       
-      // Debug: Find what's available in the DOM
-      console.log("Looking for preview content...");
+      console.log("Generated clean HTML length:", cleanHTML.length);
+      console.log("HTML contains form placeholder:", cleanHTML.includes('FORM_PLACEHOLDER'));
       
-      let previewContent = null;
-      
-      // Method 1: Try to find the UnifiedTemplateRenderer with data attribute
-      previewContent = document.querySelector('[data-capture-target="preview-content"]');
-      console.log("Method 1 - data-capture-target found:", !!previewContent);
-      
-      // Method 2: Look for the Preview tab specifically
-      if (!previewContent) {
-        // Look for tabs with "Preview" in the text content
-        const allTabs = document.querySelectorAll('[role="tabpanel"]');
-        console.log("Found tab panels:", allTabs.length);
-        
-        for (let i = 0; i < allTabs.length; i++) {
-          const tab = allTabs[i];
-          const state = tab.getAttribute('data-state');
-          console.log(`Tab ${i} state:`, state);
-          
-          // If this is the active tab AND contains preview content
-          if (state === 'active') {
-            // Look for UnifiedTemplateRenderer inside this tab
-            const templateRenderer = tab.querySelector('.min-h-screen[style*="background-color"]');
-            console.log("Found template renderer in active tab:", !!templateRenderer);
-            
-            if (templateRenderer) {
-              previewContent = templateRenderer;
-              console.log("Selected preview from active tab");
-              break;
-            }
-          }
-        }
-      }
-      
-      // Method 3: Look for any min-h-screen - prioritize the largest content
-      if (!previewContent) {
-        const allMinScreens = document.querySelectorAll('.min-h-screen');
-        console.log("Total min-h-screen elements found:", allMinScreens.length);
-        
-        let largestElement = null;
-        let largestSize = 0;
-        
-        for (let i = 0; i < allMinScreens.length; i++) {
-          const element = allMinScreens[i] as HTMLElement;
-          console.log(`Element ${i} has style:`, !!element.style.backgroundColor);
-          console.log(`Element ${i} innerHTML length:`, element.innerHTML.length);
-          
-          // Prioritize elements with larger content (likely the full preview)
-          if (element.innerHTML.length > largestSize) {
-            largestElement = element;
-            largestSize = element.innerHTML.length;
-          }
-        }
-        
-        if (largestElement && largestSize > 1000) {
-          previewContent = largestElement;
-          console.log("Selected largest element with", largestSize, "characters");
-        }
-      }
-      
-      if (!previewContent) {
-        console.error("Could not find preview content with any method");
-        return;
-      }
-      
-      console.log("Found preview content:", previewContent);
-      
-      // Clone only the actual preview content (not the editor interface)
-      const clonedContainer = previewContent.cloneNode(true) as HTMLElement;
-      
-      // Remove all interactive editor elements (floating menus, drop zones, etc.)
-      const elementsToRemove = clonedContainer.querySelectorAll(
-        '.absolute, .cursor-pointer, [onclick], [ondblclick], [class*="ring-"], [class*="border-dashed"], [class*="hover:"], .z-10, .transition-colors, [data-editor], .editor-element'
-      );
-      
-      elementsToRemove.forEach(el => el.remove());
-      
-      // Remove ALL editor-specific event handlers and interactive classes
-      const allElements = clonedContainer.querySelectorAll('*');
-      allElements.forEach(el => {
-        // Remove ALL event handlers
-        el.removeAttribute('onclick');
-        el.removeAttribute('ondblclick');
-        el.removeAttribute('onmouseover');
-        el.removeAttribute('onmouseout');
-        el.removeAttribute('onmouseenter');
-        el.removeAttribute('onmouseleave');
-        el.removeAttribute('data-editor');
-        
-        // Remove ALL editor-specific classes
-        const classesToRemove = [
-          'cursor-pointer', 'ring-2', 'ring-primary', 'transition-colors',
-          'hover:ring-2', 'hover:ring-primary', 'z-10', 'border-dashed',
-          'hover:bg-gray-100', 'group', 'relative'
-        ];
-        
-        classesToRemove.forEach(className => {
-          if (el.classList) {
-            el.classList.remove(className);
-          }
-        });
-        
-        // Remove any click handlers that might be attached
-        if ((el as any).onclick) {
-          (el as any).onclick = null;
-        }
-      });
-      
-      // Get the exact HTML from the screen
-      let capturedHTML = clonedContainer.outerHTML;
-      
-      // Remove ALL editor interface texts that shouldn't be in checkout
-      capturedHTML = capturedHTML.replace(/Editando:[^<]*/gi, '');
-      capturedHTML = capturedHTML.replace(/Preview/gi, '');
-      capturedHTML = capturedHTML.replace(/Visualização da página de dados/gi, '');
-      capturedHTML = capturedHTML.replace(/Dados do Cliente/gi, '');
-      
-      // Remove specific duplicated form elements that are causing issues
-      capturedHTML = capturedHTML.replace(/<div[^>]*>\s*E-mail\s*<\/div>/gi, '');
-      capturedHTML = capturedHTML.replace(/<div[^>]*>\s*CPF\s*<\/div>/gi, '');
-      capturedHTML = capturedHTML.replace(/<div[^>]*>\s*Telefone\s*<\/div>/gi, '');
-      
-      // Remove duplicated form containers that are causing the bug
-      capturedHTML = capturedHTML.replace(/<div[^>]*class="[^"]*space-y-4[^"]*"[^>]*>[\s\S]*?(?=<div class="w-full max-w-md">|$)/gi, '');
-      
-      // Clean up any empty divs or malformed HTML
-      capturedHTML = capturedHTML.replace(/<div[^>]*>\s*<\/div>/gi, '');
-      capturedHTML = capturedHTML.replace(/\s+/g, ' ');
-      
-      // Ensure we have a form placeholder
-      if (!capturedHTML.includes('FORM_PLACEHOLDER')) {
-        // Find the main content area and add the form placeholder
-        if (capturedHTML.includes('flex-1')) {
-          capturedHTML = capturedHTML.replace(
-            /(<div[^>]*class="[^"]*flex-1[^"]*"[^>]*>)/,
-            '$1\n<div class="max-w-md mx-auto mb-6">\n<div class="bg-white border border-gray-200 rounded-lg p-6">{{FORM_PLACEHOLDER}}</div>\n</div>'
-          );
-        } else if (capturedHTML.includes('p-6')) {
-          // Add after header if no flex-1 found
-          capturedHTML = capturedHTML.replace(
-            /(<div[^>]*class="[^"]*p-6[^"]*text-white[^"]*"[^>]*>[\s\S]*?<\/div>)/,
-            '$1\n<div class="p-6">\n<div class="max-w-md mx-auto">\n<div class="bg-white border border-gray-200 rounded-lg p-6">{{FORM_PLACEHOLDER}}</div>\n</div>\n</div>'
-          );
-        }
-      }
-      
-      console.log("Captured exact HTML length:", capturedHTML.length);
-      console.log("HTML contains form placeholder:", capturedHTML.includes('FORM_PLACEHOLDER'));
-      
-      // Save with the exact captured HTML
+      // Save with the generated clean HTML
       const updatedData = {
         ...data,
         customTitle: data.customTitle?.trim() || "",
         customSubtitle: data.customSubtitle?.trim() || "",
         customElements: JSON.stringify(customElements),
-        previewHtml: capturedHTML // This is the EXACT HTML from the screen
+        previewHtml: cleanHTML
       };
       
-      console.log("Saving page with EXACT captured HTML");
+      console.log("Saving page with generated clean HTML");
       updatePageMutation.mutate(updatedData);
       
     } catch (error) {
-      console.error("Error capturing exact HTML:", error);
+      console.error("Error generating clean HTML:", error);
     }
   };
 
