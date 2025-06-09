@@ -223,14 +223,18 @@ export default function CheckoutFinal() {
             input.value = value.substring(0,15);
           }
 
-          document.addEventListener('DOMContentLoaded', function() {
-            console.log('DOM loaded, searching for form...');
+          function initializeForm() {
+            console.log('Initializing form...');
             const form = document.querySelector('form');
             console.log('Form found:', form);
             
             if (form) {
               console.log('Adding event listener to form');
-              form.addEventListener('submit', async function(event) {
+              
+              // Remove any existing listeners
+              form.onsubmit = null;
+              
+              form.onsubmit = async function(event) {
                 console.log('Form submit event triggered');
                 event.preventDefault();
                 event.stopPropagation();
@@ -240,7 +244,7 @@ export default function CheckoutFinal() {
                 
                 if (!submitBtn) {
                   console.error('Submit button not found');
-                  return;
+                  return false;
                 }
                 
                 const originalHtml = submitBtn.innerHTML;
@@ -252,7 +256,7 @@ export default function CheckoutFinal() {
                   paymentPageId: ${(page as any).id},
                   customerName: formData.get('customerName'),
                   customerEmail: formData.get('customerEmail'),
-                  customerCpf: formData.get('customerCpf').replace(/[^0-9]/g, ''),
+                  customerCpf: formData.get('customerCpf') ? formData.get('customerCpf').replace(/[^0-9]/g, '') : '',
                   customerPhone: formData.get('customerPhone'),
                   amount: '${(page as any).price}'
                 };
@@ -283,7 +287,9 @@ export default function CheckoutFinal() {
                   submitBtn.disabled = false;
                   submitBtn.innerHTML = originalHtml;
                 }
-              });
+                
+                return false;
+              };
               
               // Add formatting to inputs
               const cpfInput = form.querySelector('input[name="customerCpf"]');
@@ -299,8 +305,21 @@ export default function CheckoutFinal() {
                   formatPhone(this);
                 });
               }
+            } else {
+              console.error('Form not found, retrying in 500ms...');
+              setTimeout(initializeForm, 500);
             }
-          });
+          }
+          
+          // Try multiple initialization methods
+          if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', initializeForm);
+          } else {
+            initializeForm();
+          }
+          
+          // Fallback initialization after a delay
+          setTimeout(initializeForm, 1000);
         </script>
       `;
       
