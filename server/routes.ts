@@ -147,9 +147,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Check if we have a configured API key
       if (!apiKey || apiKey.length < 30) {
         return res.status(503).json({
-          message: "Payment service not configured. Please provide a valid For4Payments API key.",
-          error: "Valid FOR4PAYMENTS_API_KEY is required",
-          suggestion: "Configure your For4Payments API key in the environment settings"
+          message: "Serviço de pagamento não configurado. Configure uma chave válida da For4Payments nas configurações do sistema.",
+          error: "Chave da API For4Payments é obrigatória",
+          suggestion: "Acesse as configurações do sistema e configure sua chave da API For4Payments"
         });
       }
 
@@ -189,7 +189,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       if (error instanceof Error) {
         if (error.message.includes("authentication") || error.message.includes("Unauthorized") || error.message.includes("For4Payments")) {
-          errorMessage = "Payment service authentication error. Please verify your For4Payments API key is valid and active.";
+          errorMessage = "Erro de autenticação com a For4Payments. Verifique se a chave da API está válida e ativa nas configurações do sistema.";
           statusCode = 503; // Service Unavailable
         } else if (error.message.includes("Connection") || error.message.includes("fetch")) {
           errorMessage = "Payment service temporarily unavailable. Please try again in a few moments.";
