@@ -332,34 +332,50 @@ export default function EditPage() {
       // Wait for React to fully render the preview, then capture the ACTUAL HTML
       await new Promise(resolve => setTimeout(resolve, 1000));
       
-      // Debug: Log all elements to see what's available
-      console.log("All elements with data-capture-target:", document.querySelectorAll('[data-capture-target]'));
-      console.log("All min-h-screen elements:", document.querySelectorAll('.min-h-screen'));
+      // Debug: Find what's available in the DOM
+      console.log("Looking for preview content...");
       
-      // Try multiple selectors to find the preview content
-      let previewContent = document.querySelector('[data-capture-target="preview-content"]');
+      let previewContent = null;
       
+      // Method 1: Try to find the UnifiedTemplateRenderer with data attribute
+      previewContent = document.querySelector('[data-capture-target="preview-content"]');
+      console.log("Method 1 - data-capture-target found:", !!previewContent);
+      
+      // Method 2: Look in the actual Preview tab panel
       if (!previewContent) {
-        console.log("Primary selector failed, trying alternative selectors...");
+        const previewTabs = document.querySelectorAll('[role="tabpanel"]');
+        console.log("Found tab panels:", previewTabs.length);
         
-        // Try to find within the Preview tab
-        const previewTab = document.querySelector('[role="tabpanel"][data-state="active"]');
-        if (previewTab) {
-          previewContent = previewTab.querySelector('.min-h-screen');
-          console.log("Found preview content in active tab:", previewContent);
-        }
-        
-        // Last resort: find any min-h-screen with style attribute
-        if (!previewContent) {
-          const allScreens = document.querySelectorAll('.min-h-screen[style]');
-          for (let i = 0; i < allScreens.length; i++) {
-            const screen = allScreens[i];
-            // Check if this screen is in the preview area and not in editor
-            if ((screen as HTMLElement).style.backgroundColor && !screen.closest('.editor-panel')) {
-              previewContent = screen;
-              console.log("Found preview content via fallback method:", previewContent);
+        for (let i = 0; i < previewTabs.length; i++) {
+          const tab = previewTabs[i];
+          const state = tab.getAttribute('data-state');
+          console.log(`Tab ${i} state:`, state);
+          
+          if (state === 'active') {
+            const minScreen = tab.querySelector('.min-h-screen');
+            console.log("Found min-h-screen in active tab:", !!minScreen);
+            if (minScreen) {
+              previewContent = minScreen;
               break;
             }
+          }
+        }
+      }
+      
+      // Method 3: Look for any min-h-screen with background style
+      if (!previewContent) {
+        const allMinScreens = document.querySelectorAll('.min-h-screen');
+        console.log("Total min-h-screen elements found:", allMinScreens.length);
+        
+        for (let i = 0; i < allMinScreens.length; i++) {
+          const element = allMinScreens[i] as HTMLElement;
+          console.log(`Element ${i} has style:`, !!element.style.backgroundColor);
+          console.log(`Element ${i} innerHTML length:`, element.innerHTML.length);
+          
+          if (element.style.backgroundColor && element.innerHTML.length > 500) {
+            previewContent = element;
+            console.log("Selected element with background and content");
+            break;
           }
         }
       }
@@ -428,18 +444,21 @@ export default function EditPage() {
       capturedHTML = capturedHTML.replace(/<div[^>]*>\s*<\/div>/gi, '');
       capturedHTML = capturedHTML.replace(/\s+/g, ' ');
       
-      // Replace the main form area with placeholder, but keep it clean
-      if (capturedHTML.includes('bg-white') && capturedHTML.includes('border')) {
-        capturedHTML = capturedHTML.replace(
-          /<div[^>]*class="[^"]*bg-white[^"]*border[^"]*"[^>]*>[\s\S]*?<\/div>/gi,
-          '<div class="bg-white border border-gray-200 rounded-lg p-6 max-w-md mx-auto">{{FORM_PLACEHOLDER}}</div>'
-        );
-      } else {
-        // Fallback: add form placeholder in a standard location
-        capturedHTML = capturedHTML.replace(
-          /<div class="flex-1 p-6">/,
-          '<div class="flex-1 p-6"><div class="bg-white border border-gray-200 rounded-lg p-6 max-w-md mx-auto">{{FORM_PLACEHOLDER}}</div>'
-        );
+      // Ensure we have a form placeholder
+      if (!capturedHTML.includes('FORM_PLACEHOLDER')) {
+        // Find the main content area and add the form placeholder
+        if (capturedHTML.includes('flex-1')) {
+          capturedHTML = capturedHTML.replace(
+            /(<div[^>]*class="[^"]*flex-1[^"]*"[^>]*>)/,
+            '$1\n<div class="max-w-md mx-auto mb-6">\n<div class="bg-white border border-gray-200 rounded-lg p-6">{{FORM_PLACEHOLDER}}</div>\n</div>'
+          );
+        } else if (capturedHTML.includes('p-6')) {
+          // Add after header if no flex-1 found
+          capturedHTML = capturedHTML.replace(
+            /(<div[^>]*class="[^"]*p-6[^"]*text-white[^"]*"[^>]*>[\s\S]*?<\/div>)/,
+            '$1\n<div class="p-6">\n<div class="max-w-md mx-auto">\n<div class="bg-white border border-gray-200 rounded-lg p-6">{{FORM_PLACEHOLDER}}</div>\n</div>\n</div>'
+          );
+        }
       }
       
       console.log("Captured exact HTML length:", capturedHTML.length);
