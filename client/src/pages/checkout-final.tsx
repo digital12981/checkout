@@ -159,6 +159,51 @@ export default function CheckoutFinal() {
   // Use the exact previewHtml from database with logo and custom design
   let finalHtml = page.previewHtml;
   
+  // Replace the form placeholder with actual form HTML
+  if (finalHtml.includes('{{FORM_PLACEHOLDER}}')) {
+    const formHtml = `
+      <div class="max-w-md mx-auto mb-6">
+        <div class="bg-white border border-gray-200 rounded-lg p-6">
+          <form data-react-form="true" class="space-y-4">
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-1">Nome completo</label>
+              <input type="text" name="customerName" required 
+                     class="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500" />
+            </div>
+            
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-1">Email</label>
+              <input type="email" name="customerEmail" required 
+                     class="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500" />
+            </div>
+            
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-1">CPF</label>
+              <input type="text" name="customerCpf" required maxlength="14" placeholder="000.000.000-00"
+                     class="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500" />
+            </div>
+            
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-1">Telefone</label>
+              <input type="tel" name="customerPhone" required placeholder="(11) 99999-9999"
+                     class="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500" />
+            </div>
+            
+            <button type="submit"
+                    class="w-full text-white py-3 px-6 rounded-md font-semibold hover:opacity-90 transition-colors disabled:opacity-50 flex items-center justify-center gap-2"
+                    style="background-color: ${page.accentColor};" ${isSubmitting ? 'disabled' : ''}>
+              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path>
+              </svg>
+              ${isSubmitting ? 'Processando...' : (page.customButtonText || 'Pagar com PIX')}
+            </button>
+          </form>
+        </div>
+      </div>
+    `;
+    finalHtml = finalHtml.replace('{{FORM_PLACEHOLDER}}', formHtml);
+  }
+  
   // If we have a PIX payment, show the payment interface instead
   if (pixPayment) {
     finalHtml = `<div class="min-h-screen w-full" style="background-color: ${page.backgroundColor};">
@@ -174,11 +219,10 @@ export default function CheckoutFinal() {
         <p class="text-lg opacity-90">Escaneie o QR Code ou copie o código PIX para finalizar</p>
       </div>
       
-      <!-- Main Content -->
-      <div class="flex-1 p-6">
-        <!-- Status e Cronômetro -->
-        <div class="max-w-md mx-auto mb-6">
-          <div class="bg-amber-600 text-white rounded-lg p-6 text-center shadow-lg">
+      <!-- Status e Cronômetro Logo Abaixo do Header -->
+      <div class="w-full px-6 pt-4">
+        <div class="max-w-md mx-auto">
+          <div style="background-color: #B45309;" class="text-white rounded-lg p-6 text-center shadow-lg">
             <!-- Status com Spinner -->
             <div class="flex items-center justify-center mb-4">
               <svg class="animate-spin h-6 w-6 mr-3" fill="none" viewBox="0 0 24 24">
@@ -189,7 +233,7 @@ export default function CheckoutFinal() {
             </div>
             
             <!-- Cronômetro -->
-            <div class="bg-amber-700 rounded-lg p-4">
+            <div style="background-color: #92400E;" class="rounded-lg p-4">
               <div class="text-sm mb-2 opacity-90">Tempo restante para pagamento:</div>
               <div class="text-3xl font-bold font-mono tracking-wider">
                 ${formatTime(timeLeft)}
@@ -200,6 +244,10 @@ export default function CheckoutFinal() {
             </div>
           </div>
         </div>
+      </div>
+      
+      <!-- Main Content -->
+      <div class="flex-1 p-6">
 
         <!-- Payment Status -->
         <div class="max-w-md mx-auto mb-6">
