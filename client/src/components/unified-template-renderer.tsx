@@ -196,13 +196,17 @@ export default function UnifiedTemplateRenderer({
           </div>
         )}
 
-        {/* Title and subtitle */}
-        <h1 className="text-2xl font-bold mb-2">
-          {page.customTitle || page.productName}
-        </h1>
-        <p className="text-white/90">
-          {page.customSubtitle || page.productDescription}
-        </p>
+        {/* Title and subtitle - only show if custom values are provided */}
+        {page.customTitle && (
+          <h1 className="text-2xl font-bold mb-2">
+            {page.customTitle}
+          </h1>
+        )}
+        {page.customSubtitle && (
+          <p className="text-white/90">
+            {page.customSubtitle}
+          </p>
+        )}
       </div>
 
       {/* Main content area */}
