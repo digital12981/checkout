@@ -237,26 +237,39 @@ export default function EditPage() {
     // Based on the current form data and custom elements
     
     const generateCleanHTML = () => {
+      // Header section with logo, title, subtitle and price
+      const headerContent = [];
+      
+      if (formData.showLogo && formData.logoUrl) {
+        const logoAlignment = formData.logoPosition === 'left' ? 'justify-start' : 
+                            formData.logoPosition === 'right' ? 'justify-end' : 'justify-center';
+        headerContent.push(`
+          <div class="mb-4 flex ${logoAlignment}">
+            <img src="${formData.logoUrl}" alt="Logo" class="object-contain rounded" 
+                 style="width: ${formData.logoSize}px; height: ${formData.logoSize}px;" />
+          </div>
+        `);
+      }
+      
+      if (formData.customTitle && formData.customTitle.trim()) {
+        headerContent.push(`<h1 class="text-2xl font-bold mb-2">${formData.customTitle}</h1>`);
+      }
+      
+      if (formData.customSubtitle && formData.customSubtitle.trim()) {
+        headerContent.push(`<p class="text-white/90 mb-4">${formData.customSubtitle}</p>`);
+      }
+      
+      headerContent.push(`<div class="text-3xl font-bold">${formatCurrency(formData.price)}</div>`);
+      
       const headerHTML = `
         <div class="w-full p-6 text-white text-center flex flex-col justify-center" 
              style="background-color: ${formData.primaryColor}; height: ${formData.headerHeight}px;">
-          ${formData.showLogo && formData.logoUrl ? `
-            <div class="mb-4 flex ${formData.logoPosition === 'left' ? 'justify-start' : formData.logoPosition === 'right' ? 'justify-end' : 'justify-center'}">
-              <img src="${formData.logoUrl}" alt="Logo" class="object-contain rounded" 
-                   style="width: ${formData.logoSize}px; height: ${formData.logoSize}px;" />
-            </div>
-          ` : ''}
-          
-          ${formData.customTitle ? `<h1 class="text-2xl font-bold mb-2">${formData.customTitle}</h1>` : ''}
-          ${formData.customSubtitle ? `<p class="text-white/90 mb-4">${formData.customSubtitle}</p>` : ''}
-          <div class="text-3xl font-bold">${formatCurrency(formData.price)}</div>
+          ${headerContent.join('')}
         </div>
       `;
       
       // Generate custom elements HTML
       const customElementsHTML = customElements.map(element => {
-        let elementHTML = '';
-        
         if (element.type === 'text') {
           const styles = {
             color: element.styles.color || '#000000',
@@ -274,17 +287,16 @@ export default function EditPage() {
             `${key.replace(/([A-Z])/g, '-$1').toLowerCase()}: ${value}`
           ).join('; ');
           
-          elementHTML = `<div style="${styleString}">${element.content.replace(/\n/g, '<br>')}</div>`;
+          return `<div style="${styleString}">${element.content.replace(/\n/g, '<br>')}</div>`;
         } else if (element.type === 'image') {
           const imageSize = element.styles.imageSize || 200;
-          elementHTML = `<div class="text-center mb-4">
+          return `<div class="text-center mb-4">
             <img src="${element.content}" alt="Elemento de imagem" 
                  style="width: ${imageSize}px; height: ${imageSize}px; border-radius: ${element.styles.borderRadius || 0}px;" 
                  class="mx-auto object-cover" />
           </div>`;
         }
-        
-        return elementHTML;
+        return '';
       }).join('');
       
       const formHTML = `
@@ -296,12 +308,15 @@ export default function EditPage() {
         </div>
       `;
       
-      return `
+      const fullHTML = `
         <div class="min-h-screen w-full" style="background-color: ${formData.backgroundColor};">
           ${headerHTML}
           ${formHTML}
         </div>
       `;
+      
+      console.log("Full generated HTML:", fullHTML);
+      return fullHTML;
     };
     
     const cleanHTML = generateCleanHTML();
