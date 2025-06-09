@@ -162,46 +162,82 @@ export default function CheckoutFinal() {
   // Replace the form placeholder with actual form HTML
   if (finalHtml.includes('{{FORM_PLACEHOLDER}}')) {
     const formHtml = `
-      <div class="max-w-md mx-auto mb-6">
-        <div class="bg-white border border-gray-200 rounded-lg p-6">
-          <form data-react-form="true" class="space-y-4">
-            <div>
-              <label class="block text-sm font-medium text-gray-700 mb-1">Nome completo</label>
-              <input type="text" name="customerName" required 
-                     class="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500" />
-            </div>
-            
-            <div>
-              <label class="block text-sm font-medium text-gray-700 mb-1">Email</label>
-              <input type="email" name="customerEmail" required 
-                     class="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500" />
-            </div>
-            
-            <div>
-              <label class="block text-sm font-medium text-gray-700 mb-1">CPF</label>
-              <input type="text" name="customerCpf" required maxlength="14" placeholder="000.000.000-00"
-                     class="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500" />
-            </div>
-            
-            <div>
-              <label class="block text-sm font-medium text-gray-700 mb-1">Telefone</label>
-              <input type="tel" name="customerPhone" required placeholder="(11) 99999-9999"
-                     class="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500" />
-            </div>
-            
-            <button type="submit"
-                    class="w-full text-white py-3 px-6 rounded-md font-semibold hover:opacity-90 transition-colors disabled:opacity-50 flex items-center justify-center gap-2"
-                    style="background-color: ${page.accentColor};" ${isSubmitting ? 'disabled' : ''}>
-              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path>
-              </svg>
-              ${isSubmitting ? 'Processando...' : (page.customButtonText || 'Pagar com PIX')}
-            </button>
-          </form>
+      <!-- Status Compacto -->
+      <div class="bg-amber-100 border border-amber-200 rounded-md p-3 mb-4 text-center">
+        <div class="flex items-center justify-center mb-2">
+          <svg class="animate-spin h-4 w-4 mr-2 text-amber-600" fill="none" viewBox="0 0 24 24">
+            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+          </svg>
+          <span class="text-sm font-medium text-amber-800">Aguardando pagamento...</span>
         </div>
+        <div class="text-lg font-bold font-mono text-amber-900">15:00</div>
       </div>
+
+      <form data-react-form="true" class="space-y-4">
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">Nome completo</label>
+          <input type="text" name="customerName" required 
+                 class="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500" />
+        </div>
+        
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">Email</label>
+          <input type="email" name="customerEmail" required 
+                 class="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500" />
+        </div>
+        
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">CPF</label>
+          <input type="text" name="customerCpf" required maxlength="14" placeholder="000.000.000-00"
+                 class="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500" />
+        </div>
+        
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">Telefone</label>
+          <input type="tel" name="customerPhone" required placeholder="(11) 99999-9999"
+                 class="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500" />
+        </div>
+        
+        <button type="submit"
+                class="w-full text-white py-3 px-6 rounded-md font-semibold hover:opacity-90 transition-colors disabled:opacity-50 flex items-center justify-center gap-2"
+                style="background-color: ${page.accentColor};" ${isSubmitting ? 'disabled' : ''}>
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path>
+          </svg>
+          ${isSubmitting ? 'Processando...' : (page.customButtonText || 'Pagar com PIX')}
+        </button>
+      </form>
     `;
     finalHtml = finalHtml.replace('{{FORM_PLACEHOLDER}}', formHtml);
+  }
+  
+  // Add footer if missing
+  if (!finalHtml.includes('<footer')) {
+    finalHtml = finalHtml.replace('</div>', `</div>
+    
+    <!-- Footer -->
+    <footer class="w-full py-6 px-6 border-t border-gray-200 bg-gray-50">
+      <div class="max-w-md mx-auto text-center">
+        <div class="flex items-center justify-center space-x-6 text-sm text-gray-600 mb-3">
+          <span class="flex items-center space-x-1">
+            <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+              <path fill-rule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clip-rule="evenodd" />
+            </svg>
+            <span>Pagamento Seguro</span>
+          </span>
+          <span class="flex items-center space-x-1">
+            <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+              <path fill-rule="evenodd" d="M6.267 3.455a3.066 3.066 0 001.745-.723 3.066 3.066 0 013.976 0 3.066 3.066 0 001.745.723 3.066 3.066 0 012.812 2.812c.051.643.304 1.254.723 1.745a3.066 3.066 0 010 3.976 3.066 3.066 0 00-.723 1.745 3.066 3.066 0 01-2.812 2.812 3.066 3.066 0 00-1.745.723 3.066 3.066 0 01-3.976 0 3.066 3.066 0 00-1.745-.723 3.066 3.066 0 01-2.812-2.812 3.066 3.066 0 00-.723-1.745 3.066 3.066 0 010-3.976 3.066 3.066 0 00.723-1.745 3.066 3.066 0 012.812-2.812zm7.44 5.252a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
+            </svg>
+            <span>Processamento Imediato</span>
+          </span>
+        </div>
+        <div class="text-xs text-gray-500">
+          Seus dados estão protegidos e a transação é processada com segurança
+        </div>
+      </div>
+    </footer>`);
   }
   
   // If we have a PIX payment, show the payment interface instead
@@ -219,35 +255,21 @@ export default function CheckoutFinal() {
         <p class="text-lg opacity-90">Escaneie o QR Code ou copie o código PIX para finalizar</p>
       </div>
       
-      <!-- Status e Cronômetro Logo Abaixo do Header -->
-      <div class="w-full px-6 pt-4">
-        <div class="max-w-md mx-auto">
-          <div style="background-color: #B45309;" class="text-white rounded-lg p-6 text-center shadow-lg">
-            <!-- Status com Spinner -->
-            <div class="flex items-center justify-center mb-4">
-              <svg class="animate-spin h-6 w-6 mr-3" fill="none" viewBox="0 0 24 24">
+      <!-- Main Content -->
+      <div class="flex-1 p-6">
+        <!-- Status Compacto -->
+        <div class="max-w-md mx-auto mb-6">
+          <div class="bg-amber-100 border border-amber-200 rounded-md p-3 text-center">
+            <div class="flex items-center justify-center mb-2">
+              <svg class="animate-spin h-4 w-4 mr-2 text-amber-600" fill="none" viewBox="0 0 24 24">
                 <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
                 <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
               </svg>
-              <span class="text-lg font-medium">Aguardando pagamento...</span>
+              <span class="text-sm font-medium text-amber-800">Aguardando pagamento...</span>
             </div>
-            
-            <!-- Cronômetro -->
-            <div style="background-color: #92400E;" class="rounded-lg p-4">
-              <div class="text-sm mb-2 opacity-90">Tempo restante para pagamento:</div>
-              <div class="text-3xl font-bold font-mono tracking-wider">
-                ${formatTime(timeLeft)}
-              </div>
-              <div class="text-sm mt-2 opacity-80">
-                O PIX expira automaticamente
-              </div>
-            </div>
+            <div class="text-lg font-bold font-mono text-amber-900">${formatTime(timeLeft)}</div>
           </div>
         </div>
-      </div>
-      
-      <!-- Main Content -->
-      <div class="flex-1 p-6">
 
         <!-- Payment Status -->
         <div class="max-w-md mx-auto mb-6">
