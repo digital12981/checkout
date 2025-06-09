@@ -2,13 +2,46 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+    <meta name="format-detection" content="telephone=no" />
+    <style>
+      /* Force input interactivity */
+      * {
+        -webkit-user-select: auto !important;
+        -moz-user-select: auto !important;
+        -ms-user-select: auto !important;
+        user-select: auto !important;
+        pointer-events: auto !important;
+        touch-action: manipulation !important;
+      }
+      
+      input, textarea, select, button {
+        -webkit-appearance: none !important;
+        -moz-appearance: none !important;
+        appearance: none !important;
+        background-color: white !important;
+        pointer-events: auto !important;
+        touch-action: manipulation !important;
+        user-select: auto !important;
+        -webkit-user-select: auto !important;
+      }
+      
+      /* Override any potential blocking overlays */
+      body::before,
+      body::after,
+      *::before,
+      *::after {
+        pointer-events: none !important;
+      }
+    </style>
   </head>
   <body>
     <div id="test-area" style="position: fixed; top: 10px; right: 10px; background: white; padding: 10px; border: 2px solid red; z-index: 99999;">
-      <h3>Teste de Input</h3>
-      <input type="text" placeholder="Teste aqui" style="padding: 5px; margin: 5px;">
-      <button onclick="alert('Botão funcionou!')">Testar</button>
+      <h3>Teste Custom Input</h3>
+      <div id="custom-input" style="border: 1px solid #ccc; padding: 5px; min-height: 20px; background: white; cursor: text;" contenteditable="true">
+        Clique aqui para testar
+      </div>
+      <button onclick="alert('Custom input: ' + document.getElementById('custom-input').textContent)">Testar</button>
     </div>
     <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>
