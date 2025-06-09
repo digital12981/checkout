@@ -341,21 +341,26 @@ export default function EditPage() {
       previewContent = document.querySelector('[data-capture-target="preview-content"]');
       console.log("Method 1 - data-capture-target found:", !!previewContent);
       
-      // Method 2: Look in the actual Preview tab panel
+      // Method 2: Look for the Preview tab specifically
       if (!previewContent) {
-        const previewTabs = document.querySelectorAll('[role="tabpanel"]');
-        console.log("Found tab panels:", previewTabs.length);
+        // Look for tabs with "Preview" in the text content
+        const allTabs = document.querySelectorAll('[role="tabpanel"]');
+        console.log("Found tab panels:", allTabs.length);
         
-        for (let i = 0; i < previewTabs.length; i++) {
-          const tab = previewTabs[i];
+        for (let i = 0; i < allTabs.length; i++) {
+          const tab = allTabs[i];
           const state = tab.getAttribute('data-state');
           console.log(`Tab ${i} state:`, state);
           
+          // If this is the active tab AND contains preview content
           if (state === 'active') {
-            const minScreen = tab.querySelector('.min-h-screen');
-            console.log("Found min-h-screen in active tab:", !!minScreen);
-            if (minScreen) {
-              previewContent = minScreen;
+            // Look for UnifiedTemplateRenderer inside this tab
+            const templateRenderer = tab.querySelector('.min-h-screen[style*="background-color"]');
+            console.log("Found template renderer in active tab:", !!templateRenderer);
+            
+            if (templateRenderer) {
+              previewContent = templateRenderer;
+              console.log("Selected preview from active tab");
               break;
             }
           }
@@ -439,8 +444,13 @@ export default function EditPage() {
       // Get the exact HTML from the screen
       let capturedHTML = clonedContainer.outerHTML;
       
+      // Remove ALL editor interface texts that shouldn't be in checkout
+      capturedHTML = capturedHTML.replace(/Editando:[^<]*/gi, '');
+      capturedHTML = capturedHTML.replace(/Preview/gi, '');
+      capturedHTML = capturedHTML.replace(/Visualização da página de dados/gi, '');
+      capturedHTML = capturedHTML.replace(/Dados do Cliente/gi, '');
+      
       // Remove specific duplicated form elements that are causing issues
-      // Remove any standalone form field labels that are floating
       capturedHTML = capturedHTML.replace(/<div[^>]*>\s*E-mail\s*<\/div>/gi, '');
       capturedHTML = capturedHTML.replace(/<div[^>]*>\s*CPF\s*<\/div>/gi, '');
       capturedHTML = capturedHTML.replace(/<div[^>]*>\s*Telefone\s*<\/div>/gi, '');
