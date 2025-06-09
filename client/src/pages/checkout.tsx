@@ -60,6 +60,31 @@ export default function Checkout() {
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const [pixPayment, setPixPayment] = useState<PixPayment | null>(null);
+  const [timeLeft, setTimeLeft] = useState(15 * 60); // 15 minutes in seconds
+
+  // Timer functionality
+  useEffect(() => {
+    if (pixPayment && timeLeft > 0) {
+      const timer = setInterval(() => {
+        setTimeLeft(prev => {
+          if (prev <= 1) {
+            clearInterval(timer);
+            return 0;
+          }
+          return prev - 1;
+        });
+      }, 1000);
+
+      return () => clearInterval(timer);
+    }
+  }, [pixPayment, timeLeft]);
+
+  // Format time as MM:SS
+  const formatTime = (seconds: number) => {
+    const minutes = Math.floor(seconds / 60);
+    const remainingSeconds = seconds % 60;
+    return `${minutes.toString().padStart(2, '0')}:${remainingSeconds.toString().padStart(2, '0')}`;
+  };
 
   // Extract URL parameters for auto-fill
   const urlParams = new URLSearchParams(window.location.search);
@@ -362,7 +387,7 @@ export default function Checkout() {
             <div className="animate-spin h-4 w-4 border-2 border-yellow-600 border-t-transparent rounded-full"></div>
           </div>
           <div className="text-xl font-bold text-yellow-800">
-            Expira em 15:00
+            Expira em {formatTime(timeLeft)}
           </div>
         </div>
       </div>

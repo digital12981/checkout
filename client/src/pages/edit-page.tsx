@@ -107,6 +107,31 @@ export default function EditPage() {
   const [customElements, setCustomElements] = useState<CustomElement[]>([]);
   const [editingElement, setEditingElement] = useState<string | null>(null);
   const [capturedHTML, setCapturedHTML] = useState<string>("");
+  const [timeLeft, setTimeLeft] = useState(15 * 60); // 15 minutes in seconds
+
+  // Timer functionality
+  useEffect(() => {
+    if (previewTab === "payment" && timeLeft > 0) {
+      const timer = setInterval(() => {
+        setTimeLeft(prev => {
+          if (prev <= 1) {
+            clearInterval(timer);
+            return 0;
+          }
+          return prev - 1;
+        });
+      }, 1000);
+
+      return () => clearInterval(timer);
+    }
+  }, [previewTab, timeLeft]);
+
+  // Format time as MM:SS
+  const formatTime = (seconds: number) => {
+    const minutes = Math.floor(seconds / 60);
+    const remainingSeconds = seconds % 60;
+    return `${minutes.toString().padStart(2, '0')}:${remainingSeconds.toString().padStart(2, '0')}`;
+  };
 
   const { data: page, isLoading } = useQuery({
     queryKey: ["/api/payment-pages", id],
@@ -953,7 +978,7 @@ export default function EditPage() {
                           <div className="animate-spin h-4 w-4 border-2 border-yellow-600 border-t-transparent rounded-full"></div>
                         </div>
                         <div className="text-xl font-bold text-yellow-800">
-                          Expira em 15:00
+                          Expira em {formatTime(timeLeft)}
                         </div>
                       </div>
                     </div>
@@ -993,7 +1018,13 @@ export default function EditPage() {
                           disabled
                         />
                         <button 
-                          className="w-full px-4 py-3 bg-gray-600 text-white rounded-md hover:bg-gray-700 flex items-center justify-center gap-2"
+                          className="w-full px-4 py-3 text-white flex items-center justify-center gap-2 shadow-lg transform transition-all duration-150 active:scale-95"
+                          style={{
+                            backgroundColor: '#48AD45',
+                            borderRadius: '4px',
+                            boxShadow: '0 4px 8px rgba(72, 173, 69, 0.3), 0 2px 4px rgba(0, 0, 0, 0.1)',
+                            border: '1px solid rgba(255, 255, 255, 0.2)'
+                          }}
                           disabled
                         >
                           <Copy className="w-4 h-4" />
