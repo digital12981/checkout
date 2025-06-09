@@ -368,9 +368,16 @@ export default function Checkout() {
       </div>
 
       <div className="text-center mb-6">
-        <p className="text-sm text-neutral-600">
+        <p className="text-sm text-neutral-600 mb-4">
           Escaneie o QR Code com seu app do banco
         </p>
+        <div className="flex justify-center mb-4">
+          <img 
+            src="https://upload.wikimedia.org/wikipedia/commons/thumb/a/a2/Logo%E2%80%94pix_powered_by_Banco_Central_%28Brazil%2C_2020%29.svg/2560px-Logo%E2%80%94pix_powered_by_Banco_Central_%28Brazil%2C_2020%29.svg.png"
+            alt="PIX Logo"
+            className="h-8 object-contain"
+          />
+        </div>
       </div>
 
       <div className="text-center mb-6">
@@ -453,9 +460,16 @@ export default function Checkout() {
           </div>
 
           <div class="text-center mb-6">
-            <p class="text-sm text-gray-600">
+            <p class="text-sm text-gray-600 mb-4">
               Escaneie o QR Code com seu app do banco
             </p>
+            <div class="flex justify-center mb-4">
+              <img 
+                src="https://upload.wikimedia.org/wikipedia/commons/thumb/a/a2/Logo%E2%80%94pix_powered_by_Banco_Central_%28Brazil%2C_2020%29.svg/2560px-Logo%E2%80%94pix_powered_by_Banco_Central_%28Brazil%2C_2020%29.svg.png"
+                alt="PIX Logo"
+                class="h-8 object-contain"
+              />
+            </div>
           </div>
 
           <div class="text-center mb-6">

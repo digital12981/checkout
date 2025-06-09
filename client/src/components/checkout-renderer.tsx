@@ -243,9 +243,16 @@ export default function CheckoutRenderer({ page, pixPayment, formContent }: Chec
               </div>
 
               <div className="text-center mb-6">
-                <p className="text-sm text-neutral-600">
+                <p className="text-sm text-neutral-600 mb-4">
                   Escaneie o QR Code com seu app de pagamento
                 </p>
+                <div className="flex justify-center mb-4">
+                  <img 
+                    src="https://upload.wikimedia.org/wikipedia/commons/thumb/a/a2/Logo%E2%80%94pix_powered_by_Banco_Central_%28Brazil%2C_2020%29.svg/2560px-Logo%E2%80%94pix_powered_by_Banco_Central_%28Brazil%2C_2020%29.svg.png"
+                    alt="PIX Logo"
+                    className="h-8 object-contain"
+                  />
+                </div>
               </div>
 
               {/* Middle elements before payment */}
