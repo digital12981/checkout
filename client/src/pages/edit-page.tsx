@@ -362,21 +362,29 @@ export default function EditPage() {
         }
       }
       
-      // Method 3: Look for any min-h-screen with background style
+      // Method 3: Look for any min-h-screen - prioritize the largest content
       if (!previewContent) {
         const allMinScreens = document.querySelectorAll('.min-h-screen');
         console.log("Total min-h-screen elements found:", allMinScreens.length);
+        
+        let largestElement = null;
+        let largestSize = 0;
         
         for (let i = 0; i < allMinScreens.length; i++) {
           const element = allMinScreens[i] as HTMLElement;
           console.log(`Element ${i} has style:`, !!element.style.backgroundColor);
           console.log(`Element ${i} innerHTML length:`, element.innerHTML.length);
           
-          if (element.style.backgroundColor && element.innerHTML.length > 500) {
-            previewContent = element;
-            console.log("Selected element with background and content");
-            break;
+          // Prioritize elements with larger content (likely the full preview)
+          if (element.innerHTML.length > largestSize) {
+            largestElement = element;
+            largestSize = element.innerHTML.length;
           }
+        }
+        
+        if (largestElement && largestSize > 1000) {
+          previewContent = largestElement;
+          console.log("Selected largest element with", largestSize, "characters");
         }
       }
       
