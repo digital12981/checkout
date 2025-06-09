@@ -132,73 +132,7 @@ export default function CheckoutWorking() {
     } else {
       // Customer Form - always show when no payment exists
       const formContent = `
-        <script>
-          window.formatCpf = function(input) {
-            let value = input.value.replace(/[^0-9]/g, '');
-            if (value.length > 3) value = value.substring(0,3) + '.' + value.substring(3);
-            if (value.length > 7) value = value.substring(0,7) + '.' + value.substring(7);
-            if (value.length > 11) value = value.substring(0,11) + '-' + value.substring(11,13);
-            input.value = value.substring(0,14);
-          };
-
-          window.formatPhone = function(input) {
-            let value = input.value.replace(/[^0-9]/g, '');
-            if (value.length > 2) value = '(' + value.substring(0,2) + ') ' + value.substring(2);
-            if (value.length > 10) value = value.substring(0,10) + '-' + value.substring(10);
-            input.value = value.substring(0,15);
-          };
-
-          window.handleSubmit = function(event) {
-            event.preventDefault();
-            
-            const submitBtn = document.getElementById('submit-btn');
-            const form = event.target;
-            const formData = new FormData(form);
-            
-            submitBtn.disabled = true;
-            submitBtn.textContent = 'Processando...';
-            
-            const data = {
-              paymentPageId: ${(page as any).id},
-              customerName: formData.get('customerName'),
-              customerEmail: formData.get('customerEmail'),
-              customerCpf: formData.get('customerCpf').replace(/[^0-9]/g, ''),
-              customerPhone: formData.get('customerPhone'),
-              amount: '${(page as any).price}'
-            };
-            
-            console.log('Submitting payment data:', data);
-            
-            fetch('/api/pix-payments', {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify(data)
-            })
-            .then(response => {
-              console.log('Response status:', response.status);
-              return response.json();
-            })
-            .then(result => {
-              console.log('Response data:', result);
-              if (result.id) {
-                console.log('Payment created successfully, reloading page');
-                window.location.reload();
-              } else {
-                throw new Error(result.message || 'Erro ao processar pagamento');
-              }
-            })
-            .catch(error => {
-              console.error('Error:', error);
-              alert('Erro ao processar pagamento: ' + error.message);
-              submitBtn.disabled = false;
-              submitBtn.innerHTML = '<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path></svg>${(page as any).customButtonText || 'Pagar com PIX'}';
-            });
-            
-            return false;
-          };
-        </script>
-        
-        <form class="space-y-4" onsubmit="return window.handleSubmit(event)">
+        <form class="space-y-4" id="checkout-form"&gt;
           <div>
             <label class="block text-sm font-medium text-gray-700 mb-1">Nome completo</label>
             <input type="text" name="customerName" required class="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500" />

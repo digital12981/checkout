@@ -4,7 +4,7 @@ import { QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import Dashboard from "@/pages/dashboard";
-import CheckoutWorking from "@/pages/checkout-working";
+import CheckoutFinal from "@/pages/checkout-final";
 import EditPage from "@/pages/edit-page";
 import HtmlEditor from "@/pages/html-editor";
 import NotFound from "@/pages/not-found";
@@ -17,8 +17,8 @@ function Router() {
       <Route path="/settings" component={Dashboard} />
       <Route path="/pages/edit/:id" component={EditPage} />
       <Route path="/pages/html-edit/:id" component={HtmlEditor} />
-      <Route path="/checkout/:id" component={CheckoutWorking} />
-      <Route path="/pagamento/:id" component={CheckoutWorking} />
+      <Route path="/checkout/:id" component={CheckoutFinal} />
+      <Route path="/pagamento/:id" component={CheckoutFinal} />
       <Route component={NotFound} />
     </Switch>
   );
