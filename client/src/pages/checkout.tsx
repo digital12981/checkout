@@ -408,13 +408,51 @@ export default function Checkout() {
     </div>
   ) : null;
 
-  // If we have saved preview HTML, use it directly
-  if (page.previewHtml) {
+  // If we have saved preview HTML, use it directly but inject the form content
+  if (page.previewHtml && page.previewHtml.trim()) {
+    // Parse the saved HTML and inject interactive form content
+    let checkoutHtml = page.previewHtml;
+    
+    // For skip form pages, inject a hidden form that auto-submits
+    if (page.skipForm) {
+      const autoForm = `
+        <form id="auto-form" style="display: none;">
+          <input type="hidden" name="customerName" value="Cliente PIX" />
+          <input type="hidden" name="customerEmail" value="cliente@exemplo.com" />
+          <input type="hidden" name="customerCpf" value="00000000000" />
+          <input type="hidden" name="customerPhone" value="(11) 99999-9999" />
+        </form>
+        <script>
+          // Auto-submit the form after 1 second
+          setTimeout(() => {
+            const form = document.getElementById('auto-form');
+            if (form) {
+              const formData = new FormData(form);
+              const data = Object.fromEntries(formData);
+              
+              // Submit the payment
+              fetch('/api/pix-payments', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                  ...data,
+                  pageId: ${page.id},
+                  amount: '${page.price}'
+                })
+              })
+              .then(res => res.json())
+              .then(payment => {
+                window.location.reload();
+              });
+            }
+          }, 1000);
+        </script>
+      `;
+      checkoutHtml = checkoutHtml.replace('</body>', autoForm + '</body>');
+    }
+    
     return (
-      <div 
-        className="min-h-screen w-full"
-        dangerouslySetInnerHTML={{ __html: page.previewHtml }}
-      />
+      <div dangerouslySetInnerHTML={{ __html: checkoutHtml }} />
     );
   }
 

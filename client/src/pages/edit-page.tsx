@@ -236,35 +236,51 @@ export default function EditPage() {
     const previewElement = document.getElementById('checkout-preview');
     if (!previewElement) return "";
     
-    // Clone the preview element to manipulate without affecting the original
+    // Clone the preview element to capture clean HTML
     const clone = previewElement.cloneNode(true) as HTMLElement;
     
-    // Remove all editor-specific elements
-    const editorElements = clone.querySelectorAll('.ring-2, .ring-primary, .absolute, [class*="border-dashed"], [class*="bg-primary/10"], [class*="cursor-pointer"]');
-    editorElements.forEach(el => el.remove());
+    // Remove ALL editor-specific elements and attributes
+    const removeEditorElements = (element: Element) => {
+      // Remove editor-specific elements
+      const editorSelectors = [
+        '.ring-2', '.ring-primary', '.absolute', 
+        '[class*="border-dashed"]', '[class*="bg-primary/10"]',
+        '[class*="cursor-pointer"]', '[class*="z-10"]',
+        '[class*="transition-colors"]'
+      ];
+      
+      editorSelectors.forEach(selector => {
+        const elements = element.querySelectorAll(selector);
+        elements.forEach(el => el.remove());
+      });
+      
+      // Remove editor event handlers and attributes
+      const allElements = element.querySelectorAll('*');
+      allElements.forEach(el => {
+        // Remove editor-specific attributes
+        el.removeAttribute('onclick');
+        el.removeAttribute('ondoubleclick');
+        el.removeAttribute('data-*');
+        
+        // Remove editor-specific classes
+        const classList = Array.from(el.classList);
+        classList.forEach(className => {
+          if (className.includes('cursor-pointer') || 
+              className.includes('ring-') || 
+              className.includes('border-dashed') ||
+              className.includes('bg-primary/10') ||
+              className.includes('transition-colors') ||
+              className.includes('z-10')) {
+            el.classList.remove(className);
+          }
+        });
+      });
+    };
     
-    // Remove drag and drop zones
-    const dropZones = clone.querySelectorAll('[class*="border-dashed"]');
-    dropZones.forEach(el => el.remove());
+    removeEditorElements(clone);
     
-    // Remove floating menus and editor controls
-    const floatingMenus = clone.querySelectorAll('.absolute');
-    floatingMenus.forEach(el => el.remove());
-    
-    // Remove editor event handlers
-    const interactiveElements = clone.querySelectorAll('[onclick], [ondoubleclick]');
-    interactiveElements.forEach(el => {
-      el.removeAttribute('onclick');
-      el.removeAttribute('ondoubleclick');
-    });
-    
-    // Remove editor-specific classes
-    const allElements = clone.querySelectorAll('*');
-    allElements.forEach(el => {
-      el.classList.remove('cursor-pointer', 'ring-2', 'ring-primary');
-    });
-    
-    return clone.innerHTML;
+    // Return the complete HTML structure with all Tailwind classes intact
+    return clone.outerHTML;
   };
 
   const onSubmit = (data: EditPageForm) => {
