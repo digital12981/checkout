@@ -68,6 +68,7 @@ export default function CheckoutHtml() {
 
   // If we have saved HTML, use it EXACTLY as is
   if ((page as any).previewHtml && (page as any).previewHtml.trim()) {
+    console.log("USING SAVED HTML FROM DATABASE");
     let finalHtml = (page as any).previewHtml;
 
     // Replace FORM_PLACEHOLDER with actual content
