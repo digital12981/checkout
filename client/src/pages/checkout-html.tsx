@@ -40,7 +40,15 @@ export default function CheckoutHtml() {
     enabled: !!params?.id,
   });
 
+  const pixPaymentsQuery = useQuery({
+    queryKey: [`/api/pix-payments`, 'pageId', params?.id],
+    queryFn: () => fetch(`/api/pix-payments?pageId=${params?.id}`).then(res => res.json()),
+    enabled: !!params?.id,
+    refetchInterval: 1000, // Check every second for new payments
+  });
+
   const page = pageQuery.data;
+  const recentPixPayment = pixPaymentsQuery.data?.[0];
 
   // Check for skip form parameter
   const urlParams = new URLSearchParams(location.split('?')[1] || '');
@@ -64,9 +72,16 @@ export default function CheckoutHtml() {
     },
   });
 
+  // Set pixPayment from recent payment if found
+  useEffect(() => {
+    if (recentPixPayment && !pixPayment) {
+      setPixPayment(recentPixPayment);
+    }
+  }, [recentPixPayment, pixPayment]);
+
   // Auto-submit for skip form
   useEffect(() => {
-    if (shouldSkipForm && page && !pixPayment && !isLoading) {
+    if (shouldSkipForm && page && !pixPayment && !recentPixPayment && !isLoading) {
       setIsLoading(true);
       createPaymentMutation.mutate({
         customerName: "Cliente Direto",
@@ -75,7 +90,7 @@ export default function CheckoutHtml() {
         customerPhone: "(11) 99999-9999",
       });
     }
-  }, [shouldSkipForm, page, pixPayment, isLoading]);
+  }, [shouldSkipForm, page, pixPayment, recentPixPayment, isLoading]);
 
   if (pageQuery.isLoading) {
     return <div className="flex items-center justify-center min-h-screen">Carregando...</div>;
