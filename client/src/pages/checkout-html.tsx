@@ -11,7 +11,7 @@ export default function CheckoutHtml() {
   const [isLoading, setIsLoading] = useState(false);
 
   const pageQuery = useQuery({
-    queryKey: ["/api/payment-pages", params?.id],
+    queryKey: [`/api/payment-pages/${params?.id}`],
     enabled: !!params?.id,
   });
 
