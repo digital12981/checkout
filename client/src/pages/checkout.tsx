@@ -408,11 +408,12 @@ export default function Checkout() {
     </div>
   ) : null;
 
-  // Use saved preview HTML if available
+  // Use saved preview HTML if available - this is the EXACT code from the editor preview
   if (page.previewHtml && page.previewHtml.trim()) {
-    console.log("Using saved preview HTML for checkout");
+    console.log("Using EXACT saved preview HTML for checkout");
+    console.log("Preview HTML being used:", page.previewHtml);
     
-    // Replace the FORM_PLACEHOLDER with actual content
+    // Use the exact HTML from preview, only replace the form placeholder
     let checkoutHtml = page.previewHtml;
     
     if (pixPayment) {
