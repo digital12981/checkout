@@ -91,16 +91,26 @@ export default function CheckoutFinal() {
 
   const formatCpf = (value: string) => {
     let cleaned = value.replace(/[^0-9]/g, '');
-    if (cleaned.length > 3) cleaned = cleaned.substring(0,3) + '.' + cleaned.substring(3);
-    if (cleaned.length > 7) cleaned = cleaned.substring(0,7) + '.' + cleaned.substring(7);
-    if (cleaned.length > 11) cleaned = cleaned.substring(0,11) + '-' + cleaned.substring(11,13);
+    if (cleaned.length >= 3) {
+      cleaned = cleaned.substring(0,3) + '.' + cleaned.substring(3);
+    }
+    if (cleaned.length >= 7) {
+      cleaned = cleaned.substring(0,7) + '.' + cleaned.substring(7);
+    }
+    if (cleaned.length >= 11) {
+      cleaned = cleaned.substring(0,11) + '-' + cleaned.substring(11,13);
+    }
     return cleaned.substring(0,14);
   };
 
   const formatPhone = (value: string) => {
     let cleaned = value.replace(/[^0-9]/g, '');
-    if (cleaned.length > 2) cleaned = '(' + cleaned.substring(0,2) + ') ' + cleaned.substring(2);
-    if (cleaned.length > 10) cleaned = cleaned.substring(0,10) + '-' + cleaned.substring(10);
+    if (cleaned.length >= 2) {
+      cleaned = '(' + cleaned.substring(0,2) + ') ' + cleaned.substring(2);
+    }
+    if (cleaned.length >= 10) {
+      cleaned = cleaned.substring(0,10) + '-' + cleaned.substring(10);
+    }
     return cleaned.substring(0,15);
   };
 
@@ -199,75 +209,81 @@ export default function CheckoutFinal() {
       const formRegex = /<form[^>]*>[\s\S]*?<\/form>/;
       
       if (formRegex.test(finalHtml)) {
-        const beforeForm = finalHtml.split(formRegex)[0];
-        const afterForm = finalHtml.split(formRegex)[1] || '';
-        
-        return (
-          <div>
-            <div dangerouslySetInnerHTML={{ __html: beforeForm }} />
-            
-            <form className="space-y-4" onSubmit={handleFormSubmit}>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Nome completo</label>
-                <input 
-                  type="text" 
-                  name="customerName" 
-                  required 
-                  className="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500" 
-                />
-              </div>
+        const formMatch = finalHtml.match(formRegex);
+        if (formMatch) {
+          const formStartIndex = finalHtml.indexOf(formMatch[0]);
+          const formEndIndex = formStartIndex + formMatch[0].length;
+          
+          const beforeForm = finalHtml.substring(0, formStartIndex);
+          const afterForm = finalHtml.substring(formEndIndex);
+          
+          return (
+            <div>
+              <div dangerouslySetInnerHTML={{ __html: beforeForm }} />
               
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Email</label>
-                <input 
-                  type="email" 
-                  name="customerEmail" 
-                  required 
-                  className="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500" 
-                />
-              </div>
+              <form className="space-y-4" onSubmit={handleFormSubmit}>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Nome completo</label>
+                  <input 
+                    type="text" 
+                    name="customerName" 
+                    required 
+                    className="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500" 
+                  />
+                </div>
+                
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Email</label>
+                  <input 
+                    type="email" 
+                    name="customerEmail" 
+                    required 
+                    className="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500" 
+                  />
+                </div>
+                
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">CPF</label>
+                  <input 
+                    type="text" 
+                    name="customerCpf" 
+                    required 
+                    maxLength={14}
+                    placeholder="000.000.000-00"
+                    className="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    onChange={(e) => e.target.value = formatCpf(e.target.value)}
+                  />
+                </div>
+                
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Telefone</label>
+                  <input 
+                    type="tel" 
+                    name="customerPhone" 
+                    required 
+                    placeholder="(11) 99999-9999"
+                    className="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    onChange={(e) => e.target.value = formatPhone(e.target.value)}
+                  />
+                </div>
+                
+                <button 
+                  type="submit" 
+                  disabled={isSubmitting || createPaymentMutation.isPending}
+                  className="w-full text-white py-3 px-6 rounded-md font-semibold hover:opacity-90 transition-colors disabled:opacity-50 flex items-center justify-center gap-2"
+                  style={{ backgroundColor: (page as any).accentColor || '#10B981' }}
+                >
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path>
+                  </svg>
+                  {isSubmitting || createPaymentMutation.isPending ? 'Processando...' : ((page as any).customButtonText || 'Pagar com PIX')}
+                </button>
+              </form>
               
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">CPF</label>
-                <input 
-                  type="text" 
-                  name="customerCpf" 
-                  required 
-                  maxLength={14}
-                  placeholder="000.000.000-00"
-                  className="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                  onChange={(e) => e.target.value = formatCpf(e.target.value)}
-                />
-              </div>
-              
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Telefone</label>
-                <input 
-                  type="tel" 
-                  name="customerPhone" 
-                  required 
-                  placeholder="(11) 99999-9999"
-                  className="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                  onChange={(e) => e.target.value = formatPhone(e.target.value)}
-                />
-              </div>
-              
-              <button 
-                type="submit" 
-                disabled={isSubmitting || createPaymentMutation.isPending}
-                className="w-full text-white py-3 px-6 rounded-md font-semibold hover:opacity-90 transition-colors disabled:opacity-50 flex items-center justify-center gap-2"
-                style={{ backgroundColor: (page as any).accentColor || '#10B981' }}
-              >
-                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path>
-                </svg>
-                {isSubmitting || createPaymentMutation.isPending ? 'Processando...' : ((page as any).customButtonText || 'Pagar com PIX')}
-              </button>
-            </form>
-            
-            <div dangerouslySetInnerHTML={{ __html: afterForm }} />
-          </div>
-        );
+              <div dangerouslySetInnerHTML={{ __html: afterForm }} />
+            </div>
+          );
+        }
       }
     }
 
