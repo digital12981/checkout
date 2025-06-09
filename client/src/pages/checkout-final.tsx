@@ -173,31 +173,6 @@ export default function CheckoutFinal() {
         </div>
         <div id="countdown-timer" class="text-lg font-bold font-mono text-amber-700">15:00</div>
       </div>
-      
-      <script>
-        // Cronômetro funcional de 15 minutos
-        let timeRemaining = 15 * 60; // 15 minutos em segundos
-        
-        function updateCountdown() {
-          const timer = document.getElementById('countdown-timer');
-          if (timer) {
-            if (timeRemaining > 0) {
-              const minutes = Math.floor(timeRemaining / 60);
-              const seconds = timeRemaining % 60;
-              timer.textContent = minutes.toString().padStart(2, '0') + ':' + seconds.toString().padStart(2, '0');
-              timeRemaining--;
-            } else {
-              timer.textContent = '00:00';
-              timer.style.color = '#DC2626'; // Vermelho quando expira
-            }
-          }
-        }
-        
-        // Iniciar cronômetro imediatamente
-        updateCountdown();
-        setInterval(updateCountdown, 1000);
-      </script>
-      </div>
 
       <form data-react-form="true" class="space-y-4">
         <div>
@@ -233,6 +208,30 @@ export default function CheckoutFinal() {
           ${isSubmitting ? 'Processando...' : (page.customButtonText || 'Pagar com PIX')}
         </button>
       </form>
+      
+      <script>
+        // Cronômetro funcional de 15 minutos
+        let timeRemaining = 15 * 60; // 15 minutos em segundos
+        
+        function updateCountdown() {
+          const timer = document.getElementById('countdown-timer');
+          if (timer) {
+            if (timeRemaining > 0) {
+              const minutes = Math.floor(timeRemaining / 60);
+              const seconds = timeRemaining % 60;
+              timer.textContent = minutes.toString().padStart(2, '0') + ':' + seconds.toString().padStart(2, '0');
+              timeRemaining--;
+            } else {
+              timer.textContent = '00:00';
+              timer.style.color = '#DC2626'; // Vermelho quando expira
+            }
+          }
+        }
+        
+        // Iniciar cronômetro imediatamente
+        updateCountdown();
+        setInterval(updateCountdown, 1000);
+      </script>
     `;
     finalHtml = finalHtml.replace('{{FORM_PLACEHOLDER}}', formHtml);
   }
