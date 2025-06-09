@@ -4,7 +4,7 @@ import { useQuery, useMutation } from "@tanstack/react-query";
 import { formatCpf, formatPhone } from "@/lib/utils";
 
 export default function CheckoutTest() {
-  const [, params] = useRoute("/checkout-test/:id");
+  const [inputValue, setInputValue] = useState("");
   const [timeLeft, setTimeLeft] = useState(15 * 60);
 
   // Timer
@@ -25,13 +25,21 @@ export default function CheckoutTest() {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    const formData = new FormData(e.target as HTMLFormElement);
-    console.log('Form submitted:', {
-      name: formData.get('customerName'),
-      email: formData.get('customerEmail'),
-      cpf: formData.get('customerCpf'),
-      phone: formData.get('customerPhone')
-    });
+    alert(`Teste funcionou! Valor: ${inputValue}`);
+    console.log('Form submitted with value:', inputValue);
+  };
+
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setInputValue(e.target.value);
+    console.log('Input changed:', e.target.value);
+  };
+
+  const handleInputClick = () => {
+    console.log('Input clicked successfully!');
+  };
+
+  const handleInputFocus = () => {
+    console.log('Input focused successfully!');
   };
 
   return (
