@@ -1,5 +1,3 @@
-import { type PixPayment } from "@shared/schema";
-
 interface For4PaymentsResponse {
   id?: string;
   transactionId?: string;
@@ -31,46 +29,11 @@ export class For4PaymentsAPI {
   }
 
   private getHeaders() {
-    // Generate random user agents to avoid blocking (same as Python code)
-    const userAgents = [
-      "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/110.0.0.0 Safari/537.36",
-      "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/15.0 Safari/605.1.15",
-      "Mozilla/5.0 (iPhone; CPU iPhone OS 16_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/16.0 Mobile/15E148 Safari/604.1",
-      "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/96.0.4664.45 Safari/537.36",
-      "Mozilla/5.0 (Android 12; Mobile; rv:68.0) Gecko/68.0 Firefox/94.0",
-      "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:106.0) Gecko/20100101 Firefox/106.0"
-    ];
-
-    const languages = [
-      "pt-BR,pt;q=0.9,en-US;q=0.8,en;q=0.7",
-      "en-US,en;q=0.9,pt-BR;q=0.8,pt;q=0.7",
-      "es-ES,es;q=0.9,pt;q=0.8,en;q=0.7"
-    ];
-
-    // Test different authentication formats based on key structure
-    const authHeaders: any = {
+    return {
+      'Authorization': this.secretKey,
       'Content-Type': 'application/json',
-      'Accept': 'application/json',
-      'User-Agent': userAgents[Math.floor(Math.random() * userAgents.length)],
-      'Accept-Language': languages[Math.floor(Math.random() * languages.length)],
-      'Cache-Control': Math.random() > 0.5 ? 'max-age=0' : 'no-cache',
-      'X-Requested-With': 'XMLHttpRequest',
-      'X-Cache-Buster': Date.now().toString(),
-      'Referer': 'https://checkoutfy.replit.app/pagamento',
-      'Sec-Fetch-Site': 'same-origin',
-      'Sec-Fetch-Mode': 'cors',
-      'Sec-Fetch-Dest': 'empty'
+      'Accept': 'application/json'
     };
-
-    // Try Bearer token format for newer API keys
-    if (this.secretKey.startsWith('sk_') || this.secretKey.length > 40) {
-      authHeaders['Authorization'] = `Bearer ${this.secretKey}`;
-    } else {
-      // Use direct key format for legacy keys
-      authHeaders['Authorization'] = this.secretKey;
-    }
-
-    return authHeaders;
   }
 
   private generateRandomEmail(name: string): string {
@@ -100,7 +63,7 @@ export class For4PaymentsAPI {
     expiresAt?: string;
     status: string;
   }> {
-    // Log authentication details (partial key for security)
+    // Detailed logging of secret key (partial)
     if (!this.secretKey) {
       console.error("Authentication token not provided");
       throw new Error("Authentication token not configured");
@@ -114,50 +77,39 @@ export class For4PaymentsAPI {
     // Log received data for processing
     const safeData = { ...data };
     if (safeData.cpf) {
-      safeData.cpf = safeData.cpf.length > 5 ? `${safeData.cpf.substring(0, 3)}...${safeData.cpf.substring(-2)}` : "***";
+      safeData.cpf = `${safeData.cpf.substring(0, 3)}...${safeData.cpf.substring(-2)}`;
     }
     console.log("Data received for payment:", safeData);
 
     // Validate required fields
     const requiredFields = ['name', 'email', 'cpf', 'amount'];
-    const missingFields = [];
-    for (const field of requiredFields) {
-      if (!data[field as keyof typeof data] || data[field as keyof typeof data] === '') {
-        missingFields.push(field);
-      }
-    }
-
+    const missingFields = requiredFields.filter(field => !data[field as keyof typeof data]);
+    
     if (missingFields.length > 0) {
       console.error(`Required fields missing: ${missingFields}`);
       throw new Error(`Required fields missing: ${missingFields.join(', ')}`);
     }
 
     try {
-      // Validate and convert amount
-      let amountInCents: number;
-      try {
-        amountInCents = Math.round(parseFloat(data.amount.toString()) * 100);
-        console.log(`Payment amount: R$ ${parseFloat(data.amount.toString()).toFixed(2)} (${amountInCents} cents)`);
-      } catch (e) {
-        console.error(`Error converting payment amount: ${e}`);
-        throw new Error(`Invalid payment amount: ${data.amount}`);
-      }
-
+      // Amount validation and conversion
+      const amountInCents = Math.round(Number(data.amount) * 100);
+      console.log(`Payment amount: R$ ${Number(data.amount).toFixed(2)} (${amountInCents} cents)`);
+      
       if (amountInCents <= 0) {
-        console.error(`Payment amount not positive: ${amountInCents}`);
+        console.error(`Non-positive payment amount: ${amountInCents}`);
         throw new Error("Payment amount must be greater than zero");
       }
 
-      // Process CPF
+      // CPF processing
       const cpf = data.cpf.replace(/\D/g, '');
       if (cpf.length !== 11) {
-        console.error(`CPF with invalid format: ${cpf} (length: ${cpf.length})`);
+        console.error(`Invalid CPF format: ${cpf} (length: ${cpf.length})`);
         throw new Error("Invalid CPF - must contain 11 digits");
       } else {
         console.log(`CPF validated: ${cpf.substring(0, 3)}...${cpf.substring(-2)}`);
       }
 
-      // Validate and generate email if necessary
+      // Email validation and generation
       let email = data.email;
       if (!email || !email.includes('@')) {
         email = this.generateRandomEmail(data.name);
@@ -166,20 +118,17 @@ export class For4PaymentsAPI {
         console.log(`Email provided: ${email}`);
       }
 
-      // Process phone
+      // Phone processing
       let phone = data.phone || '';
-
-      if (phone && typeof phone === 'string' && phone.trim().length > 0) {
+      if (phone && phone.trim().length > 0) {
         phone = phone.replace(/\D/g, '');
-
         if (phone.length >= 10) {
-          // Remove Brazilian prefix if present
           if (phone.startsWith('55') && phone.length > 10) {
             phone = phone.substring(2);
           }
           console.log(`User phone processed: ${phone}`);
         } else {
-          console.warn(`Phone provided invalid (too short): ${phone}`);
+          console.log(`Invalid phone provided (too short): ${phone}`);
           phone = this.generateRandomPhone();
           console.log(`Phone generated automatically as fallback: ${phone}`);
         }
@@ -188,21 +137,52 @@ export class For4PaymentsAPI {
         console.log(`Phone not provided, generated automatically: ${phone}`);
       }
 
-      // Prepare data for API (exact same structure as Python)
-      const paymentData = {
-        name: data.name,
-        email: email,
-        cpf: cpf,
-        phone: phone,
-        paymentMethod: "PIX",
-        amount: amountInCents,
-        items: [{
-          title: "Caixa com 25",
-          quantity: 1,
-          unitPrice: amountInCents,
-          tangible: false
-        }]
-      };
+      // Try different data structures based on For4Payments API variations
+      const paymentVariations = [
+        {
+          name: data.name,
+          email: email,
+          cpf: cpf,
+          phone: phone,
+          paymentMethod: "PIX",
+          amount: amountInCents,
+          items: [{
+            title: "Caixa com 25",
+            quantity: 1,
+            unitPrice: amountInCents,
+            tangible: false
+          }]
+        },
+        {
+          customer: {
+            name: data.name,
+            email: email,
+            cpf: cpf,
+            phone: phone
+          },
+          payment: {
+            method: "PIX",
+            amount: amountInCents
+          },
+          items: [{
+            title: "Caixa com 25",
+            quantity: 1,
+            unitPrice: amountInCents,
+            tangible: false
+          }]
+        },
+        {
+          customerName: data.name,
+          customerEmail: email,
+          customerCpf: cpf,
+          customerPhone: phone,
+          paymentMethod: "PIX",
+          amount: amountInCents,
+          description: "Caixa com 25"
+        }
+      ];
+
+      let paymentData = paymentVariations[0];
 
       console.log("Payment data formatted:", paymentData);
       console.log(`API Endpoint: ${this.apiUrl}/transaction.purchase`);
@@ -243,86 +223,116 @@ export class For4PaymentsAPI {
         };
 
         console.log("Using randomized headers for For4Payments API");
-        console.log("Headers being sent:", JSON.stringify(headers, null, 2));
-        console.log("Request body:", JSON.stringify(paymentData, null, 2));
 
-        const response = await fetch(`${this.apiUrl}/transaction.purchase`, {
-          method: 'POST',
-          headers: headers,
-          body: JSON.stringify(paymentData)
-        });
+        // Try multiple authentication approaches as in Python code
+        const authMethods = [
+          { ...headers },
+          { ...headers, 'X-API-Key': this.secretKey, 'Authorization': undefined },
+          { ...headers, 'API-Key': this.secretKey, 'Authorization': undefined }
+        ];
 
-        console.log(`Response received (Status: ${response.status})`);
-        const responseText = await response.text();
-        console.log(`Complete response: ${responseText}`);
+        let response;
+        let responseText;
+        let lastError;
+
+        for (const authHeaders of authMethods) {
+          try {
+            // Clean undefined values from headers
+            const cleanHeaders = Object.entries(authHeaders).reduce((acc, [key, value]) => {
+              if (value !== undefined) {
+                acc[key] = value;
+              }
+              return acc;
+            }, {} as Record<string, string>);
+
+            console.log(`Trying authentication method with headers:`, Object.keys(cleanHeaders));
+
+            response = await fetch(`${this.apiUrl}/transaction.purchase`, {
+              method: 'POST',
+              headers: cleanHeaders,
+              body: JSON.stringify(paymentData)
+            });
+
+            responseText = await response.text();
+            console.log(`Response received (Status: ${response.status})`);
+            console.log(`Complete response: ${responseText}`);
+
+            // If we get success or non-auth error, break
+            if (response.status === 200 || (response.status !== 401 && response.status !== 403)) {
+              break;
+            }
+
+            lastError = `Auth method failed with status ${response.status}`;
+          } catch (error) {
+            lastError = `Request failed: ${error}`;
+            console.log(`Authentication method failed:`, error);
+            continue;
+          }
+        }
+
+        if (!response || !responseText) {
+          throw new Error(lastError || "All authentication methods failed");
+        }
 
         if (response.status === 200) {
           const responseData: For4PaymentsResponse = JSON.parse(responseText);
-          console.log(`API Response: ${JSON.stringify(responseData)}`);
+          console.log("API response:", responseData);
 
-          // Detailed log to identify all relevant fields
+          // Log detailed fields to identify all relevant fields
           const pixcodeFields = [];
           const qrcodeFields = [];
 
           // Check main level fields
-          for (const field of ['pixCode', 'copy_paste', 'code', 'pix_code']) {
-            if (responseData[field as keyof For4PaymentsResponse]) {
-              pixcodeFields.push(`${field}: ${String(responseData[field as keyof For4PaymentsResponse]).substring(0, 30)}...`);
-            }
+          if (responseData.pixCode) pixcodeFields.push(`pixCode: ${responseData.pixCode.substring(0, 30)}...`);
+          if (responseData.copy_paste) pixcodeFields.push(`copy_paste: ${responseData.copy_paste.substring(0, 30)}...`);
+          if (responseData.code) pixcodeFields.push(`code: ${responseData.code.substring(0, 30)}...`);
+          if (responseData.pix_code) pixcodeFields.push(`pix_code: ${responseData.pix_code.substring(0, 30)}...`);
+
+          if (responseData.pixQrCode) qrcodeFields.push("pixQrCode: present");
+          if (responseData.qr_code_image) qrcodeFields.push("qr_code_image: present");
+          if (responseData.qr_code) qrcodeFields.push("qr_code: present");
+          if (responseData.pix_qr_code) qrcodeFields.push("pix_qr_code: present");
+
+          // Check nested pix structure
+          if (responseData.pix) {
+            if (responseData.pix.code) pixcodeFields.push(`pix.code: ${responseData.pix.code.substring(0, 30)}...`);
+            if (responseData.pix.copy_paste) pixcodeFields.push(`pix.copy_paste: ${responseData.pix.copy_paste.substring(0, 30)}...`);
+            if (responseData.pix.qrCode) qrcodeFields.push("pix.qrCode: present");
+            if (responseData.pix.qr_code_image) qrcodeFields.push("pix.qr_code_image: present");
           }
 
-          for (const field of ['pixQrCode', 'qr_code_image', 'qr_code', 'pix_qr_code']) {
-            if (responseData[field as keyof For4PaymentsResponse]) {
-              qrcodeFields.push(`${field}: present`);
-            }
-          }
+          console.log("PIX code fields found:", pixcodeFields);
+          console.log("QR code fields found:", qrcodeFields);
 
-          // Check nested structures (pix)
-          if (responseData.pix && typeof responseData.pix === 'object') {
-            for (const field of ['code', 'copy_paste', 'pixCode']) {
-              if (responseData.pix[field as keyof typeof responseData.pix]) {
-                pixcodeFields.push(`pix.${field}: ${String(responseData.pix[field as keyof typeof responseData.pix]).substring(0, 30)}...`);
-              }
-            }
-
-            for (const field of ['qrCode', 'qr_code_image', 'pixQrCode']) {
-              if (responseData.pix[field as keyof typeof responseData.pix]) {
-                qrcodeFields.push(`pix.${field}: present`);
-              }
-            }
-          }
-
-          console.log(`PIX code fields found: ${pixcodeFields}`);
-          console.log(`QR code fields found: ${qrcodeFields}`);
-
-          // Formatted result with support for multiple response formats
+          // Result formatted with support for multiple response formats
           const result = {
-            id: responseData.id || responseData.transactionId || Date.now().toString(),
-            pixCode: (
-              responseData.pixCode || 
-              responseData.copy_paste || 
-              responseData.code || 
-              responseData.pix_code ||
-              responseData.pix?.code || 
-              responseData.pix?.copy_paste || ""
-            ),
-            pixQrCode: (
-              responseData.pixQrCode || 
-              responseData.qr_code_image || 
-              responseData.qr_code || 
-              responseData.pix_qr_code ||
-              responseData.pix?.qrCode || 
-              responseData.pix?.qr_code_image
-            ),
+            id: responseData.id || responseData.transactionId || "",
+            pixCode: responseData.pixCode || 
+                    responseData.copy_paste || 
+                    responseData.code || 
+                    responseData.pix_code || 
+                    responseData.pix?.code || 
+                    responseData.pix?.copy_paste || "",
+            pixQrCode: responseData.pixQrCode || 
+                      responseData.qr_code_image || 
+                      responseData.qr_code || 
+                      responseData.pix_qr_code || 
+                      responseData.pix?.qrCode || 
+                      responseData.pix?.qr_code_image,
             expiresAt: responseData.expiresAt || responseData.expiration,
-            status: responseData.status || 'pending'
+            status: responseData.status || "pending"
           };
 
           console.log(`Response mapped to standard format: ${JSON.stringify(result)}`);
 
           if (!result.pixCode) {
+            console.error("PIX code not found in response");
             throw new Error("PIX code not found in response");
           }
+
+          // Transaction completed successfully
+          const transactionId = result.id;
+          console.log(`Transaction ${transactionId} processed successfully`);
 
           return result;
 
@@ -354,42 +364,22 @@ export class For4PaymentsAPI {
       }
 
     } catch (error) {
-      if (error instanceof Error && error.message.includes('Required fields') || 
-          error instanceof Error && error.message.includes('Invalid') ||
-          error instanceof Error && error.message.includes('Authentication')) {
+      if (error instanceof Error && (
+          error.message.includes('Required fields') || 
+          error.message.includes('Invalid') ||
+          error.message.includes('Authentication'))) {
         console.error(`Validation error: ${error}`);
         throw error;
       } else {
-        console.error(`Error calling For4Payments API: ${error}`);
-        console.log("Using mock PIX instead of real API");
-        return this.generateMockPixPayment(data);
+        console.error(`Error processing payment: ${error}`);
+        throw new Error("Error processing payment. Please try again.");
       }
     }
   }
 
-  private generateMockPixPayment(data: { name: string; email: string; cpf: string; phone: string; amount: string }): any {
-    const mockPixCode = "00020126580014BR.GOV.BCB.PIX01362e07742c-5d0d-4c07-a32c-96f0e2952f4c5204000053039865802BR5925SIMULACAO FOR4PAYMENTS6009SAO PAULO62070503***63047A12";
-    const mockQrCodeUrl = "https://gerarqrcodepix.com.br/qr-code-pix/7/qrpix_f8e78b1c_mock.png";
-    
-    console.log("Using mock PIX instead of real API");
-    
-    const transactionId = `sim-${Date.now()}-${Math.floor(Math.random() * 9999)}`;
-    const currentTime = new Date().toISOString();
-    
-    return {
-      id: transactionId,
-      transactionId: transactionId,
-      pixCode: mockPixCode,
-      pixQrCode: mockQrCodeUrl,
-      status: "PENDING",
-      expiresAt: currentTime,
-      amount: data.amount
-    };
-  }
-
   async testConnection(): Promise<boolean> {
     try {
-      console.log("Testing For4Payments API connection with multiple auth methods...");
+      console.log("Testing For4Payments API connection...");
       
       const testData = {
         name: "Test User",
@@ -406,43 +396,41 @@ export class For4PaymentsAPI {
         }]
       };
 
-      // Test different authentication methods
-      const authMethods = [
-        { name: "Bearer Token", headers: { 'Authorization': `Bearer ${this.secretKey}`, 'Content-Type': 'application/json' } },
-        { name: "Direct Key", headers: { 'Authorization': this.secretKey, 'Content-Type': 'application/json' } },
-        { name: "X-API-Key", headers: { 'X-API-Key': this.secretKey, 'Content-Type': 'application/json' } },
-        { name: "API-Key", headers: { 'API-Key': this.secretKey, 'Content-Type': 'application/json' } }
-      ].filter(method => 
-        Object.values(method.headers).every(value => typeof value === 'string')
-      );
+      const userAgents = [
+        "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/110.0.0.0 Safari/537.36"
+      ];
 
-      for (const method of authMethods) {
-        try {
-          console.log(`Testing ${method.name} authentication...`);
-          const response = await fetch(this.apiUrl + '/transaction.purchase', {
-            method: 'POST',
-            headers: method.headers,
-            body: JSON.stringify(testData)
-          });
+      const extraHeaders = {
+        "User-Agent": userAgents[0],
+        "Accept-Language": "pt-BR,pt;q=0.9,en-US;q=0.8,en;q=0.7",
+        "Cache-Control": "no-cache",
+        "X-Requested-With": "XMLHttpRequest",
+        "X-Cache-Buster": Date.now().toString(),
+        "Referer": "https://encceja2025.com.br/pagamento",
+        "Sec-Fetch-Site": "same-origin",
+        "Sec-Fetch-Mode": "cors",
+        "Sec-Fetch-Dest": "empty"
+      };
 
-          const responseText = await response.text();
-          console.log(`${method.name} Response Status: ${response.status}`);
-          console.log(`${method.name} Response: ${responseText.substring(0, 200)}`);
+      const headers = {
+        ...this.getHeaders(),
+        ...extraHeaders
+      };
 
-          if (response.status === 200 || response.status === 201) {
-            console.log(`✓ ${method.name} authentication successful!`);
-            return true;
-          }
+      const response = await fetch(`${this.apiUrl}/transaction.purchase`, {
+        method: 'POST',
+        headers: headers,
+        body: JSON.stringify(testData)
+      });
 
-          if (response.status !== 401 && response.status !== 403) {
-            console.log(`${method.name} returned non-auth error: ${response.status}`);
-          }
-        } catch (error) {
-          console.log(`${method.name} failed with error:`, error);
-        }
+      console.log(`Test response status: ${response.status}`);
+
+      if (response.status !== 401 && response.status !== 403) {
+        console.log("For4Payments API connection test successful");
+        return true;
       }
 
-      console.log("All authentication methods failed");
+      console.log("For4Payments API authentication failed");
       return false;
     } catch (error) {
       console.error("For4Payments connection test failed:", error);
