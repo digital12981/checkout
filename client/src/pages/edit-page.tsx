@@ -114,53 +114,38 @@ export default function EditPage() {
 
   const form = useForm<EditPageForm>({
     resolver: zodResolver(editPageSchema),
-    defaultValues: {
-      productName: "",
-      productDescription: "",
-      price: "",
-      customTitle: "",
-      customSubtitle: "",
-      customButtonText: "",
-      customInstructions: "",
-      primaryColor: "#1E40AF",
-      accentColor: "#10B981",
-      backgroundColor: "#F8FAFC",
-      textColor: "#1F2937",
-      logoUrl: "",
-      logoPosition: "center",
-      logoSize: 64,
-      headerHeight: 96,
-      skipForm: false,
-      showLogo: true,
-    },
     mode: "onChange",
   });
 
   useEffect(() => {
     if (page) {
+      const pageData = page as any;
+      console.log("Loading page data:", pageData);
+      
       form.reset({
-        productName: (page as any).productName,
-        productDescription: (page as any).productDescription,
-        price: (page as any).price,
-        customTitle: (page as any).customTitle || "",
-        customSubtitle: (page as any).customSubtitle || "",
-        customButtonText: (page as any).customButtonText || "",
-        customInstructions: (page as any).customInstructions || "",
-        primaryColor: (page as any).primaryColor,
-        accentColor: (page as any).accentColor,
-        backgroundColor: (page as any).backgroundColor,
-        textColor: (page as any).textColor,
-        logoUrl: (page as any).logoUrl || "",
-        logoPosition: (page as any).logoPosition as "left" | "center" | "right",
-        logoSize: (page as any).logoSize,
-        headerHeight: (page as any).headerHeight,
-        skipForm: (page as any).skipForm,
-        showLogo: (page as any).showLogo ?? true,
+        productName: pageData.productName || "",
+        productDescription: pageData.productDescription || "",
+        price: pageData.price || "",
+        customTitle: pageData.customTitle || "",
+        customSubtitle: pageData.customSubtitle || "",
+        customButtonText: pageData.customButtonText || "",
+        customInstructions: pageData.customInstructions || "",
+        primaryColor: pageData.primaryColor || "#1E40AF",
+        accentColor: pageData.accentColor || "#10B981",
+        backgroundColor: pageData.backgroundColor || "#F8FAFC",
+        textColor: pageData.textColor || "#1F2937",
+        logoUrl: pageData.logoUrl || "",
+        logoPosition: (pageData.logoPosition as "left" | "center" | "right") || "center",
+        logoSize: pageData.logoSize || 64,
+        headerHeight: pageData.headerHeight || 96,
+        skipForm: pageData.skipForm || false,
+        showLogo: pageData.showLogo ?? true,
       });
 
       try {
-        const elements = JSON.parse((page as any).customElements || "[]");
+        const elements = JSON.parse(pageData.customElements || "[]");
         setCustomElements(elements);
+        console.log("Loaded custom elements:", elements);
       } catch {
         setCustomElements([]);
       }
