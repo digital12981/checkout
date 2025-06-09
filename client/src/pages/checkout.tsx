@@ -209,14 +209,12 @@ export default function Checkout() {
     }
   }
   
-  // Fallback to legacy custom elements
-  if (!templateData && page.customElements) {
-    try {
-      customElements = JSON.parse(page.customElements);
-    } catch (error) {
-      console.error('Error parsing custom elements:', error);
-      customElements = [];
-    }
+  // Use customElements directly from page like in the editor
+  try {
+    customElements = JSON.parse(page.customElements || "[]");
+  } catch (error) {
+    console.error('Error parsing custom elements:', error);
+    customElements = [];
   }
 
   const customStyles = getCustomStyles(page, templateData);
@@ -284,10 +282,14 @@ export default function Checkout() {
           height: `${page.headerHeight || 120}px`
         }}
       >
-        {/* Top custom elements */}
+        {/* Top custom elements - exactly like editor */}
         {customElements
-          .filter((el: any) => el.position === "top" || el.position < 0)
-          .sort((a: any, b: any) => a.position - b.position)
+          .filter((el: any) => el.position === "top" || (typeof el.position === "number" && el.position >= 0 && el.position < 10))
+          .sort((a: any, b: any) => {
+            const posA = typeof a.position === "string" ? 0 : a.position;
+            const posB = typeof b.position === "string" ? 0 : b.position;
+            return posA - posB;
+          })
           .map((element: any) => (
             <div key={element.id} className="mb-4">
               {renderCustomElement(element)}
