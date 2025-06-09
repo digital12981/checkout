@@ -133,22 +133,22 @@ export default function CheckoutWorking() {
       // Customer Form - always show when no payment exists
       const formContent = `
         <script>
-          function formatCpf(input) {
+          window.formatCpf = function(input) {
             let value = input.value.replace(/[^0-9]/g, '');
             if (value.length > 3) value = value.substring(0,3) + '.' + value.substring(3);
             if (value.length > 7) value = value.substring(0,7) + '.' + value.substring(7);
             if (value.length > 11) value = value.substring(0,11) + '-' + value.substring(11,13);
             input.value = value.substring(0,14);
-          }
+          };
 
-          function formatPhone(input) {
+          window.formatPhone = function(input) {
             let value = input.value.replace(/[^0-9]/g, '');
             if (value.length > 2) value = '(' + value.substring(0,2) + ') ' + value.substring(2);
             if (value.length > 10) value = value.substring(0,10) + '-' + value.substring(10);
             input.value = value.substring(0,15);
-          }
+          };
 
-          function handleSubmit(event) {
+          window.handleSubmit = function(event) {
             event.preventDefault();
             
             const submitBtn = document.getElementById('submit-btn');
@@ -195,10 +195,10 @@ export default function CheckoutWorking() {
             });
             
             return false;
-          }
+          };
         </script>
         
-        <form class="space-y-4" onsubmit="return handleSubmit(event)">
+        <form class="space-y-4" onsubmit="return window.handleSubmit(event)">
           <div>
             <label class="block text-sm font-medium text-gray-700 mb-1">Nome completo</label>
             <input type="text" name="customerName" required class="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500" />
@@ -211,12 +211,12 @@ export default function CheckoutWorking() {
           
           <div>
             <label class="block text-sm font-medium text-gray-700 mb-1">CPF</label>
-            <input type="text" name="customerCpf" required maxlength="14" placeholder="000.000.000-00" class="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500" oninput="formatCpf(this)" />
+            <input type="text" name="customerCpf" required maxlength="14" placeholder="000.000.000-00" class="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500" oninput="window.formatCpf(this)" />
           </div>
           
           <div>
             <label class="block text-sm font-medium text-gray-700 mb-1">Telefone</label>
-            <input type="tel" name="customerPhone" required placeholder="(11) 99999-9999" class="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500" oninput="formatPhone(this)" />
+            <input type="tel" name="customerPhone" required placeholder="(11) 99999-9999" class="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500" oninput="window.formatPhone(this)" />
           </div>
           
           <button type="submit" id="submit-btn" class="w-full text-white py-3 px-6 rounded-md font-semibold hover:opacity-90 transition-colors disabled:opacity-50 flex items-center justify-center gap-2" style="background-color: ${(page as any).accentColor || '#10B981'};">
