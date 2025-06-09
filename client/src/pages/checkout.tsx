@@ -359,10 +359,14 @@ export default function Checkout() {
       {/* Form area */}
       <div className="w-full p-6 bg-white flex justify-center">
         <div className="w-full max-w-md">
-          {/* Render middle elements */}
+          {/* Render middle elements - exactly like editor */}
           {customElements
-            .filter((el: any) => el.position === "middle" || (el.position >= 0 && el.position < 100))
-            .sort((a: any, b: any) => a.position - b.position)
+            .filter((el: any) => el.position === "middle" || (typeof el.position === "number" && el.position >= 10 && el.position < 100))
+            .sort((a: any, b: any) => {
+              const posA = typeof a.position === "string" ? 50 : a.position;
+              const posB = typeof b.position === "string" ? 50 : b.position;
+              return posA - posB;
+            })
             .map((element: any) => (
               <div key={element.id} className="mb-4">
                 {renderCustomElement(element)}
@@ -510,10 +514,14 @@ export default function Checkout() {
             </div>
           )}
 
-          {/* Bottom custom elements */}
+          {/* Bottom custom elements - exactly like editor */}
           {customElements
-            .filter((el: any) => el.position === "bottom" || (el.position >= 100 && el.position < 1000))
-            .sort((a: any, b: any) => a.position - b.position)
+            .filter((el: any) => el.position === "bottom" || (typeof el.position === "number" && el.position >= 100 && el.position < 1000))
+            .sort((a: any, b: any) => {
+              const posA = typeof a.position === "string" ? 100 : a.position;
+              const posB = typeof b.position === "string" ? 100 : b.position;
+              return posA - posB;
+            })
             .map((element: any) => (
               <div key={element.id} className="mt-4">
                 {renderCustomElement(element)}
