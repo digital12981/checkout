@@ -5,7 +5,9 @@ import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import Dashboard from "@/pages/dashboard";
 import Checkout from "@/pages/checkout";
+import CheckoutHtml from "@/pages/checkout-html";
 import EditPage from "@/pages/edit-page";
+import HtmlEditor from "@/pages/html-editor";
 import NotFound from "@/pages/not-found";
 
 function Router() {
@@ -15,8 +17,9 @@ function Router() {
       <Route path="/pages" component={Dashboard} />
       <Route path="/settings" component={Dashboard} />
       <Route path="/pages/edit/:id" component={EditPage} />
-      <Route path="/checkout/:id" component={Checkout} />
-      <Route path="/pagamento/:id" component={Checkout} />
+      <Route path="/pages/html-edit/:id" component={HtmlEditor} />
+      <Route path="/checkout/:id" component={CheckoutHtml} />
+      <Route path="/pagamento/:id" component={CheckoutHtml} />
       <Route component={NotFound} />
     </Switch>
   );

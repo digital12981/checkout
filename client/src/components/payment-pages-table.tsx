@@ -29,7 +29,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { Edit, Eye, Share, Trash2, MoreHorizontal, Filter, ShoppingBag, Book, Play } from "lucide-react";
+import { Edit, Eye, Share, Trash2, MoreHorizontal, Filter, ShoppingBag, Book, Play, Code } from "lucide-react";
 import { formatCurrency, formatDate } from "@/lib/utils";
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
@@ -222,7 +222,13 @@ export default function PaymentPagesTable() {
                               <DropdownMenuItem asChild>
                                 <Link href={`/pages/edit/${page.id}`}>
                                   <Edit className="w-4 h-4 mr-2" />
-                                  Editar
+                                  Editor Visual
+                                </Link>
+                              </DropdownMenuItem>
+                              <DropdownMenuItem asChild>
+                                <Link href={`/pages/html-edit/${page.id}`}>
+                                  <Code className="w-4 h-4 mr-2" />
+                                  Editor HTML
                                 </Link>
                               </DropdownMenuItem>
                               <DropdownMenuItem asChild>
