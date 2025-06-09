@@ -111,7 +111,7 @@ export default function CheckoutHtml() {
     console.log("USING SAVED HTML FROM DATABASE");
     let finalHtml = (page as any).previewHtml;
 
-    // Replace FORM_PLACEHOLDER with actual content
+    // Replace form content with PIX interface when payment exists
     if (pixPayment) {
       // PIX Payment View
       const pixContent = `
@@ -195,7 +195,22 @@ export default function CheckoutHtml() {
         </div>
       `;
       
-      finalHtml = finalHtml.replace('<!-- FORM_PLACEHOLDER -->', pixContent);
+      // Replace either FORM_PLACEHOLDER or the entire form content
+      if (finalHtml.includes('<!-- FORM_PLACEHOLDER -->')) {
+        finalHtml = finalHtml.replace('<!-- FORM_PLACEHOLDER -->', pixContent);
+      } else {
+        // Find and replace the form content directly
+        const formRegex = /<form[^>]*>[\s\S]*?<\/form>/;
+        if (formRegex.test(finalHtml)) {
+          finalHtml = finalHtml.replace(formRegex, pixContent);
+        } else {
+          // Fallback: replace content within the white container
+          const containerMatch = finalHtml.match(/(<div class="bg-white[^>]*>)([\s\S]*?)(<\/div>)/);
+          if (containerMatch) {
+            finalHtml = finalHtml.replace(containerMatch[0], containerMatch[1] + pixContent + containerMatch[3]);
+          }
+        }
+      }
     } else {
       // Customer Form View
       const formContent = `
