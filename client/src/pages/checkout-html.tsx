@@ -222,7 +222,7 @@ export default function CheckoutHtml() {
         </form>
 
         <script>
-          function formatCpfInput(input) {
+          window.formatCpfInput = function(input) {
             let value = input.value.replace(/[^0-9]/g, '');
             if (value.length > 3) {
               value = value.substring(0,3) + '.' + value.substring(3);
@@ -234,9 +234,9 @@ export default function CheckoutHtml() {
               value = value.substring(0,11) + '-' + value.substring(11,13);
             }
             input.value = value.substring(0,14);
-          }
+          };
 
-          function formatPhoneInput(input) {
+          window.formatPhoneInput = function(input) {
             let value = input.value.replace(/[^0-9]/g, '');
             if (value.length > 2) {
               value = '(' + value.substring(0,2) + ') ' + value.substring(2);
@@ -245,7 +245,7 @@ export default function CheckoutHtml() {
               value = value.substring(0,10) + '-' + value.substring(10);
             }
             input.value = value.substring(0,15);
-          }
+          };
 
           async function handleFormSubmit(event) {
             event.preventDefault();
@@ -263,7 +263,7 @@ export default function CheckoutHtml() {
                   paymentPageId: ${(page as any).id},
                   customerName: formData.get('customerName'),
                   customerEmail: formData.get('customerEmail'),
-                  customerCpf: formData.get('customerCpf').replace(/\\D/g, ''),
+                  customerCpf: formData.get('customerCpf').replace(/[^0-9]/g, ''),
                   customerPhone: formData.get('customerPhone'),
                   amount: '${(page as any).price}'
                 })
