@@ -1,12 +1,55 @@
 import { useState, useEffect } from "react";
 import { useRoute } from "wouter";
 import { useQuery, useMutation } from "@tanstack/react-query";
+import { formatCpf, formatPhone } from "@/lib/utils";
 
 export default function CheckoutFinal() {
   const [, params] = useRoute("/checkout/:id");
   const [pixPayment, setPixPayment] = useState<any>(null);
   const [timeLeft, setTimeLeft] = useState(15 * 60);
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const pageQuery = useQuery({
+    queryKey: [`/api/payment-pages/${params?.id}`],
+    enabled: !!params?.id,
+  });
+
+  const createPaymentMutation = useMutation({
+    mutationFn: async (formData: FormData) => {
+      const data = {
+        paymentPageId: parseInt(params?.id || "0"),
+        customerName: formData.get('customerName'),
+        customerEmail: formData.get('customerEmail'),
+        customerCpf: formData.get('customerCpf')?.toString().replace(/[^0-9]/g, ''),
+        customerPhone: formData.get('customerPhone'),
+        amount: (pageQuery.data as any)?.price?.toString()
+      };
+      
+      console.log('Sending payment data:', data);
+      
+      const response = await fetch('/api/pix-payments', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data)
+      });
+      
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || 'Erro ao processar pagamento');
+      }
+      
+      return response.json();
+    },
+    onSuccess: (payment: any) => {
+      console.log('Payment created successfully:', payment);
+      setPixPayment(payment);
+      setTimeLeft(15 * 60);
+    },
+    onError: (error: any) => {
+      console.error('Payment creation failed:', error);
+      alert('Erro ao processar pagamento: ' + error.message);
+    }
+  });
 
   useEffect(() => {
     if (pixPayment && timeLeft > 0) {
@@ -23,312 +66,234 @@ export default function CheckoutFinal() {
     }
   }, [pixPayment, timeLeft]);
 
+  // Add event handlers for the form after component renders
+  useEffect(() => {
+    const form = document.querySelector('form[data-react-form]');
+    if (form) {
+      console.log('Attaching React event handlers to form');
+      
+      const handleSubmit = async (event: Event) => {
+        event.preventDefault();
+        
+        if (isSubmitting) return;
+        setIsSubmitting(true);
+        
+        const formData = new FormData(form as HTMLFormElement);
+        
+        try {
+          await createPaymentMutation.mutateAsync(formData);
+        } catch (error) {
+          console.error('Payment submission failed:', error);
+        } finally {
+          setIsSubmitting(false);
+        }
+      };
+
+      const handleCpfInput = (event: Event) => {
+        const input = event.target as HTMLInputElement;
+        input.value = formatCpf(input.value);
+      };
+
+      const handlePhoneInput = (event: Event) => {
+        const input = event.target as HTMLInputElement;
+        input.value = formatPhone(input.value);
+      };
+
+      form.addEventListener('submit', handleSubmit);
+      
+      const cpfInput = form.querySelector('input[name="customerCpf"]');
+      const phoneInput = form.querySelector('input[name="customerPhone"]');
+      
+      if (cpfInput) cpfInput.addEventListener('input', handleCpfInput);
+      if (phoneInput) phoneInput.addEventListener('input', handlePhoneInput);
+
+      return () => {
+        form.removeEventListener('submit', handleSubmit);
+        if (cpfInput) cpfInput.removeEventListener('input', handleCpfInput);
+        if (phoneInput) phoneInput.removeEventListener('input', handlePhoneInput);
+      };
+    }
+  }, [pageQuery.data, isSubmitting, createPaymentMutation]);
+
   const formatTime = (seconds: number) => {
     const minutes = Math.floor(seconds / 60);
     const remainingSeconds = seconds % 60;
     return `${minutes.toString().padStart(2, '0')}:${remainingSeconds.toString().padStart(2, '0')}`;
   };
 
-  const pageQuery = useQuery({
-    queryKey: [`/api/payment-pages/${params?.id}`],
-    enabled: !!params?.id,
-  });
-
-  const createPaymentMutation = useMutation({
-    mutationFn: async (formData: FormData) => {
-      const data = {
-        paymentPageId: parseInt(params?.id || "0"),
-        customerName: formData.get('customerName'),
-        customerEmail: formData.get('customerEmail'),
-        customerCpf: formData.get('customerCpf')?.toString().replace(/[^0-9]/g, ''),
-        customerPhone: formData.get('customerPhone'),
-        amount: (page as any)?.price?.toString()
-      };
-      
-      console.log('Sending payment data:', data);
-      
-      const response = await fetch('/api/pix-payments', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(data)
-      });
-      
-      const result = await response.json();
-      console.log('API Response:', result);
-      
-      if (!response.ok) {
-        throw new Error(result.message || 'Erro ao processar pagamento');
-      }
-      
-      return result;
-    },
-    onSuccess: (payment) => {
-      console.log('Payment created successfully:', payment);
-      setPixPayment(payment);
-    },
-    onError: (error: any) => {
-      console.error('Payment creation failed:', error);
-      alert('Erro ao processar pagamento: ' + error.message);
-    }
-  });
-
-  const page = pageQuery.data;
-
-  const handleFormSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
-    
-    if (isSubmitting) return;
-    
-    setIsSubmitting(true);
-    const formData = new FormData(event.currentTarget);
-    
-    try {
-      await createPaymentMutation.mutateAsync(formData);
-    } finally {
-      setIsSubmitting(false);
-    }
-  };
-
-  const formatCpf = (value: string) => {
-    let cleaned = value.replace(/[^0-9]/g, '');
-    if (cleaned.length >= 3) {
-      cleaned = cleaned.substring(0,3) + '.' + cleaned.substring(3);
-    }
-    if (cleaned.length >= 7) {
-      cleaned = cleaned.substring(0,7) + '.' + cleaned.substring(7);
-    }
-    if (cleaned.length >= 11) {
-      cleaned = cleaned.substring(0,11) + '-' + cleaned.substring(11,13);
-    }
-    return cleaned.substring(0,14);
-  };
-
-  const formatPhone = (value: string) => {
-    let cleaned = value.replace(/[^0-9]/g, '');
-    if (cleaned.length >= 2) {
-      cleaned = '(' + cleaned.substring(0,2) + ') ' + cleaned.substring(2);
-    }
-    if (cleaned.length >= 10) {
-      cleaned = cleaned.substring(0,10) + '-' + cleaned.substring(10);
-    }
-    return cleaned.substring(0,15);
-  };
-
   if (pageQuery.isLoading) {
     return <div className="flex items-center justify-center min-h-screen">Carregando...</div>;
   }
 
-  if (!page) {
+  if (pageQuery.error || !pageQuery.data) {
     return <div className="flex items-center justify-center min-h-screen">Página não encontrada</div>;
   }
 
-  if ((page as any).previewHtml && (page as any).previewHtml.trim()) {
-    let finalHtml = (page as any).previewHtml;
+  const page = pageQuery.data as any;
 
-    if (pixPayment) {
-      // PIX Payment Interface
-      const pixContent = `
-        <div class="space-y-6 text-center">
-          <div class="text-lg font-semibold text-gray-800 mb-4">
-            Valor: R$ ${parseFloat((page as any).price).toFixed(2).replace('.', ',')}
-          </div>
-
-          <div class="bg-yellow-50 border border-yellow-200 rounded-lg p-4 mb-6">
-            <div class="text-center space-y-2">
-              <div class="flex items-center justify-center gap-2 text-yellow-800">
-                <span class="text-sm font-medium">Aguardando pagamento...</span>
-                <div class="animate-spin h-4 w-4 border-2 border-yellow-600 border-t-transparent rounded-full"></div>
-              </div>
-              <div class="text-xl font-bold text-yellow-800" id="timer-display">
-                Expira em ${formatTime(timeLeft)}
-              </div>
-            </div>
-          </div>
-
-          <div class="text-center mb-6">
-            <p class="text-sm text-gray-600 mb-4">Escaneie o QR Code com seu app de pagamento</p>
-            <div class="flex justify-center mb-4">
-              <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/a/a2/Logo%E2%80%94pix_powered_by_Banco_Central_%28Brazil%2C_2020%29.svg/2560px-Logo%E2%80%94pix_powered_by_Banco_Central_%28Brazil%2C_2020%29.svg.png" alt="PIX Logo" class="h-8 object-contain" />
-            </div>
-          </div>
-
-          <div class="bg-white border-2 border-gray-200 rounded-lg p-6">
-            ${pixPayment.pixQrCode ? `
-              <img src="${pixPayment.pixQrCode}" alt="QR Code PIX" class="mx-auto mb-4 rounded border" style="width: 200px; height: 200px;" />
-            ` : `
-              <div class="w-48 h-48 bg-gray-200 rounded mx-auto mb-4 flex items-center justify-center">
-                <span class="text-gray-500">QR Code</span>
-              </div>
-            `}
+  // Generate the HTML template
+  let finalHtml = `<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>${page.productName} - Pagamento PIX</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        .pix-container { max-width: 400px; margin: 0 auto; }
+        .qr-code-container { background: white; padding: 20px; border-radius: 12px; margin: 20px 0; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
+        .timer-display { font-size: 1.5rem; font-weight: bold; color: #e11d48; text-align: center; margin: 20px 0; }
+        .pix-code-display { background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 15px; font-family: monospace; word-break: break-all; margin: 15px 0; }
+    </style>
+</head>
+<body style="background-color: ${page.backgroundColor}; color: ${page.textColor}; font-family: system-ui, -apple-system, sans-serif;">
+    <div class="min-h-screen flex items-center justify-center p-4">
+        <div class="pix-container w-full">
+            ${page.showLogo && page.logoUrl ? `
+                <div class="text-center mb-8">
+                    <img src="${page.logoUrl}" alt="Logo" class="mx-auto" style="height: ${page.logoSize}px;" />
+                </div>
+            ` : ''}
             
-            <div class="space-y-3">
-              <div class="text-sm text-gray-600">Código PIX:</div>
-              <div class="bg-gray-50 border rounded p-3 text-sm break-all font-mono">${pixPayment.pixCode || 'Carregando...'}</div>
-              <button onclick="navigator.clipboard.writeText('${pixPayment.pixCode || ''}').then(() => alert('Código PIX copiado!'))" class="w-full text-white py-2 px-4 shadow-lg transform transition-all duration-150 active:scale-95" style="background-color: #48AD45; border-radius: 4px; box-shadow: 0 4px 8px rgba(72, 173, 69, 0.3), 0 2px 4px rgba(0, 0, 0, 0.1); border: 1px solid rgba(255, 255, 255, 0.2);">
-                Copiar Código PIX
-              </button>
+            <div class="bg-white rounded-lg shadow-lg p-8" style="border-top: 4px solid ${page.primaryColor};">
+                <h1 class="text-2xl font-bold text-center mb-2" style="color: ${page.primaryColor};">
+                    ${page.customTitle || page.productName}
+                </h1>
+                
+                <p class="text-gray-600 text-center mb-6">
+                    ${page.customSubtitle || page.productDescription}
+                </p>
+                
+                <div class="text-center mb-6">
+                    <div class="text-3xl font-bold" style="color: ${page.primaryColor};">
+                        R$ ${page.price}
+                    </div>
+                </div>
+
+                <form data-react-form="true" class="space-y-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Nome completo</label>
+                        <input type="text" name="customerName" required class="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500" />
+                    </div>
+                    
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Email</label>
+                        <input type="email" name="customerEmail" required class="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500" />
+                    </div>
+                    
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">CPF</label>
+                        <input type="text" name="customerCpf" required maxlength="14" placeholder="000.000.000-00" class="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500" />
+                    </div>
+                    
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Telefone</label>
+                        <input type="tel" name="customerPhone" required placeholder="(11) 99999-9999" class="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500" />
+                    </div>
+                    
+                    <button type="submit" class="w-full text-white py-3 px-6 rounded-md font-semibold hover:opacity-90 transition-colors disabled:opacity-50 flex items-center justify-center gap-2" style="background-color: ${page.accentColor || '#10B981'};" ${isSubmitting ? 'disabled' : ''}>
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path>
+                        </svg>
+                        ${isSubmitting ? 'Processando...' : (page.customButtonText || 'Pagar com PIX')}
+                    </button>
+                </form>
+                
+                ${page.customInstructions ? `
+                    <div class="mt-6 p-4 bg-blue-50 rounded-md border border-blue-200">
+                        <p class="text-sm text-blue-800">${page.customInstructions}</p>
+                    </div>
+                ` : ''}
             </div>
-          </div>
-
-          <div class="text-sm text-gray-500">
-            <p>Valor: R$ ${parseFloat((page as any).price).toFixed(2).replace('.', ',')}</p>
-            <p>O pagamento será confirmado automaticamente</p>
-          </div>
-
-          <script>
-            let timeLeft = ${timeLeft};
-            
-            function updateTimer() {
-              if (timeLeft > 0) {
-                const minutes = Math.floor(timeLeft / 60);
-                const seconds = timeLeft % 60;
-                const formattedTime = minutes.toString().padStart(2, '0') + ':' + seconds.toString().padStart(2, '0');
-                const timerEl = document.getElementById('timer-display');
-                if (timerEl) timerEl.textContent = 'Expira em ' + formattedTime;
-                timeLeft--;
-                setTimeout(updateTimer, 1000);
-              } else {
-                const timerEl = document.getElementById('timer-display');
-                if (timerEl) timerEl.textContent = 'Expirado';
-              }
-            }
-            
-            updateTimer();
-          </script>
         </div>
-      `;
-      
-      const formRegex = /<form[^>]*>[\s\S]*?<\/form>/;
-      if (formRegex.test(finalHtml)) {
-        finalHtml = finalHtml.replace(formRegex, pixContent);
-      }
-      
-      return <div dangerouslySetInnerHTML={{ __html: finalHtml }} />;
-    } else {
-      // Customer Form - Add JavaScript event handlers to existing HTML
-      const formContent = `
-        <script>
-          function formatCpf(input) {
-            let value = input.value.replace(/[^0-9]/g, '');
-            if (value.length >= 3) value = value.substring(0,3) + '.' + value.substring(3);
-            if (value.length >= 7) value = value.substring(0,7) + '.' + value.substring(7);
-            if (value.length >= 11) value = value.substring(0,11) + '-' + value.substring(11,13);
-            input.value = value.substring(0,14);
-          }
+    </div>
+</body>
+</html>`;
 
-          function formatPhone(input) {
-            let value = input.value.replace(/[^0-9]/g, '');
-            if (value.length >= 2) value = '(' + value.substring(0,2) + ') ' + value.substring(2);
-            if (value.length >= 10) value = value.substring(0,10) + '-' + value.substring(10);
-            input.value = value.substring(0,15);
-          }
-
-          function initializeForm() {
-            console.log('Initializing form...');
-            const form = document.querySelector('form');
-            console.log('Form found:', form);
+  // If we have a PIX payment, show the payment interface instead
+  if (pixPayment) {
+    finalHtml = `<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pagamento PIX - ${page.productName}</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        .pix-container { max-width: 400px; margin: 0 auto; }
+        .qr-code-container { background: white; padding: 20px; border-radius: 12px; margin: 20px 0; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
+        .timer-display { font-size: 1.5rem; font-weight: bold; color: #e11d48; text-align: center; margin: 20px 0; }
+        .pix-code-display { background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 15px; font-family: monospace; word-break: break-all; margin: 15px 0; }
+    </style>
+</head>
+<body style="background-color: ${page.backgroundColor}; color: ${page.textColor}; font-family: system-ui, -apple-system, sans-serif;">
+    <div class="min-h-screen flex items-center justify-center p-4">
+        <div class="pix-container w-full">
+            ${page.showLogo && page.logoUrl ? `
+                <div class="text-center mb-8">
+                    <img src="${page.logoUrl}" alt="Logo" class="mx-auto" style="height: ${page.logoSize}px;" />
+                </div>
+            ` : ''}
             
-            if (form) {
-              console.log('Adding event listener to form');
-              
-              // Remove any existing listeners
-              form.onsubmit = null;
-              
-              form.onsubmit = async function(event) {
-                console.log('Form submit event triggered');
-                event.preventDefault();
-                event.stopPropagation();
-                
-                const submitBtn = form.querySelector('button[type="submit"]');
-                console.log('Submit button found:', submitBtn);
-                
-                if (!submitBtn) {
-                  console.error('Submit button not found');
-                  return false;
-                }
-                
-                const originalHtml = submitBtn.innerHTML;
-                submitBtn.disabled = true;
-                submitBtn.textContent = 'Processando...';
+            <div class="bg-white rounded-lg shadow-lg p-8" style="border-top: 4px solid ${page.primaryColor};">
+                <div class="text-center mb-6">
+                    <div class="w-16 h-16 mx-auto mb-4 bg-green-100 rounded-full flex items-center justify-center">
+                        <svg class="w-8 h-8 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                        </svg>
+                    </div>
+                    <h1 class="text-2xl font-bold mb-2" style="color: ${page.primaryColor};">Pagamento PIX</h1>
+                    <p class="text-gray-600">Escaneie o QR Code ou copie o código PIX</p>
+                </div>
 
-                const formData = new FormData(form);
-                const data = {
-                  paymentPageId: ${(page as any).id},
-                  customerName: formData.get('customerName'),
-                  customerEmail: formData.get('customerEmail'),
-                  customerCpf: formData.get('customerCpf') ? formData.get('customerCpf').replace(/[^0-9]/g, '') : '',
-                  customerPhone: formData.get('customerPhone'),
-                  amount: '${(page as any).price}'
-                };
-                
-                console.log('Form data prepared:', data);
-                
-                try {
-                  console.log('Sending request to API...');
-                  const response = await fetch('/api/pix-payments', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(data)
-                  });
-                  
-                  console.log('Response received:', response.status);
-                  const result = await response.json();
-                  console.log('Response data:', result);
-                  
-                  if (response.ok && result.id) {
-                    console.log('Payment successful, reloading page...');
-                    window.location.reload();
-                  } else {
-                    throw new Error(result.message || 'Erro ao processar pagamento');
-                  }
-                } catch (error) {
-                  console.error('Payment error:', error);
-                  alert('Erro ao processar pagamento: ' + error.message);
-                  submitBtn.disabled = false;
-                  submitBtn.innerHTML = originalHtml;
-                }
-                
-                return false;
-              };
-              
-              // Add formatting to inputs
-              const cpfInput = form.querySelector('input[name="customerCpf"]');
-              if (cpfInput) {
-                cpfInput.addEventListener('input', function() {
-                  formatCpf(this);
-                });
-              }
-              
-              const phoneInput = form.querySelector('input[name="customerPhone"]');
-              if (phoneInput) {
-                phoneInput.addEventListener('input', function() {
-                  formatPhone(this);
-                });
-              }
-            } else {
-              console.error('Form not found, retrying in 500ms...');
-              setTimeout(initializeForm, 500);
-            }
-          }
-          
-          // Try multiple initialization methods
-          if (document.readyState === 'loading') {
-            document.addEventListener('DOMContentLoaded', initializeForm);
-          } else {
-            initializeForm();
-          }
-          
-          // Fallback initialization after a delay
-          setTimeout(initializeForm, 1000);
-        </script>
-      `;
-      
-      // Add the script to the end of the HTML
-      finalHtml = finalHtml + formContent;
-    }
+                <div class="timer-display">
+                    Tempo restante: ${formatTime(timeLeft)}
+                </div>
 
-    return <div dangerouslySetInnerHTML={{ __html: finalHtml }} />;
+                <div class="qr-code-container text-center">
+                    <img src="${pixPayment.pixQrCode}" alt="QR Code PIX" class="mx-auto max-w-full h-auto" style="max-width: 250px;" />
+                </div>
+
+                <div class="space-y-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Código PIX (Copiar e Colar)</label>
+                        <div class="pix-code-display">
+                            <div class="text-sm">${pixPayment.pixCode}</div>
+                        </div>
+                        <button onclick="navigator.clipboard.writeText('${pixPayment.pixCode}').then(() => alert('Código PIX copiado!'))" 
+                                class="w-full mt-2 text-white py-2 px-4 rounded-md font-medium hover:opacity-90 transition-colors" 
+                                style="background-color: ${page.accentColor || '#10B981'};">
+                            Copiar Código PIX
+                        </button>
+                    </div>
+
+                    <div class="bg-blue-50 rounded-md p-4 border border-blue-200">
+                        <h3 class="font-medium text-blue-900 mb-2">Como pagar:</h3>
+                        <ol class="text-sm text-blue-800 space-y-1">
+                            <li>1. Abra o app do seu banco</li>
+                            <li>2. Procure pela opção PIX</li>
+                            <li>3. Escaneie o QR Code ou cole o código</li>
+                            <li>4. Confirme o pagamento</li>
+                        </ol>
+                    </div>
+
+                    <div class="bg-yellow-50 rounded-md p-4 border border-yellow-200">
+                        <div class="flex items-center">
+                            <svg class="w-5 h-5 text-yellow-600 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L4.082 15.5c-.77.833.192 2.5 1.732 2.5z"></path>
+                            </svg>
+                            <p class="text-sm text-yellow-800">
+                                <strong>Valor:</strong> R$ ${page.price} • <strong>Status:</strong> ${pixPayment.status || 'Aguardando'}
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>`;
   }
 
-  return <div className="flex items-center justify-center min-h-screen">Template não encontrado</div>;
+  return <div dangerouslySetInnerHTML={{ __html: finalHtml }} />;
 }
