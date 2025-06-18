@@ -121,110 +121,108 @@ export default function CheckoutFinal() {
       isEditor={false}
     >
       {!pixPayment ? (
-        // Form Step - usando o mesmo layout do editor
-        <div className="p-6 space-y-6">
-          <div className="text-center space-y-4">
-            <div className="text-3xl font-bold text-gray-900 mb-2">
-              R$ {page.price}
+        // Form Step - código EXATO do editor
+        <div className="p-6 space-y-4">
+          {/* Status Compacto com Cronômetro - IGUAL AO EDITOR */}
+          <div className="bg-amber-50 border border-amber-300 rounded-md p-3 mb-4 text-center">
+            <div className="flex items-center justify-center mb-2">
+              <svg className="animate-spin h-4 w-4 mr-2 text-amber-500" fill="none" viewBox="0 0 24 24">
+                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+              </svg>
+              <span className="text-sm font-medium text-amber-600">Aguardando Pagamento...</span>
             </div>
-            
-            {/* Timer */}
-            <div className="mb-6">
-              <div className="text-sm text-gray-500 mb-2">Tempo restante para finalizar:</div>
-              <div 
-                className="text-2xl font-mono font-bold"
-                style={{ color: timeLeft <= 60 ? '#DC2626' : page.primaryColor }}
-              >
-                {formatTime(timeLeft)}
-              </div>
-            </div>
+            <div className="text-lg font-bold font-mono text-amber-700">{formatTime(timeLeft)}</div>
           </div>
 
-          <form onSubmit={handleSubmit} className="space-y-4">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Nome completo</label>
-              <input
-                type="text"
-                name="customerName"
-                required
-                className="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                placeholder="Seu nome completo"
-              />
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Email</label>
-              <input
-                type="email"
-                name="customerEmail"
-                required
-                className="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                placeholder="seu@email.com"
-              />
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">CPF</label>
-              <input
-                type="text"
-                name="customerCpf"
-                required
-                onChange={handleCpfChange}
-                maxLength={14}
-                className="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                placeholder="000.000.000-00"
-              />
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Telefone</label>
-              <input
-                type="text"
-                name="customerPhone"
-                required
-                onChange={handlePhoneChange}
-                maxLength={15}
-                className="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                placeholder="(11) 99999-9999"
-              />
-            </div>
-
-            <button
-              type="submit"
-              disabled={createPaymentMutation.isPending}
-              className="w-full text-white py-3 px-6 rounded-md font-semibold flex items-center justify-center gap-2"
-              style={{ backgroundColor: page.accentColor || page.primaryColor }}
-            >
-              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path>
-              </svg>
-              {createPaymentMutation.isPending ? 'Processando...' : (page.customButtonText || 'Pagar com PIX')} - R$ {page.price}
-            </button>
-          </form>
+          <div className="text-lg font-semibold text-gray-900">
+            {page.skipForm ? "Processando Pagamento..." : "Complete seus dados"}
+          </div>
+          
+          {!page.skipForm && (
+            <>
+              <form onSubmit={handleSubmit} className="space-y-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Nome completo</label>
+                  <input 
+                    type="text" 
+                    name="customerName"
+                    required
+                    placeholder="Seu nome completo"
+                    className="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  />
+                </div>
+                
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Email</label>
+                  <input 
+                    type="email" 
+                    name="customerEmail"
+                    required
+                    placeholder="seu@email.com"
+                    className="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  />
+                </div>
+                
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">CPF</label>
+                  <input 
+                    type="text" 
+                    name="customerCpf"
+                    required
+                    onChange={handleCpfChange}
+                    maxLength={14}
+                    placeholder="000.000.000-00"
+                    className="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  />
+                </div>
+                
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Telefone</label>
+                  <input 
+                    type="tel" 
+                    name="customerPhone"
+                    required
+                    onChange={handlePhoneChange}
+                    maxLength={15}
+                    placeholder="(11) 99999-9999"
+                    className="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  />
+                </div>
+                
+                <button 
+                  type="submit"
+                  disabled={createPaymentMutation.isPending}
+                  className="w-full text-white py-3 px-6 rounded-md font-semibold flex items-center justify-center gap-2"
+                  style={{ backgroundColor: page.accentColor }}
+                >
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path>
+                  </svg>
+                  {createPaymentMutation.isPending ? 'Processando...' : (page.customButtonText || "Pagar com PIX")} - R$ {page.price}
+                </button>
+              </form>
+            </>
+          )}
         </div>
       ) : (
         // Payment Step
         <div className="p-6 text-center space-y-6">
+          {/* Status Compacto com Cronômetro - IGUAL AO EDITOR */}
+          <div className="bg-amber-50 border border-amber-300 rounded-md p-3 mb-4 text-center">
+            <div className="flex items-center justify-center mb-2">
+              <svg className="animate-spin h-4 w-4 mr-2 text-amber-500" fill="none" viewBox="0 0 24 24">
+                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+              </svg>
+              <span className="text-sm font-medium text-amber-600">Aguardando Pagamento...</span>
+            </div>
+            <div className="text-lg font-bold font-mono text-amber-700">{formatTime(timeLeft)}</div>
+          </div>
+
           <h2 className="text-2xl font-bold" style={{ color: page.primaryColor }}>
             Pagamento PIX
           </h2>
-          
-          <div>
-            <div className="text-sm text-gray-500 mb-2">Status:</div>
-            <div className="text-lg font-semibold" style={{ color: page.primaryColor }}>
-              Aguardando Pagamento...
-            </div>
-          </div>
-
-          <div>
-            <div className="text-sm text-gray-500 mb-2">Tempo restante:</div>
-            <div 
-              className="text-xl font-mono font-bold"
-              style={{ color: timeLeft <= 60 ? '#DC2626' : page.primaryColor }}
-            >
-              {formatTime(timeLeft)}
-            </div>
-          </div>
 
           {pixPayment.pixQrCode && (
             <div>
