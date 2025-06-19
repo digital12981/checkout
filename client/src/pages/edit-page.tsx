@@ -105,7 +105,7 @@ export default function EditPage() {
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const [currentTab, setCurrentTab] = useState("config");
-  const [previewTab, setPreviewTab] = useState("preview");
+  const [previewTab, setPreviewTab] = useState("form");
   const [customElements, setCustomElements] = useState<CustomElement[]>([]);
   const [editingElement, setEditingElement] = useState<string | null>(null);
   const [capturedHTML, setCapturedHTML] = useState<string>("");
