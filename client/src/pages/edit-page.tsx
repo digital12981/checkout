@@ -103,7 +103,7 @@ export default function EditPage() {
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const [currentTab, setCurrentTab] = useState("config");
-  const [previewTab, setPreviewTab] = useState("preview");
+  const [previewTab, setPreviewTab] = useState("form");
   const [customElements, setCustomElements] = useState<CustomElement[]>([]);
   const [editingElement, setEditingElement] = useState<string | null>(null);
   const [capturedHTML, setCapturedHTML] = useState<string>("");
@@ -803,10 +803,6 @@ export default function EditPage() {
         <div className="flex-1 bg-gray-50 overflow-auto">
           <Tabs value={previewTab} onValueChange={setPreviewTab} className="h-full">
             <TabsList className="m-4">
-              <TabsTrigger value="preview">
-                <Eye className="w-4 h-4 mr-2" />
-                Preview
-              </TabsTrigger>
               <TabsTrigger value="form">
                 <ShoppingBag className="w-4 h-4 mr-2" />
                 Formulário
@@ -817,18 +813,6 @@ export default function EditPage() {
               </TabsTrigger>
             </TabsList>
             
-            <TabsContent value="preview" className="p-4 h-full">
-              <div className="flex justify-center h-full">
-                <div className="w-96 max-w-sm border bg-white overflow-auto shadow-lg" style={{ height: '100%', minHeight: '600px' }}>
-                  <UnifiedTemplateRenderer
-                    page={{...formData, id: parseInt(id || "0")}}
-                    customElements={customElements}
-                    isEditor={true}
-                  />
-                </div>
-              </div>
-            </TabsContent>
-
             <TabsContent value="form" className="p-4 h-full">
               <div className="flex justify-center h-full">
                 <div className="w-96 max-w-sm border bg-white overflow-auto shadow-lg" style={{ height: '100%', minHeight: '600px' }}>
