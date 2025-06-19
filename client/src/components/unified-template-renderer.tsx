@@ -200,6 +200,34 @@ export default function UnifiedTemplateRenderer({
   const bottomElements = filterElementsByPosition("bottom");
   const footerElements = filterElementsByPosition("footer");
 
+  // Calculate dynamic header height based on content
+  const calculateDynamicHeaderHeight = () => {
+    let baseHeight = 60; // Minimum base height
+    
+    // Add space for logo if present
+    if (page.showLogo && page.logoUrl) {
+      baseHeight += page.logoSize + 16; // Logo size + margin
+    }
+    
+    // Add space for title (approximate)
+    if (page.customTitle) {
+      baseHeight += 32; // Title space
+    }
+    
+    // Add space for subtitle (approximate)
+    if (page.customSubtitle) {
+      baseHeight += 28; // Subtitle space
+    }
+    
+    // Add space for top elements
+    baseHeight += topElements.length * 24;
+    
+    // Ensure reasonable bounds
+    return Math.max(120, Math.min(baseHeight, 350));
+  };
+
+  const dynamicHeaderHeight = isEditor ? calculateDynamicHeaderHeight() : page.headerHeight;
+
   return (
     <div 
       className="min-h-screen w-full"
@@ -211,8 +239,8 @@ export default function UnifiedTemplateRenderer({
         className="w-full text-white text-center relative overflow-hidden"
         style={{ 
           backgroundColor: page.primaryColor,
-          height: `${page.headerHeight}px`,
-          paddingTop: `${Math.max(8, page.headerHeight * 0.04)}px`,
+          height: `${dynamicHeaderHeight}px`,
+          paddingTop: `${Math.max(8, dynamicHeaderHeight * 0.04)}px`,
           paddingLeft: '16px',
           paddingRight: '16px'
         }}
@@ -232,9 +260,9 @@ export default function UnifiedTemplateRenderer({
               alt="Logo" 
               className="object-contain rounded"
               style={{ 
-                width: `${Math.min(page.logoSize * 0.7, Math.max(60, page.headerHeight * 0.35))}px`, 
-                height: `${Math.min(page.logoSize * 0.7, Math.max(60, page.headerHeight * 0.35))}px`,
-                maxHeight: `${Math.max(60, page.headerHeight - 80)}px`
+                width: `${page.logoSize}px`, 
+                height: `${page.logoSize}px`,
+                maxHeight: `${Math.max(60, dynamicHeaderHeight - 60)}px`
               }}
               onError={(e) => {
                 e.currentTarget.style.display = 'none';
@@ -248,7 +276,7 @@ export default function UnifiedTemplateRenderer({
           <h1 
             className="font-bold"
             style={{ 
-              fontSize: `${Math.max(16, Math.min(24, page.headerHeight * 0.09))}px`,
+              fontSize: `${Math.max(16, Math.min(24, dynamicHeaderHeight * 0.09))}px`,
               lineHeight: '1.1',
               maxWidth: '98%',
               margin: '0 auto 2px auto'
@@ -263,7 +291,7 @@ export default function UnifiedTemplateRenderer({
           <p 
             className="text-white/90"
             style={{ 
-              fontSize: `${Math.max(14, Math.min(19, page.headerHeight * 0.08))}px`,
+              fontSize: `${Math.max(14, Math.min(19, dynamicHeaderHeight * 0.08))}px`,
               lineHeight: '1.2',
               maxWidth: '98%',
               margin: '0 auto'
