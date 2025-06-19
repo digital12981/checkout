@@ -208,26 +208,25 @@ export default function UnifiedTemplateRenderer({
     >
       {/* Header */}
       <div 
-        className="w-full text-white text-center flex flex-col justify-start relative overflow-hidden"
+        className="w-full text-white text-center relative overflow-hidden"
         style={{ 
           backgroundColor: page.primaryColor,
           height: `${page.headerHeight}px`,
           paddingTop: `${Math.max(8, page.headerHeight * 0.04)}px`,
-          paddingBottom: `${Math.max(8, page.headerHeight * 0.04)}px`,
           paddingLeft: '16px',
           paddingRight: '16px'
         }}
       >
         {/* Top custom elements */}
         {topElements.map(element => (
-          <div key={element.id} className="mb-1">
+          <div key={element.id} style={{ marginBottom: '2px' }}>
             {renderCustomElement(element)}
           </div>
         ))}
 
         {/* Logo */}
         {page.showLogo && page.logoUrl && (
-          <div className={`mb-1 flex ${page.logoPosition === 'left' ? 'justify-start' : page.logoPosition === 'right' ? 'justify-end' : 'justify-center'}`}>
+          <div className={`flex ${page.logoPosition === 'left' ? 'justify-start' : page.logoPosition === 'right' ? 'justify-end' : 'justify-center'} mb-1`}>
             <img 
               src={page.logoUrl} 
               alt="Logo" 
@@ -244,20 +243,22 @@ export default function UnifiedTemplateRenderer({
           </div>
         )}
 
-        {/* Title and subtitle with mobile-optimized sizing */}
+        {/* Title */}
         {page.customTitle && (
           <h1 
-            className="font-bold mb-1"
+            className="font-bold"
             style={{ 
               fontSize: `${Math.max(14, Math.min(22, page.headerHeight * 0.08))}px`,
               lineHeight: '1.1',
               maxWidth: '98%',
-              margin: '0 auto 4px auto'
+              margin: '0 auto 2px auto'
             }}
           >
             {page.customTitle}
           </h1>
         )}
+        
+        {/* Subtitle - último elemento sem margem inferior */}
         {page.customSubtitle && (
           <p 
             className="text-white/90"
@@ -265,8 +266,7 @@ export default function UnifiedTemplateRenderer({
               fontSize: `${Math.max(13, Math.min(18, page.headerHeight * 0.075))}px`,
               lineHeight: '1.2',
               maxWidth: '98%',
-              margin: '0 auto',
-              marginBottom: '0'
+              margin: '0 auto'
             }}
           >
             {page.customSubtitle}
