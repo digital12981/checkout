@@ -801,10 +801,6 @@ export default function EditPage() {
         <div className="flex-1 bg-gray-50 overflow-auto">
           <Tabs value={previewTab} onValueChange={setPreviewTab} className="h-full">
             <TabsList className="m-4">
-              <TabsTrigger value="preview">
-                <Eye className="w-4 h-4 mr-2" />
-                Preview
-              </TabsTrigger>
               <TabsTrigger value="form">
                 <ShoppingBag className="w-4 h-4 mr-2" />
                 Formulário
@@ -815,165 +811,85 @@ export default function EditPage() {
               </TabsTrigger>
             </TabsList>
             
-            <TabsContent value="preview" className="p-4 h-full">
-              <div className="border rounded-lg bg-white h-full overflow-auto">
-                <UnifiedTemplateRenderer
-                  page={{...formData, id: parseInt(id || "0")}}
-                  customElements={customElements}
-                  isEditor={true}
-                >
-                  <div className="p-6 space-y-4">
-                    {/* Status Compacto com Cronômetro */}
-                    <div className="bg-amber-50 border border-amber-300 rounded-md p-3 mb-4 text-center">
-                      <div className="flex items-center justify-center mb-2">
-                        <svg className="animate-spin h-4 w-4 mr-2 text-amber-500" fill="none" viewBox="0 0 24 24">
-                          <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                          <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 714 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                        </svg>
-                        <span className="text-sm font-medium text-amber-600">Aguardando Pagamento...</span>
-                      </div>
-                      <div className="text-lg font-bold font-mono text-amber-700">{formatTime(timeLeft)}</div>
-                    </div>
 
-                    <div className="text-lg font-semibold text-gray-900">
-                      {formData.skipForm ? "Processando Pagamento..." : "Complete seus dados"}
-                    </div>
-                    
-                    {!formData.skipForm && (
-                      <>
-                        <div className="space-y-4">
-                          <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-1">Nome completo</label>
-                            <input 
-                              type="text" 
-                              placeholder="Seu nome completo"
-                              className="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                              disabled 
-                            />
-                          </div>
-                          
-                          <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-1">Email</label>
-                            <input 
-                              type="email" 
-                              placeholder="seu@email.com"
-                              className="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                              disabled 
-                            />
-                          </div>
-                          
-                          <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-1">CPF</label>
-                            <input 
-                              type="text" 
-                              placeholder="000.000.000-00"
-                              className="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                              disabled 
-                            />
-                          </div>
-                          
-                          <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-1">Telefone</label>
-                            <input 
-                              type="tel" 
-                              placeholder="(11) 99999-9999"
-                              className="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                              disabled 
-                            />
-                          </div>
-                        </div>
-                      </>
-                    )}
-                    
-                    <button 
-                      className="w-full text-white py-3 px-6 rounded-md font-semibold flex items-center justify-center gap-2"
-                      style={{ backgroundColor: formData.accentColor }}
-                      disabled
-                    >
-                      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path>
-                      </svg>
-                      {formData.customButtonText || "Pagar com PIX"} - {formatCurrency(formData.price)}
-                    </button>
-                  </div>
-                </UnifiedTemplateRenderer>
-              </div>
-            </TabsContent>
 
             <TabsContent value="form" className="p-4 h-full">
-              <div className="border rounded-lg bg-white h-full overflow-auto">
-                <UnifiedTemplateRenderer
-                  page={{...formData, id: parseInt(id || "0")}}
-                  customElements={customElements}
-                  isEditor={true}
-                >
-                  <div className="p-6 space-y-4">
-                    <div className="text-lg font-semibold text-gray-900">
-                      Complete seus dados
+              <div className="flex justify-center">
+                <div className="w-96 max-w-sm border rounded-xl bg-white overflow-auto shadow-lg" style={{ height: '700px', maxHeight: '85vh' }}>
+                  <UnifiedTemplateRenderer
+                    page={{...formData, id: parseInt(id || "0")}}
+                    customElements={customElements}
+                    isEditor={true}
+                  >
+                    <div className="p-6 space-y-4">
+                      <div className="text-lg font-semibold text-gray-900">
+                        Complete seus dados
+                      </div>
+                      
+                      <div className="space-y-4">
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 mb-1">Nome completo</label>
+                          <input 
+                            type="text" 
+                            placeholder="Seu nome completo"
+                            className="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                            disabled 
+                          />
+                        </div>
+                        
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 mb-1">Email</label>
+                          <input 
+                            type="email" 
+                            placeholder="seu@email.com"
+                            className="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                            disabled 
+                          />
+                        </div>
+                        
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 mb-1">CPF</label>
+                          <input 
+                            type="text" 
+                            placeholder="000.000.000-00"
+                            className="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                            disabled 
+                          />
+                        </div>
+                        
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 mb-1">Telefone</label>
+                          <input 
+                            type="tel" 
+                            placeholder="(11) 99999-9999"
+                            className="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                            disabled 
+                          />
+                        </div>
+                      </div>
+                      
+                      <button 
+                        className="w-full text-white py-3 px-6 rounded-md font-semibold flex items-center justify-center"
+                        style={{ backgroundColor: formData.accentColor }}
+                        disabled
+                      >
+                        {formData.customButtonText || "Pagar com PIX"}
+                      </button>
                     </div>
-                    
-                    <div className="space-y-4">
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">Nome completo</label>
-                        <input 
-                          type="text" 
-                          placeholder="Seu nome completo"
-                          className="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                          disabled 
-                        />
-                      </div>
-                      
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">Email</label>
-                        <input 
-                          type="email" 
-                          placeholder="seu@email.com"
-                          className="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                          disabled 
-                        />
-                      </div>
-                      
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">CPF</label>
-                        <input 
-                          type="text" 
-                          placeholder="000.000.000-00"
-                          className="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                          disabled 
-                        />
-                      </div>
-                      
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">Telefone</label>
-                        <input 
-                          type="tel" 
-                          placeholder="(11) 99999-9999"
-                          className="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                          disabled 
-                        />
-                      </div>
-                    </div>
-                    
-                    <button 
-                      className="w-full text-white py-3 px-6 rounded-md font-semibold flex items-center justify-center"
-                      style={{ backgroundColor: formData.accentColor }}
-                      disabled
-                    >
-                      {formData.customButtonText || "Pagar com PIX"}
-                    </button>
-                  </div>
-                </UnifiedTemplateRenderer>
+                  </UnifiedTemplateRenderer>
+                </div>
               </div>
             </TabsContent>
 
             <TabsContent value="payment" className="p-4 h-full">
-              <div className="border rounded-lg bg-white h-full overflow-auto">
-                <UnifiedTemplateRenderer
-                  page={{...formData, id: parseInt(id || "0")}}
-                  customElements={customElements}
-                  isEditor={true}
-                >
-                  <div className="p-6 space-y-6">
+              <div className="flex justify-center">
+                <div className="w-96 max-w-sm border rounded-xl bg-white overflow-auto shadow-lg" style={{ height: '700px', maxHeight: '85vh' }}>
+                  <UnifiedTemplateRenderer
+                    page={{...formData, id: parseInt(id || "0")}}
+                    customElements={customElements}
+                    isEditor={true}
+                  >
+                    <div className="p-6 space-y-6">
                     <div className="text-center">
                       <div className="text-lg font-semibold text-gray-900 mb-2">
                         Valor: {formatCurrency(formData.price)}
@@ -1062,6 +978,7 @@ export default function EditPage() {
 
                   </div>
                 </UnifiedTemplateRenderer>
+                </div>
               </div>
             </TabsContent>
           </Tabs>
