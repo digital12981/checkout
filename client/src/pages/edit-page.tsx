@@ -165,7 +165,6 @@ export default function EditPage() {
 
   useEffect(() => {
     if (page && Array.isArray(page) && page.length > 0) {
-      console.log("Loading page data:", page);
       const pageData = page[0]; // The data comes as an array
       
       const formData = {
@@ -189,15 +188,12 @@ export default function EditPage() {
         showLogo: pageData.showLogo !== false
       };
       
-      console.log("Resetting form with data:", formData);
       form.reset(formData);
 
       try {
         const elements = JSON.parse(pageData.customElements || "[]");
-        console.log("Loaded custom elements:", elements);
         setCustomElements(elements);
       } catch (error) {
-        console.error("Error parsing custom elements:", error);
         setCustomElements([]);
       }
     }
