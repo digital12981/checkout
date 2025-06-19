@@ -253,7 +253,7 @@ export default function UnifiedTemplateRenderer({
               lineHeight: '1.2',
               maxWidth: '95%',
               margin: '0 auto',
-              marginBottom: `${Math.max(32, page.headerHeight * 0.2)}px`
+              marginBottom: `${Math.max(20, page.headerHeight * 0.12)}px`
             }}
           >
             {page.customTitle}
