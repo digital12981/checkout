@@ -208,11 +208,14 @@ export default function UnifiedTemplateRenderer({
     >
       {/* Header */}
       <div 
-        className="w-full text-white text-center flex flex-col justify-center relative"
+        className="w-full text-white text-center flex flex-col justify-start relative"
         style={{ 
           backgroundColor: page.primaryColor,
           height: `${page.headerHeight}px`,
-          padding: `${Math.max(12, page.headerHeight * 0.05)}px 24px`
+          paddingTop: `${Math.max(16, page.headerHeight * 0.08)}px`,
+          paddingBottom: `${Math.max(16, page.headerHeight * 0.12)}px`,
+          paddingLeft: '24px',
+          paddingRight: '24px'
         }}
       >
         {/* Top custom elements */}
@@ -224,15 +227,15 @@ export default function UnifiedTemplateRenderer({
 
         {/* Logo */}
         {page.showLogo && page.logoUrl && (
-          <div className={`mb-2 flex ${page.logoPosition === 'left' ? 'justify-start' : page.logoPosition === 'right' ? 'justify-end' : 'justify-center'}`}>
+          <div className={`mb-3 flex ${page.logoPosition === 'left' ? 'justify-start' : page.logoPosition === 'right' ? 'justify-end' : 'justify-center'}`}>
             <img 
               src={page.logoUrl} 
               alt="Logo" 
               className="object-contain rounded"
               style={{ 
-                width: `${Math.min(page.logoSize, page.headerHeight * 0.6)}px`, 
-                height: `${Math.min(page.logoSize, page.headerHeight * 0.6)}px`,
-                maxHeight: `${page.headerHeight - 40}px`
+                width: `${Math.min(page.logoSize, page.headerHeight * 0.45)}px`, 
+                height: `${Math.min(page.logoSize, page.headerHeight * 0.45)}px`,
+                maxHeight: `${page.headerHeight - 60}px`
               }}
               onError={(e) => {
                 e.currentTarget.style.display = 'none';
@@ -241,12 +244,12 @@ export default function UnifiedTemplateRenderer({
           </div>
         )}
 
-        {/* Title and subtitle - responsive sizing */}
+        {/* Title and subtitle with better sizing */}
         {page.customTitle && (
           <h1 
-            className="font-bold mb-1"
+            className="font-bold mb-2"
             style={{ 
-              fontSize: `${Math.max(16, Math.min(32, page.headerHeight * 0.12))}px`,
+              fontSize: `${Math.max(14, Math.min(24, page.headerHeight * 0.08))}px`,
               lineHeight: '1.2'
             }}
           >
@@ -257,8 +260,10 @@ export default function UnifiedTemplateRenderer({
           <p 
             className="text-white/90"
             style={{ 
-              fontSize: `${Math.max(12, Math.min(18, page.headerHeight * 0.08))}px`,
-              lineHeight: '1.3'
+              fontSize: `${Math.max(11, Math.min(16, page.headerHeight * 0.06))}px`,
+              lineHeight: '1.4',
+              maxWidth: '90%',
+              margin: '0 auto'
             }}
           >
             {page.customSubtitle}
