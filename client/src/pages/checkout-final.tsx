@@ -239,12 +239,12 @@ export default function CheckoutFinal() {
               <img 
                 src={pixPayment.pixQrCode} 
                 alt="QR Code PIX" 
-                className="w-64 h-64 border-2 border-gray-300 rounded-lg"
+                className="w-48 h-48 border-2 border-gray-300 rounded-lg"
               />
             ) : (
-              <div className="w-64 h-64 bg-gray-100 border-2 border-dashed border-gray-300 rounded-lg flex items-center justify-center">
+              <div className="w-48 h-48 bg-gray-100 border-2 border-dashed border-gray-300 rounded-lg flex items-center justify-center">
                 <div className="text-center text-gray-500">
-                  <svg className="w-16 h-16 mx-auto mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <svg className="w-12 h-12 mx-auto mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 4v1m6 11a2 2 0 100-4m0 4a2 2 0 100 4m0-4v2m-6-6a2 2 0 100-4m0 4a2 2 0 100 4m0-4v2m-6-6a2 2 0 100-4m0 4a2 2 0 100 4m0-4v2"></path>
                   </svg>
                   <p className="text-sm">QR Code PIX</p>
