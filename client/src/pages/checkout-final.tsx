@@ -129,10 +129,6 @@ export default function CheckoutFinal() {
             <div className="text-lg font-bold font-mono text-amber-700">{formatTime(timeLeft)}</div>
           </div>
 
-          <div className="text-lg font-semibold text-gray-900">
-            Complete seus dados
-          </div>
-          
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">Nome completo</label>
