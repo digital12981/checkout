@@ -144,8 +144,8 @@ export default function EditPage() {
   });
 
   useEffect(() => {
-    if (page && Array.isArray(page) && page.length > 0) {
-      const pageData = page[0];
+    if (page) {
+      const pageData = Array.isArray(page) ? page[0] : page;
       console.log("Loading page data:", pageData);
       
       form.reset({
@@ -408,7 +408,9 @@ export default function EditPage() {
             </Button>
             <div>
               <h1 className="font-semibold">Editar Página de Pagamento</h1>
-              <p className="text-sm text-gray-600">{page.productName}</p>
+              <p className="text-sm text-gray-600">{
+                page ? (Array.isArray(page) ? page[0]?.productName : (page as any)?.productName) || "Carregando..." : "Carregando..."
+              }</p>
             </div>
           </div>
           <div className="flex gap-2">
@@ -801,6 +803,10 @@ export default function EditPage() {
         <div className="flex-1 bg-gray-50 overflow-auto">
           <Tabs value={previewTab} onValueChange={setPreviewTab} className="h-full">
             <TabsList className="m-4">
+              <TabsTrigger value="preview">
+                <Eye className="w-4 h-4 mr-2" />
+                Preview
+              </TabsTrigger>
               <TabsTrigger value="form">
                 <ShoppingBag className="w-4 h-4 mr-2" />
                 Formulário
@@ -811,7 +817,17 @@ export default function EditPage() {
               </TabsTrigger>
             </TabsList>
             
-
+            <TabsContent value="preview" className="p-4 h-full">
+              <div className="flex justify-center h-full">
+                <div className="w-96 max-w-sm border bg-white overflow-auto shadow-lg" style={{ height: '100%', minHeight: '600px' }}>
+                  <UnifiedTemplateRenderer
+                    page={{...formData, id: parseInt(id || "0")}}
+                    customElements={customElements}
+                    isEditor={true}
+                  />
+                </div>
+              </div>
+            </TabsContent>
 
             <TabsContent value="form" className="p-4 h-full">
               <div className="flex justify-center h-full">
