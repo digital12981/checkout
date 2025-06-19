@@ -131,6 +131,28 @@ export default function EditPage() {
     }
   }, [previewTab, timeLeft]);
 
+  // Auto-save functionality when form changes
+  useEffect(() => {
+    const subscription = form.watch((value, { name, type }) => {
+      if (type === 'change' && name && page) {
+        const timeoutId = setTimeout(() => {
+          const updatedData = {
+            ...value,
+            customElements: JSON.stringify(customElements)
+          };
+          console.log("Auto-saving form changes:", updatedData);
+          // Only auto-save if there are actual changes
+          if (JSON.stringify(updatedData) !== JSON.stringify(page)) {
+            updatePageMutation.mutate(updatedData as EditPageForm);
+          }
+        }, 1000); // Auto-save after 1 second of no changes
+
+        return () => clearTimeout(timeoutId);
+      }
+    });
+    return () => subscription.unsubscribe();
+  }, [form, customElements, page, updatePageMutation]);
+
   const { data: page, isLoading } = useQuery({
     queryKey: ["/api/payment-pages", id],
     enabled: !!id,
@@ -199,6 +221,7 @@ export default function EditPage() {
 
   const updatePageMutation = useMutation({
     mutationFn: async (data: EditPageForm) => {
+      console.log("Sending data to server:", data);
       const response = await fetch(`/api/payment-pages/${id}`, {
         method: "PUT",
         headers: {
@@ -208,17 +231,25 @@ export default function EditPage() {
       });
       
       if (!response.ok) {
-        throw new Error("Erro ao salvar página");
+        const errorData = await response.text();
+        console.error("Server error:", response.status, errorData);
+        throw new Error(`Erro ao salvar página: ${response.status}`);
       }
       
-      return response.json();
+      const result = await response.json();
+      console.log("Server response:", result);
+      return result;
     },
-    onSuccess: () => {
+    onSuccess: (updatedPage) => {
       toast({
         title: "Página atualizada",
         description: "Suas alterações foram salvas com sucesso.",
       });
+      // Invalidate both the list and the specific page
       queryClient.invalidateQueries({ queryKey: ["/api/payment-pages"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/payment-pages", id] });
+      // Update the query cache with the new data
+      queryClient.setQueryData(["/api/payment-pages", id], updatedPage);
     },
     onError: (error: any) => {
       toast({
@@ -234,6 +265,7 @@ export default function EditPage() {
       ...data,
       customElements: JSON.stringify(customElements)
     };
+    console.log("Submitting form data:", updatedData);
     updatePageMutation.mutate(updatedData);
   };
 

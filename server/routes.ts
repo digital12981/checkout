@@ -86,8 +86,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.put("/api/payment-pages/:id", async (req, res) => {
     try {
       const id = parseInt(req.params.id);
+      console.log("Updating payment page", id, "with data:", req.body);
       const data = insertPaymentPageSchema.partial().parse(req.body);
+      console.log("Parsed data:", data);
       const page = await storage.updatePaymentPage(id, data);
+      console.log("Updated page result:", page);
       
       if (!page) {
         return res.status(404).json({ message: "Payment page not found" });
@@ -95,6 +98,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       res.json(page);
     } catch (error) {
+      console.error("Error updating payment page:", error);
       if (error instanceof z.ZodError) {
         return res.status(400).json({ message: "Invalid data", errors: error.errors });
       }
