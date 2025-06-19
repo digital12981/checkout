@@ -197,7 +197,7 @@ export default function EditPage() {
         setCustomElements([]);
       }
     }
-  }, [page, form]);
+  }, [page]);
 
   const updatePageMutation = useMutation({
     mutationFn: async (data: EditPageForm) => {
