@@ -735,6 +735,71 @@ export default function EditPage() {
                     )}
                   />
                 </div>
+
+                <Separator />
+                
+                <div className="space-y-4">
+                  <h3 className="text-sm font-medium">Configurações do Rodapé</h3>
+                  
+                  <FormField
+                    control={form.control}
+                    name="footerText"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Texto do Rodapé</FormLabel>
+                        <FormControl>
+                          <Input {...field} placeholder="INSS 2025" />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  <FormField
+                    control={form.control}
+                    name="showFooterLogo"
+                    render={({ field }) => (
+                      <FormItem className="flex flex-row items-center justify-between rounded-lg border p-3">
+                        <div className="space-y-0.5">
+                          <FormLabel>Mostrar Logo no Rodapé</FormLabel>
+                          <FormDescription>
+                            Exibir a mesma logo do header no rodapé
+                          </FormDescription>
+                        </div>
+                        <FormControl>
+                          <Switch
+                            checked={field.value}
+                            onCheckedChange={field.onChange}
+                          />
+                        </FormControl>
+                      </FormItem>
+                    )}
+                  />
+
+                  {form.watch("showFooterLogo") && (
+                    <FormField
+                      control={form.control}
+                      name="footerLogoSize"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Tamanho da Logo no Rodapé: {field.value}px</FormLabel>
+                          <FormControl>
+                            <input
+                              type="range"
+                              min="20"
+                              max="100"
+                              step="2"
+                              value={field.value}
+                              onChange={(e) => field.onChange(Number(e.target.value))}
+                              className="w-full"
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  )}
+                </div>
               </Form>
             </TabsContent>
 

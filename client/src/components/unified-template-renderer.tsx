@@ -444,16 +444,16 @@ export default function UnifiedTemplateRenderer({
       >
         <div className="max-w-md mx-auto">
           <div className="text-base font-medium mb-3">
-            {page.footerText || "INSS 2025"}
+            {(page as any).footerText || "INSS 2025"}
           </div>
-          {page.showFooterLogo && page.logoUrl && (
+          {(page as any).showFooterLogo && page.logoUrl && (
             <div className="flex justify-center">
               <img 
                 src={page.logoUrl} 
                 alt="Logo" 
                 className="object-contain"
                 style={{ 
-                  height: `${page.footerLogoSize || 48}px`,
+                  height: `${(page as any).footerLogoSize || 48}px`,
                   maxWidth: '200px'
                 }}
               />
