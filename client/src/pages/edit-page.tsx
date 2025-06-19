@@ -811,82 +811,35 @@ export default function EditPage() {
               <div className="space-y-4">
                 <h3 className="text-lg font-semibold">Configurações de Upsell</h3>
                 
-                <FormField
-                  control={form.control}
-                  name="upsellEnabled"
-                  render={({ field }) => (
-                    <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
-                      <div className="space-y-0.5">
-                        <FormLabel className="text-base">Ativar Upsell</FormLabel>
-                        <div className="text-sm text-gray-600">
-                          Oferecer produtos adicionais após o pagamento
-                        </div>
-                      </div>
-                      <FormControl>
-                        <Switch
-                          checked={field.value}
-                          onCheckedChange={field.onChange}
-                        />
-                      </FormControl>
-                    </FormItem>
-                  )}
-                />
+                <div className="flex flex-row items-center justify-between rounded-lg border p-4">
+                  <div className="space-y-0.5">
+                    <label className="text-base font-medium">Ativar Upsell</label>
+                    <div className="text-sm text-gray-600">
+                      Oferecer produtos adicionais após o pagamento
+                    </div>
+                  </div>
+                  <Switch />
+                </div>
 
-                <FormField
-                  control={form.control}
-                  name="upsellTitle"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Título do Upsell</FormLabel>
-                      <FormControl>
-                        <Input {...field} placeholder="Oferta especial para você!" />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
+                <div className="space-y-2">
+                  <label className="text-sm font-medium">Título do Upsell</label>
+                  <Input placeholder="Oferta especial para você!" />
+                </div>
 
-                <FormField
-                  control={form.control}
-                  name="upsellDescription"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Descrição do Upsell</FormLabel>
-                      <FormControl>
-                        <Textarea {...field} placeholder="Aproveite esta oferta exclusiva..." rows={3} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
+                <div className="space-y-2">
+                  <label className="text-sm font-medium">Descrição do Upsell</label>
+                  <Textarea placeholder="Aproveite esta oferta exclusiva..." rows={3} />
+                </div>
 
-                <FormField
-                  control={form.control}
-                  name="upsellPrice"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Preço do Upsell</FormLabel>
-                      <FormControl>
-                        <Input {...field} placeholder="19.90" />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
+                <div className="space-y-2">
+                  <label className="text-sm font-medium">Preço do Upsell</label>
+                  <Input placeholder="19.90" />
+                </div>
 
-                <FormField
-                  control={form.control}
-                  name="upsellButtonText"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Texto do Botão</FormLabel>
-                      <FormControl>
-                        <Input {...field} placeholder="Adicionar à compra" />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
+                <div className="space-y-2">
+                  <label className="text-sm font-medium">Texto do Botão</label>
+                  <Input placeholder="Adicionar à compra" />
+                </div>
               </div>
             </TabsContent>
 
@@ -894,77 +847,40 @@ export default function EditPage() {
               <div className="space-y-4">
                 <h3 className="text-lg font-semibold">Pixels de Acompanhamento</h3>
                 
-                <FormField
-                  control={form.control}
-                  name="facebookPixel"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Facebook Pixel ID</FormLabel>
-                      <FormControl>
-                        <Input {...field} placeholder="1234567890123456" />
-                      </FormControl>
-                      <div className="text-sm text-gray-600">
-                        ID do seu pixel do Facebook para rastreamento de conversões
-                      </div>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
+                <div className="space-y-2">
+                  <label className="text-sm font-medium">Facebook Pixel ID</label>
+                  <Input placeholder="1234567890123456" />
+                  <div className="text-sm text-gray-600">
+                    ID do seu pixel do Facebook para rastreamento de conversões
+                  </div>
+                </div>
 
-                <FormField
-                  control={form.control}
-                  name="googleAnalytics"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Google Analytics</FormLabel>
-                      <FormControl>
-                        <Input {...field} placeholder="G-XXXXXXXXXX" />
-                      </FormControl>
-                      <div className="text-sm text-gray-600">
-                        ID de acompanhamento do Google Analytics
-                      </div>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
+                <div className="space-y-2">
+                  <label className="text-sm font-medium">Google Analytics</label>
+                  <Input placeholder="G-XXXXXXXXXX" />
+                  <div className="text-sm text-gray-600">
+                    ID de acompanhamento do Google Analytics
+                  </div>
+                </div>
 
-                <FormField
-                  control={form.control}
-                  name="googleTagManager"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Google Tag Manager</FormLabel>
-                      <FormControl>
-                        <Input {...field} placeholder="GTM-XXXXXXX" />
-                      </FormControl>
-                      <div className="text-sm text-gray-600">
-                        ID do Google Tag Manager
-                      </div>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
+                <div className="space-y-2">
+                  <label className="text-sm font-medium">Google Tag Manager</label>
+                  <Input placeholder="GTM-XXXXXXX" />
+                  <div className="text-sm text-gray-600">
+                    ID do Google Tag Manager
+                  </div>
+                </div>
 
-                <FormField
-                  control={form.control}
-                  name="customPixels"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Códigos Personalizados</FormLabel>
-                      <FormControl>
-                        <Textarea 
-                          {...field} 
-                          placeholder="<!-- Adicione aqui seus códigos de acompanhamento personalizados -->"
-                          rows={6}
-                        />
-                      </FormControl>
-                      <div className="text-sm text-gray-600">
-                        Scripts personalizados para pixels e ferramentas de análise
-                      </div>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
+                <div className="space-y-2">
+                  <label className="text-sm font-medium">Códigos Personalizados</label>
+                  <Textarea 
+                    placeholder="<!-- Adicione aqui seus códigos de acompanhamento personalizados -->"
+                    rows={6}
+                  />
+                  <div className="text-sm text-gray-600">
+                    Scripts personalizados para pixels e ferramentas de análise
+                  </div>
+                </div>
 
                 <div className="border rounded-lg p-4 bg-blue-50">
                   <h4 className="font-medium text-blue-900 mb-2">Como usar:</h4>
@@ -983,7 +899,7 @@ export default function EditPage() {
           <Tabs value={previewTab} onValueChange={setPreviewTab} className="h-full">
             <TabsList className="m-4">
               <TabsTrigger value="form">
-                <ShoppingBag className="w-4 h-4 mr-2" />
+                <User className="w-4 h-4 mr-2" />
                 Formulário
               </TabsTrigger>
               <TabsTrigger value="payment">
