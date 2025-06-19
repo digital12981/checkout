@@ -7,6 +7,7 @@ import { z } from "zod";
 import {
   Form,
   FormControl,
+  FormDescription,
   FormField,
   FormItem,
   FormLabel,
@@ -762,9 +763,9 @@ export default function EditPage() {
                       <FormItem className="flex flex-row items-center justify-between rounded-lg border p-3">
                         <div className="space-y-0.5">
                           <FormLabel>Mostrar Logo no Rodapé</FormLabel>
-                          <FormDescription>
+                          <div className="text-sm text-muted-foreground">
                             Exibir a mesma logo do header no rodapé
-                          </FormDescription>
+                          </div>
                         </div>
                         <FormControl>
                           <Switch
