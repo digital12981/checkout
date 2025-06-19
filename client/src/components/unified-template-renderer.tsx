@@ -213,7 +213,7 @@ export default function UnifiedTemplateRenderer({
           backgroundColor: page.primaryColor,
           height: `${page.headerHeight}px`,
           paddingTop: `${Math.max(8, page.headerHeight * 0.04)}px`,
-          paddingBottom: `${Math.max(16, page.headerHeight * 0.08)}px`,
+          paddingBottom: `${Math.max(8, page.headerHeight * 0.04)}px`,
           paddingLeft: '16px',
           paddingRight: '16px'
         }}
@@ -265,7 +265,8 @@ export default function UnifiedTemplateRenderer({
               fontSize: `${Math.max(13, Math.min(18, page.headerHeight * 0.075))}px`,
               lineHeight: '1.2',
               maxWidth: '98%',
-              margin: '0 auto'
+              margin: '0 auto',
+              marginBottom: '0'
             }}
           >
             {page.customSubtitle}
