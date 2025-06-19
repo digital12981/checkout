@@ -227,15 +227,15 @@ export default function UnifiedTemplateRenderer({
 
         {/* Logo */}
         {page.showLogo && page.logoUrl && (
-          <div className={`mb-2 flex ${page.logoPosition === 'left' ? 'justify-start' : page.logoPosition === 'right' ? 'justify-end' : 'justify-center'}`}>
+          <div className={`mb-3 flex ${page.logoPosition === 'left' ? 'justify-start' : page.logoPosition === 'right' ? 'justify-end' : 'justify-center'}`}>
             <img 
               src={page.logoUrl} 
               alt="Logo" 
               className="object-contain rounded"
               style={{ 
-                width: `${Math.min(page.logoSize * 0.8, Math.max(50, page.headerHeight * 0.35))}px`, 
-                height: `${Math.min(page.logoSize * 0.8, Math.max(50, page.headerHeight * 0.35))}px`,
-                maxHeight: `${Math.max(50, page.headerHeight - 60)}px`
+                width: `${Math.min(page.logoSize, Math.max(80, page.headerHeight * 0.45))}px`, 
+                height: `${Math.min(page.logoSize, Math.max(80, page.headerHeight * 0.45))}px`,
+                maxHeight: `${Math.max(80, page.headerHeight - 50)}px`
               }}
               onError={(e) => {
                 e.currentTarget.style.display = 'none';
@@ -244,13 +244,15 @@ export default function UnifiedTemplateRenderer({
           </div>
         )}
 
-        {/* Title and subtitle with better responsive sizing */}
+        {/* Title and subtitle with larger responsive sizing */}
         {page.customTitle && (
           <h1 
-            className="font-bold mb-1"
+            className="font-bold mb-2"
             style={{ 
-              fontSize: `${Math.max(14, Math.min(24, page.headerHeight * 0.075))}px`,
-              lineHeight: '1.1'
+              fontSize: `${Math.max(18, Math.min(32, page.headerHeight * 0.1))}px`,
+              lineHeight: '1.2',
+              maxWidth: '95%',
+              margin: '0 auto'
             }}
           >
             {page.customTitle}
@@ -260,9 +262,9 @@ export default function UnifiedTemplateRenderer({
           <p 
             className="text-white/90"
             style={{ 
-              fontSize: `${Math.max(11, Math.min(16, page.headerHeight * 0.055))}px`,
-              lineHeight: '1.2',
-              maxWidth: '90%',
+              fontSize: `${Math.max(13, Math.min(20, page.headerHeight * 0.07))}px`,
+              lineHeight: '1.3',
+              maxWidth: '95%',
               margin: '0 auto'
             }}
           >
