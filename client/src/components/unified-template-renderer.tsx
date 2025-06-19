@@ -208,12 +208,12 @@ export default function UnifiedTemplateRenderer({
     >
       {/* Header */}
       <div 
-        className="w-full text-white text-center flex flex-col justify-center relative overflow-hidden"
+        className="w-full text-white text-center flex flex-col justify-start relative overflow-hidden"
         style={{ 
           backgroundColor: page.primaryColor,
           height: `${page.headerHeight}px`,
-          paddingTop: `${Math.max(8, page.headerHeight * 0.04)}px`,
-          paddingBottom: `${Math.max(16, page.headerHeight * 0.1)}px`,
+          paddingTop: `${Math.max(16, page.headerHeight * 0.08)}px`,
+          paddingBottom: `${Math.max(20, page.headerHeight * 0.12)}px`,
           paddingLeft: '24px',
           paddingRight: '24px'
         }}
@@ -247,12 +247,13 @@ export default function UnifiedTemplateRenderer({
         {/* Title and subtitle with larger responsive sizing */}
         {page.customTitle && (
           <h1 
-            className="font-bold mb-8"
+            className="font-bold"
             style={{ 
               fontSize: `${Math.max(18, Math.min(32, page.headerHeight * 0.1))}px`,
               lineHeight: '1.2',
               maxWidth: '95%',
-              margin: '0 auto'
+              margin: '0 auto',
+              marginBottom: `${Math.max(32, page.headerHeight * 0.2)}px`
             }}
           >
             {page.customTitle}
