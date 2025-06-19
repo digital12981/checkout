@@ -170,6 +170,9 @@ export default function EditPage() {
         headerHeight: pageData.headerHeight || 96,
         skipForm: pageData.skipForm || false,
         showLogo: pageData.showLogo ?? true,
+        footerText: pageData.footerText || "INSS 2025",
+        showFooterLogo: pageData.showFooterLogo ?? true,
+        footerLogoSize: pageData.footerLogoSize || 48,
       });
 
       try {
@@ -201,6 +204,9 @@ export default function EditPage() {
         headerHeight: pageData.headerHeight || 96,
         skipForm: pageData.skipForm || false,
         showLogo: pageData.showLogo ?? true,
+        footerText: pageData.footerText || "INSS 2025",
+        showFooterLogo: pageData.showFooterLogo ?? true,
+        footerLogoSize: pageData.footerLogoSize || 48,
       });
 
       try {
