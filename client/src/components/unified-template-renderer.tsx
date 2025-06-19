@@ -208,14 +208,14 @@ export default function UnifiedTemplateRenderer({
     >
       {/* Header */}
       <div 
-        className="w-full text-white text-center flex flex-col justify-start relative overflow-hidden"
+        className="w-full text-white text-center flex flex-col justify-center relative overflow-hidden"
         style={{ 
           backgroundColor: page.primaryColor,
           height: `${page.headerHeight}px`,
-          paddingTop: `${Math.max(16, page.headerHeight * 0.08)}px`,
-          paddingBottom: `${Math.max(20, page.headerHeight * 0.12)}px`,
-          paddingLeft: '24px',
-          paddingRight: '24px'
+          paddingTop: `${Math.max(12, page.headerHeight * 0.06)}px`,
+          paddingBottom: `${Math.max(12, page.headerHeight * 0.06)}px`,
+          paddingLeft: '16px',
+          paddingRight: '16px'
         }}
       >
         {/* Top custom elements */}
@@ -227,15 +227,15 @@ export default function UnifiedTemplateRenderer({
 
         {/* Logo */}
         {page.showLogo && page.logoUrl && (
-          <div className={`mb-2 flex ${page.logoPosition === 'left' ? 'justify-start' : page.logoPosition === 'right' ? 'justify-end' : 'justify-center'}`}>
+          <div className={`mb-1 flex ${page.logoPosition === 'left' ? 'justify-start' : page.logoPosition === 'right' ? 'justify-end' : 'justify-center'}`}>
             <img 
               src={page.logoUrl} 
               alt="Logo" 
               className="object-contain rounded"
               style={{ 
-                width: `${Math.min(page.logoSize, Math.max(80, page.headerHeight * 0.45))}px`, 
-                height: `${Math.min(page.logoSize, Math.max(80, page.headerHeight * 0.45))}px`,
-                maxHeight: `${Math.max(80, page.headerHeight - 50)}px`
+                width: `${Math.min(page.logoSize * 0.7, Math.max(60, page.headerHeight * 0.35))}px`, 
+                height: `${Math.min(page.logoSize * 0.7, Math.max(60, page.headerHeight * 0.35))}px`,
+                maxHeight: `${Math.max(60, page.headerHeight - 80)}px`
               }}
               onError={(e) => {
                 e.currentTarget.style.display = 'none';
@@ -244,15 +244,15 @@ export default function UnifiedTemplateRenderer({
           </div>
         )}
 
-        {/* Title and subtitle with larger responsive sizing */}
+        {/* Title and subtitle with mobile-optimized sizing */}
         {page.customTitle && (
           <h1 
-            className="font-bold mb-3"
+            className="font-bold mb-2"
             style={{ 
-              fontSize: `${Math.max(18, Math.min(32, page.headerHeight * 0.1))}px`,
-              lineHeight: '1.2',
-              maxWidth: '95%',
-              margin: '0 auto 12px auto'
+              fontSize: `${Math.max(14, Math.min(22, page.headerHeight * 0.08))}px`,
+              lineHeight: '1.1',
+              maxWidth: '98%',
+              margin: '0 auto 8px auto'
             }}
           >
             {page.customTitle}
@@ -262,9 +262,9 @@ export default function UnifiedTemplateRenderer({
           <p 
             className="text-white/90"
             style={{ 
-              fontSize: `${Math.max(13, Math.min(20, page.headerHeight * 0.07))}px`,
-              lineHeight: '1.3',
-              maxWidth: '95%',
+              fontSize: `${Math.max(11, Math.min(15, page.headerHeight * 0.06))}px`,
+              lineHeight: '1.2',
+              maxWidth: '98%',
               margin: '0 auto'
             }}
           >
