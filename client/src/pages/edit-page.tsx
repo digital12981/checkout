@@ -814,8 +814,8 @@ export default function EditPage() {
 
 
             <TabsContent value="form" className="p-4 h-full">
-              <div className="flex justify-center">
-                <div className="w-96 max-w-sm border bg-white overflow-hidden shadow-lg" style={{ height: '700px', maxHeight: '85vh' }}>
+              <div className="flex justify-center h-full">
+                <div className="w-96 max-w-sm border bg-white overflow-auto shadow-lg" style={{ height: '100%', minHeight: '600px' }}>
                   <UnifiedTemplateRenderer
                     page={{...formData, id: parseInt(id || "0")}}
                     customElements={customElements}
@@ -882,8 +882,8 @@ export default function EditPage() {
             </TabsContent>
 
             <TabsContent value="payment" className="p-4 h-full">
-              <div className="flex justify-center">
-                <div className="w-96 max-w-sm border bg-white overflow-hidden shadow-lg" style={{ height: '700px', maxHeight: '85vh' }}>
+              <div className="flex justify-center h-full">
+                <div className="w-96 max-w-sm border bg-white overflow-auto shadow-lg" style={{ height: '100%', minHeight: '600px' }}>
                   <UnifiedTemplateRenderer
                     page={{...formData, id: parseInt(id || "0")}}
                     customElements={customElements}
