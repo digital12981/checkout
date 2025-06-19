@@ -208,34 +208,34 @@ export default function UnifiedTemplateRenderer({
     >
       {/* Header */}
       <div 
-        className="w-full text-white text-center flex flex-col justify-start relative"
+        className="w-full text-white text-center flex flex-col justify-center relative overflow-hidden"
         style={{ 
           backgroundColor: page.primaryColor,
           height: `${page.headerHeight}px`,
-          paddingTop: `${Math.max(16, page.headerHeight * 0.08)}px`,
-          paddingBottom: `${Math.max(16, page.headerHeight * 0.12)}px`,
+          paddingTop: `${Math.max(8, page.headerHeight * 0.04)}px`,
+          paddingBottom: `${Math.max(16, page.headerHeight * 0.1)}px`,
           paddingLeft: '24px',
           paddingRight: '24px'
         }}
       >
         {/* Top custom elements */}
         {topElements.map(element => (
-          <div key={element.id} className="mb-2">
+          <div key={element.id} className="mb-1">
             {renderCustomElement(element)}
           </div>
         ))}
 
         {/* Logo */}
         {page.showLogo && page.logoUrl && (
-          <div className={`mb-3 flex ${page.logoPosition === 'left' ? 'justify-start' : page.logoPosition === 'right' ? 'justify-end' : 'justify-center'}`}>
+          <div className={`mb-2 flex ${page.logoPosition === 'left' ? 'justify-start' : page.logoPosition === 'right' ? 'justify-end' : 'justify-center'}`}>
             <img 
               src={page.logoUrl} 
               alt="Logo" 
               className="object-contain rounded"
               style={{ 
-                width: `${Math.min(page.logoSize, page.headerHeight * 0.45)}px`, 
-                height: `${Math.min(page.logoSize, page.headerHeight * 0.45)}px`,
-                maxHeight: `${page.headerHeight - 60}px`
+                width: `${Math.min(page.logoSize * 0.8, Math.max(50, page.headerHeight * 0.35))}px`, 
+                height: `${Math.min(page.logoSize * 0.8, Math.max(50, page.headerHeight * 0.35))}px`,
+                maxHeight: `${Math.max(50, page.headerHeight - 60)}px`
               }}
               onError={(e) => {
                 e.currentTarget.style.display = 'none';
@@ -244,13 +244,13 @@ export default function UnifiedTemplateRenderer({
           </div>
         )}
 
-        {/* Title and subtitle with better sizing */}
+        {/* Title and subtitle with better responsive sizing */}
         {page.customTitle && (
           <h1 
-            className="font-bold mb-2"
+            className="font-bold mb-1"
             style={{ 
-              fontSize: `${Math.max(14, Math.min(24, page.headerHeight * 0.08))}px`,
-              lineHeight: '1.2'
+              fontSize: `${Math.max(14, Math.min(24, page.headerHeight * 0.075))}px`,
+              lineHeight: '1.1'
             }}
           >
             {page.customTitle}
@@ -260,8 +260,8 @@ export default function UnifiedTemplateRenderer({
           <p 
             className="text-white/90"
             style={{ 
-              fontSize: `${Math.max(11, Math.min(16, page.headerHeight * 0.06))}px`,
-              lineHeight: '1.4',
+              fontSize: `${Math.max(11, Math.min(16, page.headerHeight * 0.055))}px`,
+              lineHeight: '1.2',
               maxWidth: '90%',
               margin: '0 auto'
             }}
