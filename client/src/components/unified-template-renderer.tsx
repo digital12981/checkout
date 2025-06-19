@@ -247,7 +247,7 @@ export default function UnifiedTemplateRenderer({
           paddingBottom: '8px'
         }}
       >
-        <div className="flex flex-col items-center gap-1">
+        <div className="flex flex-col items-center" style={{ gap: '2px' }}>
           {/* Top custom elements */}
           {topElements.map(element => (
             <div key={element.id}>
@@ -257,7 +257,7 @@ export default function UnifiedTemplateRenderer({
 
           {/* Logo */}
           {page.showLogo && page.logoUrl && (
-            <div className={`flex ${page.logoPosition === 'left' ? 'justify-start' : page.logoPosition === 'right' ? 'justify-end' : 'justify-center'} w-full`}>
+            <div className={`flex ${page.logoPosition === 'left' ? 'justify-start' : page.logoPosition === 'right' ? 'justify-end' : 'justify-center'} w-full`} style={{ marginBottom: '-2px' }}>
               <img 
                 src={page.logoUrl} 
                 alt="Logo" 
@@ -283,7 +283,8 @@ export default function UnifiedTemplateRenderer({
                 fontSize: '16px',
                 lineHeight: '1.1',
                 maxWidth: '98%',
-                margin: '0'
+                margin: '0',
+                marginTop: '-1px'
               }}
             >
               {page.customTitle}
