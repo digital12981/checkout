@@ -208,12 +208,12 @@ export default function UnifiedTemplateRenderer({
     >
       {/* Header */}
       <div 
-        className="w-full text-white text-center flex flex-col justify-center relative overflow-hidden"
+        className="w-full text-white text-center flex flex-col justify-start relative overflow-hidden"
         style={{ 
           backgroundColor: page.primaryColor,
           height: `${page.headerHeight}px`,
-          paddingTop: `${Math.max(12, page.headerHeight * 0.06)}px`,
-          paddingBottom: `${Math.max(12, page.headerHeight * 0.06)}px`,
+          paddingTop: `${Math.max(8, page.headerHeight * 0.04)}px`,
+          paddingBottom: `${Math.max(16, page.headerHeight * 0.08)}px`,
           paddingLeft: '16px',
           paddingRight: '16px'
         }}
@@ -262,7 +262,7 @@ export default function UnifiedTemplateRenderer({
           <p 
             className="text-white/90"
             style={{ 
-              fontSize: `${Math.max(11, Math.min(15, page.headerHeight * 0.06))}px`,
+              fontSize: `${Math.max(13, Math.min(18, page.headerHeight * 0.075))}px`,
               lineHeight: '1.2',
               maxWidth: '98%',
               margin: '0 auto'
