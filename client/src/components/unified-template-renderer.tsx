@@ -237,69 +237,74 @@ export default function UnifiedTemplateRenderer({
     >
       {/* Header */}
       <div 
-        className="w-full text-white text-center relative overflow-hidden"
+        className="w-full text-white text-center relative overflow-hidden flex flex-col justify-center"
         style={{ 
           backgroundColor: page.primaryColor,
           height: `${dynamicHeaderHeight}px`,
-          paddingTop: `${Math.max(8, dynamicHeaderHeight * 0.04)}px`,
           paddingLeft: '16px',
-          paddingRight: '16px'
+          paddingRight: '16px',
+          paddingTop: '8px',
+          paddingBottom: '8px'
         }}
       >
-        {/* Top custom elements */}
-        {topElements.map(element => (
-          <div key={element.id} style={{ marginBottom: '2px' }}>
-            {renderCustomElement(element)}
-          </div>
-        ))}
+        <div className="flex flex-col items-center gap-1">
+          {/* Top custom elements */}
+          {topElements.map(element => (
+            <div key={element.id}>
+              {renderCustomElement(element)}
+            </div>
+          ))}
 
-        {/* Logo */}
-        {page.showLogo && page.logoUrl && (
-          <div className={`flex ${page.logoPosition === 'left' ? 'justify-start' : page.logoPosition === 'right' ? 'justify-end' : 'justify-center'} mb-1`}>
-            <img 
-              src={page.logoUrl} 
-              alt="Logo" 
-              className="object-contain rounded"
+          {/* Logo */}
+          {page.showLogo && page.logoUrl && (
+            <div className={`flex ${page.logoPosition === 'left' ? 'justify-start' : page.logoPosition === 'right' ? 'justify-end' : 'justify-center'} w-full`}>
+              <img 
+                src={page.logoUrl} 
+                alt="Logo" 
+                className="object-contain rounded"
+                style={{ 
+                  width: `${page.logoSize}px`, 
+                  height: `${page.logoSize}px`,
+                  maxWidth: '90%',
+                  maxHeight: `${Math.min(page.logoSize, dynamicHeaderHeight - 80)}px`
+                }}
+                onError={(e) => {
+                  e.currentTarget.style.display = 'none';
+                }}
+              />
+            </div>
+          )}
+
+          {/* Title */}
+          {page.customTitle && (
+            <h1 
+              className="font-bold"
               style={{ 
-                width: `${page.logoSize}px`, 
-                height: `${page.logoSize}px`
+                fontSize: '16px',
+                lineHeight: '1.1',
+                maxWidth: '98%',
+                margin: '0'
               }}
-              onError={(e) => {
-                e.currentTarget.style.display = 'none';
+            >
+              {page.customTitle}
+            </h1>
+          )}
+          
+          {/* Subtitle */}
+          {page.customSubtitle && (
+            <p 
+              className="text-white/90"
+              style={{ 
+                fontSize: '13px',
+                lineHeight: '1.2',
+                maxWidth: '98%',
+                margin: '0'
               }}
-            />
-          </div>
-        )}
-
-        {/* Title */}
-        {page.customTitle && (
-          <h1 
-            className="font-bold"
-            style={{ 
-              fontSize: '16px',
-              lineHeight: '1.1',
-              maxWidth: '98%',
-              margin: '0 auto 2px auto'
-            }}
-          >
-            {page.customTitle}
-          </h1>
-        )}
-        
-        {/* Subtitle - último elemento sem margem inferior */}
-        {page.customSubtitle && (
-          <p 
-            className="text-white/90"
-            style={{ 
-              fontSize: '13px',
-              lineHeight: '1.2',
-              maxWidth: '98%',
-              margin: '0 auto'
-            }}
-          >
-            {page.customSubtitle}
-          </p>
-        )}
+            >
+              {page.customSubtitle}
+            </p>
+          )}
+        </div>
       </div>
 
       {/* Main content area */}
