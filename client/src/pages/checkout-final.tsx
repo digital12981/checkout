@@ -136,12 +136,10 @@ export default function CheckoutFinal() {
           </div>
 
           <div className="text-lg font-semibold text-gray-900">
-            {page.skipForm ? "Processando Pagamento..." : "Complete seus dados"}
+            Complete seus dados
           </div>
           
-          {!page.skipForm && (
-            <>
-              <form onSubmit={handleSubmit} className="space-y-4">
+          <form onSubmit={handleSubmit} className="space-y-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">Nome completo</label>
                   <input 
@@ -202,8 +200,6 @@ export default function CheckoutFinal() {
                   {createPaymentMutation.isPending ? 'Processando...' : (page.customButtonText || "Pagar com PIX")} - R$ {page.price}
                 </button>
               </form>
-            </>
-          )}
         </div>
       ) : (
         // Payment Step
