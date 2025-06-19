@@ -164,29 +164,29 @@ export default function EditPage() {
   });
 
   useEffect(() => {
-    if (page) {
+    if (page && Array.isArray(page) && page.length > 0) {
       console.log("Loading page data:", page);
-      const pageData = page as any;
+      const pageData = page[0]; // The data comes as an array
       
       const formData = {
-        productName: pageData.productName,
-        productDescription: pageData.productDescription,
-        price: pageData.price,
-        customTitle: pageData.customTitle,
-        customSubtitle: pageData.customSubtitle,
-        customButtonText: pageData.customButtonText,
-        customInstructions: pageData.customInstructions,
-        primaryColor: pageData.primaryColor,
-        accentColor: pageData.accentColor,
-        backgroundColor: pageData.backgroundColor,
-        textColor: pageData.textColor,
-        logoUrl: pageData.logoUrl,
-        logoPosition: pageData.logoPosition as "left" | "center" | "right",
-        logoSize: pageData.logoSize,
-        headerHeight: pageData.headerHeight,
-        customElements: pageData.customElements,
-        skipForm: pageData.skipForm,
-        showLogo: pageData.showLogo
+        productName: pageData.productName || "",
+        productDescription: pageData.productDescription || "",
+        price: pageData.price || "",
+        customTitle: pageData.customTitle || "",
+        customSubtitle: pageData.customSubtitle || "",
+        customButtonText: pageData.customButtonText || "",
+        customInstructions: pageData.customInstructions || "",
+        primaryColor: pageData.primaryColor || "#3B82F6",
+        accentColor: pageData.accentColor || "#1E40AF",
+        backgroundColor: pageData.backgroundColor || "#FFFFFF",
+        textColor: pageData.textColor || "#1F2937",
+        logoUrl: pageData.logoUrl || "",
+        logoPosition: (pageData.logoPosition as "left" | "center" | "right") || "center",
+        logoSize: pageData.logoSize || 100,
+        headerHeight: pageData.headerHeight || 150,
+        customElements: pageData.customElements || "[]",
+        skipForm: pageData.skipForm || false,
+        showLogo: pageData.showLogo !== false
       };
       
       console.log("Resetting form with data:", formData);
@@ -205,7 +205,6 @@ export default function EditPage() {
 
   const updatePageMutation = useMutation({
     mutationFn: async (data: EditPageForm) => {
-      console.log("Sending data to server:", data);
       const response = await fetch(`/api/payment-pages/${id}`, {
         method: "PUT",
         headers: {
@@ -215,17 +214,12 @@ export default function EditPage() {
       });
       
       if (!response.ok) {
-        const errorData = await response.text();
-        console.error("Server error:", response.status, errorData);
         throw new Error(`Erro ao salvar página: ${response.status}`);
       }
       
-      const result = await response.json();
-      console.log("Server response:", result);
-      return result;
+      return response.json();
     },
     onSuccess: (updatedPage) => {
-      console.log("Update successful, invalidating cache");
       toast({
         title: "Página atualizada",
         description: "Suas alterações foram salvas com sucesso.",
@@ -248,12 +242,10 @@ export default function EditPage() {
   });
 
   const onSubmit = async (data: EditPageForm) => {
-    console.log("onSubmit called with data:", data);
     const updatedData = {
       ...data,
       customElements: JSON.stringify(customElements)
     };
-    console.log("Submitting form data:", updatedData);
     updatePageMutation.mutate(updatedData);
   };
 
@@ -323,36 +315,12 @@ export default function EditPage() {
               Capturar HTML
             </Button>
             <Button 
-              onClick={(e) => {
-                e.preventDefault();
-                console.log("Save button clicked");
-                console.log("Form valid:", form.formState.isValid);
-                console.log("Form errors:", form.formState.errors);
-                console.log("Current form data:", form.getValues());
-                form.handleSubmit(onSubmit)();
-              }} 
+              onClick={form.handleSubmit(onSubmit)} 
               disabled={updatePageMutation.isPending}
               size="sm"
             >
               <Save className="w-4 h-4 mr-2" />
               {updatePageMutation.isPending ? "Salvando..." : "Salvar"}
-            </Button>
-            <Button 
-              onClick={() => {
-                console.log("Test button clicked");
-                const currentData = form.getValues();
-                console.log("Direct save test:", currentData);
-                const updatedData = {
-                  ...currentData,
-                  customElements: JSON.stringify(customElements)
-                };
-                console.log("Sending to mutation:", updatedData);
-                updatePageMutation.mutate(updatedData);
-              }}
-              variant="secondary"
-              size="sm"
-            >
-              Teste Save
             </Button>
           </div>
         </div>
