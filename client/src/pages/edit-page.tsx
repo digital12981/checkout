@@ -436,9 +436,9 @@ export default function EditPage() {
 
       <div className="flex h-screen">
         {/* Left Panel - Editor */}
-        <div className="w-96 bg-white border-r overflow-auto">
+        <div className="w-1/2 bg-white border-r overflow-auto">
           <Tabs value={currentTab} onValueChange={setCurrentTab} className="w-full">
-            <TabsList className="grid w-full grid-cols-3">
+            <TabsList className="grid w-full grid-cols-5">
               <TabsTrigger value="config">
                 <Settings className="w-4 h-4 mr-1" />
                 Config
@@ -450,6 +450,14 @@ export default function EditPage() {
               <TabsTrigger value="elements">
                 <Layout className="w-4 h-4 mr-1" />
                 Elementos
+              </TabsTrigger>
+              <TabsTrigger value="upsell">
+                <ShoppingBag className="w-4 h-4 mr-1" />
+                Upsell
+              </TabsTrigger>
+              <TabsTrigger value="pixels">
+                <QrCode className="w-4 h-4 mr-1" />
+                Pixels
               </TabsTrigger>
             </TabsList>
 
@@ -796,6 +804,176 @@ export default function EditPage() {
                     </div>
                   </Card>
                 ))}
+              </div>
+            </TabsContent>
+
+            <TabsContent value="upsell" className="p-4 space-y-4">
+              <div className="space-y-4">
+                <h3 className="text-lg font-semibold">Configurações de Upsell</h3>
+                
+                <FormField
+                  control={form.control}
+                  name="upsellEnabled"
+                  render={({ field }) => (
+                    <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
+                      <div className="space-y-0.5">
+                        <FormLabel className="text-base">Ativar Upsell</FormLabel>
+                        <div className="text-sm text-gray-600">
+                          Oferecer produtos adicionais após o pagamento
+                        </div>
+                      </div>
+                      <FormControl>
+                        <Switch
+                          checked={field.value}
+                          onCheckedChange={field.onChange}
+                        />
+                      </FormControl>
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
+                  name="upsellTitle"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Título do Upsell</FormLabel>
+                      <FormControl>
+                        <Input {...field} placeholder="Oferta especial para você!" />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
+                  name="upsellDescription"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Descrição do Upsell</FormLabel>
+                      <FormControl>
+                        <Textarea {...field} placeholder="Aproveite esta oferta exclusiva..." rows={3} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
+                  name="upsellPrice"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Preço do Upsell</FormLabel>
+                      <FormControl>
+                        <Input {...field} placeholder="19.90" />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
+                  name="upsellButtonText"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Texto do Botão</FormLabel>
+                      <FormControl>
+                        <Input {...field} placeholder="Adicionar à compra" />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
+            </TabsContent>
+
+            <TabsContent value="pixels" className="p-4 space-y-4">
+              <div className="space-y-4">
+                <h3 className="text-lg font-semibold">Pixels de Acompanhamento</h3>
+                
+                <FormField
+                  control={form.control}
+                  name="facebookPixel"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Facebook Pixel ID</FormLabel>
+                      <FormControl>
+                        <Input {...field} placeholder="1234567890123456" />
+                      </FormControl>
+                      <div className="text-sm text-gray-600">
+                        ID do seu pixel do Facebook para rastreamento de conversões
+                      </div>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
+                  name="googleAnalytics"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Google Analytics</FormLabel>
+                      <FormControl>
+                        <Input {...field} placeholder="G-XXXXXXXXXX" />
+                      </FormControl>
+                      <div className="text-sm text-gray-600">
+                        ID de acompanhamento do Google Analytics
+                      </div>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
+                  name="googleTagManager"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Google Tag Manager</FormLabel>
+                      <FormControl>
+                        <Input {...field} placeholder="GTM-XXXXXXX" />
+                      </FormControl>
+                      <div className="text-sm text-gray-600">
+                        ID do Google Tag Manager
+                      </div>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
+                  name="customPixels"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Códigos Personalizados</FormLabel>
+                      <FormControl>
+                        <Textarea 
+                          {...field} 
+                          placeholder="<!-- Adicione aqui seus códigos de acompanhamento personalizados -->"
+                          rows={6}
+                        />
+                      </FormControl>
+                      <div className="text-sm text-gray-600">
+                        Scripts personalizados para pixels e ferramentas de análise
+                      </div>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <div className="border rounded-lg p-4 bg-blue-50">
+                  <h4 className="font-medium text-blue-900 mb-2">Como usar:</h4>
+                  <ul className="text-sm text-blue-800 space-y-1">
+                    <li>• Os pixels são inseridos automaticamente nas páginas</li>
+                    <li>• Eventos de conversão são disparados no pagamento</li>
+                    <li>• Teste os pixels antes de usar em produção</li>
+                  </ul>
+                </div>
               </div>
             </TabsContent>
           </Tabs>
