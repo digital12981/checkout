@@ -268,6 +268,8 @@ export default function Dashboard() {
           description: 'Configure sua conta e integrações',
           showCreateButton: false
         };
+      case '/dashboard':
+      case '/':
       default:
         return {
           title: 'Dashboard',

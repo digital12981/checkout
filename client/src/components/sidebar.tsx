@@ -10,7 +10,7 @@ import {
 } from "lucide-react";
 
 const navigation = [
-  { name: "Dashboard", href: "/", icon: Home },
+  { name: "Dashboard", href: "/dashboard", icon: Home },
   { name: "Páginas de Pagamento", href: "/pages", icon: FileText },
   { name: "Configurações", href: "/settings", icon: Settings },
 ];
