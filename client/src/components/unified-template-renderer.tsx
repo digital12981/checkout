@@ -226,7 +226,8 @@ export default function UnifiedTemplateRenderer({
     return Math.max(120, Math.min(baseHeight, 350));
   };
 
-  const dynamicHeaderHeight = isEditor ? calculateDynamicHeaderHeight() : page.headerHeight;
+  // No editor, usar sempre a altura manual configurada pelo usuário
+  const dynamicHeaderHeight = page.headerHeight;
 
   return (
     <div 
@@ -261,8 +262,7 @@ export default function UnifiedTemplateRenderer({
               className="object-contain rounded"
               style={{ 
                 width: `${page.logoSize}px`, 
-                height: `${page.logoSize}px`,
-                maxHeight: `${Math.max(60, dynamicHeaderHeight - 60)}px`
+                height: `${page.logoSize}px`
               }}
               onError={(e) => {
                 e.currentTarget.style.display = 'none';
@@ -276,7 +276,7 @@ export default function UnifiedTemplateRenderer({
           <h1 
             className="font-bold"
             style={{ 
-              fontSize: `${Math.max(14, Math.min(18, dynamicHeaderHeight * 0.06))}px`,
+              fontSize: '16px',
               lineHeight: '1.1',
               maxWidth: '98%',
               margin: '0 auto 2px auto'
@@ -291,7 +291,7 @@ export default function UnifiedTemplateRenderer({
           <p 
             className="text-white/90"
             style={{ 
-              fontSize: `${Math.max(12, Math.min(15, dynamicHeaderHeight * 0.05))}px`,
+              fontSize: '13px',
               lineHeight: '1.2',
               maxWidth: '98%',
               margin: '0 auto'
