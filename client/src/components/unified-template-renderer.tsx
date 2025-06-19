@@ -276,7 +276,7 @@ export default function UnifiedTemplateRenderer({
           <h1 
             className="font-bold"
             style={{ 
-              fontSize: `${Math.max(16, Math.min(24, dynamicHeaderHeight * 0.09))}px`,
+              fontSize: `${Math.max(14, Math.min(18, dynamicHeaderHeight * 0.06))}px`,
               lineHeight: '1.1',
               maxWidth: '98%',
               margin: '0 auto 2px auto'
@@ -291,7 +291,7 @@ export default function UnifiedTemplateRenderer({
           <p 
             className="text-white/90"
             style={{ 
-              fontSize: `${Math.max(14, Math.min(19, dynamicHeaderHeight * 0.08))}px`,
+              fontSize: `${Math.max(12, Math.min(15, dynamicHeaderHeight * 0.05))}px`,
               lineHeight: '1.2',
               maxWidth: '98%',
               margin: '0 auto'
