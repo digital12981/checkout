@@ -247,12 +247,12 @@ export default function UnifiedTemplateRenderer({
         {/* Title and subtitle with mobile-optimized sizing */}
         {page.customTitle && (
           <h1 
-            className="font-bold mb-2"
+            className="font-bold mb-1"
             style={{ 
               fontSize: `${Math.max(14, Math.min(22, page.headerHeight * 0.08))}px`,
               lineHeight: '1.1',
               maxWidth: '98%',
-              margin: '0 auto 8px auto'
+              margin: '0 auto 4px auto'
             }}
           >
             {page.customTitle}
