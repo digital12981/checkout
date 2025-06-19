@@ -1227,6 +1227,13 @@ export default function EditPage() {
                 )}
               </div>
             </div>
+          </Tabs>
+        </div>
+
+        {/* Right Panel - Empty Space */}
+        <div className="flex-1 bg-gray-50 flex items-center justify-center">
+          <div className="text-gray-400">
+            Preview no lado esquerdo
           </div>
         </div>
       </div>

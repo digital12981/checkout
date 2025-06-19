@@ -94,6 +94,15 @@ CheckoutFy is a full-stack web application for creating and managing customizabl
 - **Database URL**: Environment-specific database connections
 - **API Keys**: Secure environment variable management
 
+## Recent Changes
+
+- June 19, 2025: Editor interface redesigned
+  - Menu expandido para 50% da tela (w-1/2)
+  - Adicionadas 5 abas no editor: Config, Design, Elementos, Upsell, Pixels
+  - Preview original mantido no lado esquerdo
+  - Preview duplicado removido do lado direito
+  - Funcionalidades Upsell e Pixels implementadas para rastreamento e ofertas adicionais
+
 ## Changelog
 
 - June 18, 2025. Initial setup
