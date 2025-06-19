@@ -435,7 +435,7 @@ export default function EditPage() {
       </div>
 
       <div className="flex">
-        <div className="w-80 bg-white border-r overflow-auto">
+        <div className="flex-1 bg-white border-r overflow-auto">
           <Tabs value={currentTab} onValueChange={setCurrentTab} className="w-full">
             <TabsList className="grid w-full grid-cols-3">
               <TabsTrigger value="config">
@@ -800,7 +800,7 @@ export default function EditPage() {
           </Tabs>
         </div>
 
-        <div className="flex-1 bg-gray-50 overflow-auto">
+        <div className="w-96 bg-gray-50 overflow-auto border-l">
           <Tabs value={previewTab} onValueChange={setPreviewTab} className="h-full">
             <TabsList className="m-4">
               <TabsTrigger value="form">
@@ -815,7 +815,7 @@ export default function EditPage() {
             
             <TabsContent value="form" className="p-4 h-full">
               <div className="flex justify-center h-full">
-                <div className="w-96 max-w-sm border bg-white overflow-auto shadow-lg" style={{ height: '100%', minHeight: '600px' }}>
+                <div className="w-full max-w-sm border bg-white overflow-auto shadow-lg" style={{ height: '100%', minHeight: '600px' }}>
                   <UnifiedTemplateRenderer
                     page={{...formData, id: parseInt(id || "0")}}
                     customElements={customElements}
@@ -883,7 +883,7 @@ export default function EditPage() {
 
             <TabsContent value="payment" className="p-4 h-full">
               <div className="flex justify-center h-full">
-                <div className="w-96 max-w-sm border bg-white overflow-auto shadow-lg" style={{ height: '100%', minHeight: '600px' }}>
+                <div className="w-full max-w-sm border bg-white overflow-auto shadow-lg" style={{ height: '100%', minHeight: '600px' }}>
                   <UnifiedTemplateRenderer
                     page={{...formData, id: parseInt(id || "0")}}
                     customElements={customElements}
