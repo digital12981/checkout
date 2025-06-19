@@ -822,6 +822,17 @@ export default function EditPage() {
                     isEditor={true}
                   >
                     <div className="p-6 space-y-4">
+                      <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4 mb-4">
+                        <div className="text-center space-y-2">
+                          <div className="flex items-center justify-center gap-2 text-yellow-800">
+                            <span className="text-sm font-medium">Sessão expira em</span>
+                          </div>
+                          <div className="text-xl font-bold text-yellow-800">
+                            {formatTime(timeLeft)}
+                          </div>
+                        </div>
+                      </div>
+                      
                       <div className="text-lg font-semibold text-gray-900">
                         Complete seus dados
                       </div>
