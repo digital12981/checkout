@@ -130,28 +130,28 @@ export default function EditPage() {
     if (page) {
       console.log("Loading page data:", page);
       form.reset({
-        productName: page.productName || "",
-        productDescription: page.productDescription || "",
-        price: page.price || "",
-        customTitle: page.customTitle || "",
-        customSubtitle: page.customSubtitle || "",
-        customButtonText: page.customButtonText || "",
-        customInstructions: page.customInstructions || "",
-        primaryColor: page.primaryColor || "#3B82F6",
-        accentColor: page.accentColor || "#1E40AF",
-        backgroundColor: page.backgroundColor || "#FFFFFF",
-        textColor: page.textColor || "#1F2937",
-        logoUrl: page.logoUrl || "",
-        logoPosition: (page.logoPosition as "left" | "center" | "right") || "center",
-        logoSize: page.logoSize || 100,
-        headerHeight: page.headerHeight || 150,
-        customElements: page.customElements || "[]",
-        skipForm: page.skipForm || false,
-        showLogo: page.showLogo !== false
+        productName: (page as any).productName || "",
+        productDescription: (page as any).productDescription || "",
+        price: (page as any).price || "",
+        customTitle: (page as any).customTitle || "",
+        customSubtitle: (page as any).customSubtitle || "",
+        customButtonText: (page as any).customButtonText || "",
+        customInstructions: (page as any).customInstructions || "",
+        primaryColor: (page as any).primaryColor || "#3B82F6",
+        accentColor: (page as any).accentColor || "#1E40AF",
+        backgroundColor: (page as any).backgroundColor || "#FFFFFF",
+        textColor: (page as any).textColor || "#1F2937",
+        logoUrl: (page as any).logoUrl || "",
+        logoPosition: ((page as any).logoPosition as "left" | "center" | "right") || "center",
+        logoSize: (page as any).logoSize || 100,
+        headerHeight: (page as any).headerHeight || 150,
+        customElements: (page as any).customElements || "[]",
+        skipForm: (page as any).skipForm || false,
+        showLogo: (page as any).showLogo !== false
       });
 
       try {
-        const elements = JSON.parse(page.customElements || "[]");
+        const elements = JSON.parse((page as any).customElements || "[]");
         console.log("Loaded custom elements:", elements);
         setCustomElements(elements);
       } catch (error) {
@@ -163,11 +163,19 @@ export default function EditPage() {
 
   const mutation = useMutation({
     mutationFn: async (data: EditPageForm) => {
-      const response = await apiRequest(`/api/payment-pages/${id}`, {
+      const response = await fetch(`/api/payment-pages/${id}`, {
         method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+        },
         body: JSON.stringify(data),
       });
-      return response;
+      
+      if (!response.ok) {
+        throw new Error("Erro ao salvar página");
+      }
+      
+      return response.json();
     },
     onSuccess: () => {
       toast({
