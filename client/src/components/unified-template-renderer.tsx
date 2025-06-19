@@ -49,6 +49,9 @@ interface PageData {
   customElements?: string;
   skipForm: boolean;
   showLogo?: boolean;
+  footerText?: string;
+  showFooterLogo?: boolean;
+  footerLogoSize?: number;
 }
 
 interface UnifiedTemplateRendererProps {
@@ -434,26 +437,28 @@ export default function UnifiedTemplateRenderer({
         ))}
       </div>
 
-      {/* Default Footer */}
-      <footer className="w-full py-6 px-6 border-t border-gray-200 bg-gray-50">
-        <div className="max-w-md mx-auto text-center">
-          <div className="flex items-center justify-center space-x-6 text-sm text-gray-600 mb-3">
-            <span className="flex items-center space-x-1">
-              <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-                <path fillRule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clipRule="evenodd" />
-              </svg>
-              <span>Pagamento Seguro</span>
-            </span>
-            <span className="flex items-center space-x-1">
-              <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-                <path fillRule="evenodd" d="M6.267 3.455a3.066 3.066 0 001.745-.723 3.066 3.066 0 013.976 0 3.066 3.066 0 001.745.723 3.066 3.066 0 012.812 2.812c.051.643.304 1.254.723 1.745a3.066 3.066 0 010 3.976 3.066 3.066 0 00-.723 1.745 3.066 3.066 0 01-2.812 2.812 3.066 3.066 0 00-1.745.723 3.066 3.066 0 01-3.976 0 3.066 3.066 0 00-1.745-.723 3.066 3.066 0 01-2.812-2.812 3.066 3.066 0 00-.723-1.745 3.066 3.066 0 010-3.976 3.066 3.066 0 00.723-1.745 3.066 3.066 0 012.812-2.812zm7.44 5.252a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
-              </svg>
-              <span>Processamento Imediato</span>
-            </span>
+      {/* Configurable Footer */}
+      <footer 
+        className="w-full py-6 px-6 text-white text-center"
+        style={{ backgroundColor: page.primaryColor }}
+      >
+        <div className="max-w-md mx-auto">
+          <div className="text-base font-medium mb-3">
+            {page.footerText || "INSS 2025"}
           </div>
-          <div className="text-xs text-gray-500">
-            Seus dados estão protegidos e a transação é processada com segurança
-          </div>
+          {page.showFooterLogo && page.logoUrl && (
+            <div className="flex justify-center">
+              <img 
+                src={page.logoUrl} 
+                alt="Logo" 
+                className="object-contain"
+                style={{ 
+                  height: `${page.footerLogoSize || 48}px`,
+                  maxWidth: '200px'
+                }}
+              />
+            </div>
+          )}
         </div>
       </footer>
     </div>

@@ -34,6 +34,11 @@ export const paymentPages = pgTable("payment_pages", {
   logoSize: integer("logo_size").default(64),
   headerHeight: integer("header_height").default(96),
   
+  // Footer options
+  footerText: text("footer_text").default("INSS 2025"),
+  showFooterLogo: boolean("show_footer_logo").default(true),
+  footerLogoSize: integer("footer_logo_size").default(48),
+  
   // Custom elements (JSON array of draggable elements)
   customElements: text("custom_elements").default("[]"),
   

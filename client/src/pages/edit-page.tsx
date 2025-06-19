@@ -68,6 +68,9 @@ const editPageSchema = z.object({
   headerHeight: z.number().min(60).max(300),
   skipForm: z.boolean(),
   showLogo: z.boolean(),
+  footerText: z.string().optional(),
+  showFooterLogo: z.boolean(),
+  footerLogoSize: z.number().min(20).max(100),
 });
 
 type EditPageForm = z.infer<typeof editPageSchema>;
