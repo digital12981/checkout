@@ -221,15 +221,18 @@ export default function EditPage() {
       return result;
     },
     onSuccess: (updatedPage) => {
+      console.log("Update successful, invalidating cache");
       toast({
         title: "Página atualizada",
         description: "Suas alterações foram salvas com sucesso.",
       });
-      // Invalidate both the list and the specific page
-      queryClient.invalidateQueries({ queryKey: ["/api/payment-pages"] });
+      
+      // Force reload of the page data
       queryClient.invalidateQueries({ queryKey: ["/api/payment-pages", id] });
-      // Update the query cache with the new data
-      queryClient.setQueryData(["/api/payment-pages", id], updatedPage);
+      queryClient.refetchQueries({ queryKey: ["/api/payment-pages", id] });
+      
+      // Also update other related queries
+      queryClient.invalidateQueries({ queryKey: ["/api/payment-pages"] });
     },
     onError: (error: any) => {
       toast({
