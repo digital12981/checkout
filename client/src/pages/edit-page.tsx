@@ -145,6 +145,28 @@ export default function EditPage() {
   const form = useForm<EditPageForm>({
     resolver: zodResolver(editPageSchema),
     mode: "onChange",
+    defaultValues: {
+      productName: "",
+      productDescription: "",
+      price: "",
+      customTitle: "",
+      customSubtitle: "",
+      customButtonText: "",
+      customInstructions: "",
+      primaryColor: "#1E40AF",
+      accentColor: "#10B981",
+      backgroundColor: "#F8FAFC",
+      textColor: "#1F2937",
+      logoUrl: "",
+      logoPosition: "center" as const,
+      logoSize: 64,
+      headerHeight: 96,
+      skipForm: false,
+      showLogo: true,
+      footerText: "INSS 2025",
+      showFooterLogo: true,
+      footerLogoSize: 48,
+    },
   });
 
   useEffect(() => {
