@@ -247,7 +247,7 @@ export default function UnifiedTemplateRenderer({
         {/* Title and subtitle with larger responsive sizing */}
         {page.customTitle && (
           <h1 
-            className="font-bold mb-4"
+            className="font-bold mb-6"
             style={{ 
               fontSize: `${Math.max(18, Math.min(32, page.headerHeight * 0.1))}px`,
               lineHeight: '1.2',
