@@ -208,27 +208,32 @@ export default function UnifiedTemplateRenderer({
     >
       {/* Header */}
       <div 
-        className="w-full p-6 text-white text-center flex flex-col justify-center"
+        className="w-full text-white text-center flex flex-col justify-center relative"
         style={{ 
           backgroundColor: page.primaryColor,
-          height: `${page.headerHeight}px`
+          height: `${page.headerHeight}px`,
+          padding: `${Math.max(12, page.headerHeight * 0.05)}px 24px`
         }}
       >
         {/* Top custom elements */}
         {topElements.map(element => (
-          <div key={element.id} className="mb-4">
+          <div key={element.id} className="mb-2">
             {renderCustomElement(element)}
           </div>
         ))}
 
         {/* Logo */}
         {page.showLogo && page.logoUrl && (
-          <div className={`mb-4 flex ${page.logoPosition === 'left' ? 'justify-start' : page.logoPosition === 'right' ? 'justify-end' : 'justify-center'}`}>
+          <div className={`mb-2 flex ${page.logoPosition === 'left' ? 'justify-start' : page.logoPosition === 'right' ? 'justify-end' : 'justify-center'}`}>
             <img 
               src={page.logoUrl} 
               alt="Logo" 
               className="object-contain rounded"
-              style={{ width: `${page.logoSize}px`, height: `${page.logoSize}px` }}
+              style={{ 
+                width: `${Math.min(page.logoSize, page.headerHeight * 0.6)}px`, 
+                height: `${Math.min(page.logoSize, page.headerHeight * 0.6)}px`,
+                maxHeight: `${page.headerHeight - 40}px`
+              }}
               onError={(e) => {
                 e.currentTarget.style.display = 'none';
               }}
@@ -236,14 +241,26 @@ export default function UnifiedTemplateRenderer({
           </div>
         )}
 
-        {/* Title and subtitle - only show if custom values are provided */}
+        {/* Title and subtitle - responsive sizing */}
         {page.customTitle && (
-          <h1 className="text-2xl font-bold mb-2">
+          <h1 
+            className="font-bold mb-1"
+            style={{ 
+              fontSize: `${Math.max(16, Math.min(32, page.headerHeight * 0.12))}px`,
+              lineHeight: '1.2'
+            }}
+          >
             {page.customTitle}
           </h1>
         )}
         {page.customSubtitle && (
-          <p className="text-white/90">
+          <p 
+            className="text-white/90"
+            style={{ 
+              fontSize: `${Math.max(12, Math.min(18, page.headerHeight * 0.08))}px`,
+              lineHeight: '1.3'
+            }}
+          >
             {page.customSubtitle}
           </p>
         )}
