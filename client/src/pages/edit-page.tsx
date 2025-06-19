@@ -131,27 +131,7 @@ export default function EditPage() {
     }
   }, [previewTab, timeLeft]);
 
-  // Auto-save functionality when form changes
-  useEffect(() => {
-    const subscription = form.watch((value, { name, type }) => {
-      if (type === 'change' && name && page) {
-        const timeoutId = setTimeout(() => {
-          const updatedData = {
-            ...value,
-            customElements: JSON.stringify(customElements)
-          };
-          console.log("Auto-saving form changes:", updatedData);
-          // Only auto-save if there are actual changes
-          if (JSON.stringify(updatedData) !== JSON.stringify(page)) {
-            updatePageMutation.mutate(updatedData as EditPageForm);
-          }
-        }, 1000); // Auto-save after 1 second of no changes
 
-        return () => clearTimeout(timeoutId);
-      }
-    });
-    return () => subscription.unsubscribe();
-  }, [form, customElements, page, updatePageMutation]);
 
   const { data: page, isLoading } = useQuery({
     queryKey: ["/api/payment-pages", id],
