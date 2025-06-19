@@ -296,7 +296,7 @@ export default function UnifiedTemplateRenderer({
             <p 
               className="text-white/90"
               style={{ 
-                fontSize: '13px',
+                fontSize: '14px',
                 lineHeight: '1.2',
                 maxWidth: '98%',
                 margin: '0'
