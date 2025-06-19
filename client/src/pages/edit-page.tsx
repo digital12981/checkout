@@ -46,7 +46,9 @@ import {
   Move,
   X,
   Edit,
-  Bold
+  Bold,
+  User,
+  CreditCard
 } from "lucide-react";
 import UnifiedTemplateRenderer from "@/components/unified-template-renderer";
 
@@ -432,8 +434,9 @@ export default function EditPage() {
         </div>
       </div>
 
-      <div className="flex">
-        <div className="w-80 bg-white border-r overflow-auto">
+      <div className="flex h-screen">
+        {/* Left Panel - Editor */}
+        <div className="w-96 bg-white border-r overflow-auto">
           <Tabs value={currentTab} onValueChange={setCurrentTab} className="w-full">
             <TabsList className="grid w-full grid-cols-3">
               <TabsTrigger value="config">
@@ -982,6 +985,155 @@ export default function EditPage() {
               </div>
             </TabsContent>
           </Tabs>
+        </div>
+
+        {/* Right Panel - Preview */}
+        <div className="flex-1 bg-gray-100">
+          <div className="p-4">
+            <div className="mb-4">
+              <Tabs value={previewTab} onValueChange={setPreviewTab} className="w-full">
+                <TabsList className="grid w-full grid-cols-2 max-w-md mx-auto">
+                  <TabsTrigger value="form">
+                    <User className="w-4 h-4 mr-1" />
+                    Formulário
+                  </TabsTrigger>
+                  <TabsTrigger value="payment">
+                    <CreditCard className="w-4 h-4 mr-1" />
+                    Pagamento
+                  </TabsTrigger>
+                </TabsList>
+              </Tabs>
+            </div>
+
+            <div className="flex justify-center">
+              <div className="w-96 max-w-sm border bg-white overflow-auto shadow-lg" style={{ height: 'calc(100vh - 200px)', minHeight: '600px' }}>
+                {previewTab === "form" ? (
+                  <UnifiedTemplateRenderer
+                    page={{...formData, id: parseInt(id || "0")}}
+                    customElements={customElements}
+                    isEditor={true}
+                  >
+                    <div className="p-6 space-y-4">
+                      <div className="text-center">
+                        <div className="text-lg font-semibold text-gray-900 mb-2">
+                          Valor: {formatCurrency(formData.price)}
+                        </div>
+                      </div>
+
+                      <div className="space-y-4">
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 mb-1">Nome completo</label>
+                          <input 
+                            type="text" 
+                            placeholder="Seu nome completo"
+                            className="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                            disabled 
+                          />
+                        </div>
+                        
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 mb-1">E-mail</label>
+                          <input 
+                            type="email" 
+                            placeholder="seu@email.com"
+                            className="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                            disabled 
+                          />
+                        </div>
+                        
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 mb-1">CPF</label>
+                          <input 
+                            type="text" 
+                            placeholder="000.000.000-00"
+                            className="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                            disabled 
+                          />
+                        </div>
+                        
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 mb-1">Telefone</label>
+                          <input 
+                            type="tel" 
+                            placeholder="(11) 99999-9999"
+                            className="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                            disabled 
+                          />
+                        </div>
+                      </div>
+                      
+                      <button 
+                        className="w-full text-white py-3 px-6 rounded-md font-semibold flex items-center justify-center"
+                        style={{ backgroundColor: formData.accentColor }}
+                        disabled
+                      >
+                        {formData.customButtonText || "Pagar com PIX"}
+                      </button>
+                    </div>
+                  </UnifiedTemplateRenderer>
+                ) : (
+                  <UnifiedTemplateRenderer
+                    page={{...formData, id: parseInt(id || "0")}}
+                    customElements={customElements}
+                    isEditor={true}
+                  >
+                    <div className="p-6 space-y-6">
+                      <div className="text-center">
+                        <div className="text-lg font-semibold text-gray-900 mb-2">
+                          Valor: {formatCurrency(formData.price)}
+                        </div>
+                      </div>
+
+                      <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4 mb-6">
+                        <div className="text-center space-y-2">
+                          <div className="flex items-center justify-center gap-2 text-yellow-800">
+                            <span className="text-sm font-medium">Aguardando pagamento...</span>
+                            <div className="animate-spin h-4 w-4 border-2 border-yellow-600 border-t-transparent rounded-full"></div>
+                          </div>
+                          <div className="text-xl font-bold text-yellow-800">
+                            Expira em {formatTime(timeLeft)}
+                          </div>
+                        </div>
+                      </div>
+
+                      <div className="text-center mb-6">
+                        <div className="text-gray-600 text-sm mb-4">
+                          Escaneie o QR Code ou copie o código PIX
+                        </div>
+                        <div className="flex justify-center mb-4">
+                          <img 
+                            src="https://upload.wikimedia.org/wikipedia/commons/thumb/a/a2/Logo%E2%80%94pix_powered_by_Banco_Central_%28Brazil%2C_2020%29.svg/2560px-Logo%E2%80%94pix_powered_by_Banco_Central_%28Brazil%2C_2020%29.svg.png"
+                            alt="PIX Logo"
+                            className="h-8 object-contain"
+                          />
+                        </div>
+                        <div className="w-48 h-48 bg-gray-200 rounded-lg flex items-center justify-center mx-auto mb-4">
+                          <div className="text-center text-gray-500">
+                            <div className="text-xs">QR Code Preview</div>
+                          </div>
+                        </div>
+                        <button className="w-full bg-blue-600 text-white py-2 px-4 rounded-md text-sm font-medium hover:bg-blue-700 transition-colors">
+                          Copiar código PIX
+                        </button>
+                      </div>
+
+                      <div className="border-t pt-6">
+                        <div className="text-center">
+                          <h3 className="font-semibold text-gray-900 mb-3">Como pagar:</h3>
+                          <ul className="text-sm text-gray-600 space-y-1 text-left">
+                            <li>• Abra o aplicativo do seu banco</li>
+                            <li>• Escolha a opção Pix</li>
+                            <li>• Escaneie o QR Code ou cole o código</li>
+                            <li>• Confirme o pagamento</li>
+                          </ul>
+                        </div>
+                      </div>
+                    </div>
+                  </UnifiedTemplateRenderer>
+                )}
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     </div>
