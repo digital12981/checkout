@@ -227,7 +227,7 @@ export default function UnifiedTemplateRenderer({
 
         {/* Logo */}
         {page.showLogo && page.logoUrl && (
-          <div className={`mb-3 flex ${page.logoPosition === 'left' ? 'justify-start' : page.logoPosition === 'right' ? 'justify-end' : 'justify-center'}`}>
+          <div className={`mb-2 flex ${page.logoPosition === 'left' ? 'justify-start' : page.logoPosition === 'right' ? 'justify-end' : 'justify-center'}`}>
             <img 
               src={page.logoUrl} 
               alt="Logo" 
@@ -247,13 +247,12 @@ export default function UnifiedTemplateRenderer({
         {/* Title and subtitle with larger responsive sizing */}
         {page.customTitle && (
           <h1 
-            className="font-bold"
+            className="font-bold mb-3"
             style={{ 
               fontSize: `${Math.max(18, Math.min(32, page.headerHeight * 0.1))}px`,
               lineHeight: '1.2',
               maxWidth: '95%',
-              margin: '0 auto',
-              marginBottom: `${Math.max(20, page.headerHeight * 0.12)}px`
+              margin: '0 auto 12px auto'
             }}
           >
             {page.customTitle}
