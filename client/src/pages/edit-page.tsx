@@ -933,9 +933,9 @@ export default function EditPage() {
                     </div>
 
                     <div className="flex justify-center">
-                      <div className="w-64 h-64 bg-gray-100 border-2 border-dashed border-gray-300 rounded-lg flex items-center justify-center">
+                      <div className="w-48 h-48 bg-gray-100 border-2 border-dashed border-gray-300 rounded-lg flex items-center justify-center">
                         <div className="text-center text-gray-500">
-                          <QrCode className="w-16 h-16 mx-auto mb-2" />
+                          <QrCode className="w-12 h-12 mx-auto mb-2" />
                           <p className="text-sm">QR Code PIX</p>
                         </div>
                       </div>
