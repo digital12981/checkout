@@ -247,7 +247,7 @@ export default function UnifiedTemplateRenderer({
         {/* Title and subtitle with larger responsive sizing */}
         {page.customTitle && (
           <h1 
-            className="font-bold mb-2"
+            className="font-bold mb-4"
             style={{ 
               fontSize: `${Math.max(18, Math.min(32, page.headerHeight * 0.1))}px`,
               lineHeight: '1.2',
@@ -290,11 +290,6 @@ export default function UnifiedTemplateRenderer({
           {/* Enhanced PIX Payment Interface - shown when payment is active */}
           {!isEditor && typeof children === 'object' && (children as any)?.props?.pixPayment && (
             <div className="space-y-6">
-              <div className="text-center mb-6">
-                <div className="text-lg font-semibold text-neutral-800 mb-4">
-                  Valor: {formatCurrency(page.price)}
-                </div>
-              </div>
 
               <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4 mb-6">
                 <div className="text-center space-y-2">
