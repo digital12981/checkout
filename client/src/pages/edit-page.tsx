@@ -47,7 +47,11 @@ import {
   Move,
   X,
   Edit,
-  Bold
+  Bold,
+  MessageCircle,
+  User,
+  Send,
+  Trash2
 } from "lucide-react";
 import UnifiedTemplateRenderer from "@/components/unified-template-renderer";
 
@@ -72,6 +76,10 @@ const editPageSchema = z.object({
   footerText: z.string().optional(),
   showFooterLogo: z.boolean(),
   footerLogoSize: z.number().min(20).max(100),
+  chatEnabled: z.boolean(),
+  chatProfilePhoto: z.string().optional(),
+  chatAttendantName: z.string().optional(),
+  chatMessages: z.string().optional(),
 });
 
 type EditPageForm = z.infer<typeof editPageSchema>;
