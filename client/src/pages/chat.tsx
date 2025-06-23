@@ -53,9 +53,8 @@ export default function Chat() {
   }, [currentMessageIndex, chatMessages, page?.chatEnabled, id, setLocation]);
 
   const handleProceedToPayment = () => {
-    const urlParams = new URLSearchParams(window.location.search);
-    const queryString = urlParams.toString();
-    setLocation(`/checkout/${id}${queryString ? `?${queryString}` : ''}`);
+    console.log("Navigating to checkout from chat...");
+    setLocation(`/checkout/${id}?fromChat=true`);
   };
 
   if (isLoading) {
