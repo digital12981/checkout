@@ -81,7 +81,11 @@ export default function CheckoutFinal() {
   };
 
   if (pageQuery.isLoading) {
-    return <div className="min-h-screen flex items-center justify-center">Carregando...</div>;
+    return <CheckoutLoading 
+      logoUrl={pageQuery.data?.logoUrl} 
+      primaryColor={pageQuery.data?.primaryColor}
+      logoSize={pageQuery.data?.logoSize}
+    />;
   }
 
   if (!pageQuery.data) {

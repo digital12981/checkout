@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { useRoute } from "wouter";
 import { useQuery } from "@tanstack/react-query";
+import CheckoutLoading from "@/components/checkout-loading";
 
 export default function CheckoutWorking() {
   const [, params] = useRoute("/checkout/:id");
@@ -36,7 +37,11 @@ export default function CheckoutWorking() {
   const page = pageQuery.data;
 
   if (pageQuery.isLoading) {
-    return <div className="flex items-center justify-center min-h-screen">Carregando...</div>;
+    return <CheckoutLoading 
+      logoUrl={pageQuery.data?.logoUrl} 
+      primaryColor={pageQuery.data?.primaryColor}
+      logoSize={pageQuery.data?.logoSize}
+    />;
   }
 
   if (!page) {
