@@ -119,7 +119,12 @@ export default function EditPage() {
   const [customElements, setCustomElements] = useState<CustomElement[]>([]);
   const [editingElement, setEditingElement] = useState<string | null>(null);
   const [capturedHTML, setCapturedHTML] = useState<string>("");
-  const [timeLeft, setTimeLeft] = useState(15 * 60); // 15 minutes in seconds
+  const [timeLeft, setTimeLeft] = useState(15 * 60); // 15 minutes
+  const [chatMessages, setChatMessages] = useState<any[]>([]);
+  const [editingMessageIndex, setEditingMessageIndex] = useState<number | null>(null);
+  const [newMessage, setNewMessage] = useState("");
+  const [aiPrompt, setAiPrompt] = useState("");
+  const [isProcessingAI, setIsProcessingAI] = useState(false);
 
   // Timer functionality
   useEffect(() => {
@@ -244,6 +249,17 @@ export default function EditPage() {
         setCustomElements(elements);
       } catch {
         setCustomElements([]);
+      }
+
+      // Load chat messages
+      try {
+        const messages = JSON.parse(pageData.chatMessages || "[]");
+        setChatMessages(messages);
+      } catch {
+        setChatMessages([
+          { type: "attendant", content: "Olá! Como posso ajudá-lo hoje?", delay: 1000 },
+          { type: "attendant", content: "Estou aqui para tirar suas dúvidas sobre nossos serviços.", delay: 2000 }
+        ]);
       }
     }
   }, [page, form]);
@@ -390,7 +406,11 @@ export default function EditPage() {
         customTitle: data.customTitle?.trim() || "",
         customSubtitle: data.customSubtitle?.trim() || "",
         customElements: JSON.stringify(customElements),
-        previewHtml: finalHTML
+        previewHtml: finalHTML,
+        chatEnabled: data.chatEnabled,
+        chatProfilePhoto: data.chatProfilePhoto,
+        chatAttendantName: data.chatAttendantName,
+        chatMessages: JSON.stringify(chatMessages)
       };
       
       updatePageMutation.mutate(updatedData);
@@ -486,9 +506,9 @@ export default function EditPage() {
                 <Palette className="w-4 h-4 mr-1" />
                 Design
               </TabsTrigger>
-              <TabsTrigger value="elements">
-                <Layout className="w-4 h-4 mr-1" />
-                Elementos
+              <TabsTrigger value="chat">
+                <MessageCircle className="w-4 h-4 mr-1" />
+                Chat
               </TabsTrigger>
             </TabsList>
 
