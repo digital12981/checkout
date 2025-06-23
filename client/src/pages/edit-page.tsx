@@ -447,6 +447,62 @@ export default function EditPage() {
     setEditingElement(null);
   }, []);
 
+  // Chat functions
+  const addMessage = (type: 'attendant' | 'user', content: string, delay: number = 1000) => {
+    const newMessage = { type, content, delay };
+    setChatMessages(prev => [...prev, newMessage]);
+    setNewMessage("");
+  };
+
+  const updateMessage = (index: number, content: string) => {
+    setChatMessages(prev => 
+      prev.map((msg, i) => i === index ? { ...msg, content } : msg)
+    );
+    setEditingMessageIndex(null);
+  };
+
+  const deleteMessage = (index: number) => {
+    setChatMessages(prev => prev.filter((_, i) => i !== index));
+  };
+
+  const processWithAI = async () => {
+    if (!aiPrompt.trim()) return;
+    
+    setIsProcessingAI(true);
+    try {
+      const response = await fetch('/api/chat/process', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          prompt: aiPrompt,
+          currentMessages: chatMessages,
+          productName: form.getValues('productName'),
+          price: form.getValues('price')
+        })
+      });
+
+      if (response.ok) {
+        const result = await response.json();
+        setChatMessages(result.messages);
+        setAiPrompt("");
+        toast({
+          title: "Chat atualizado",
+          description: "As mensagens foram processadas com IA."
+        });
+      } else {
+        throw new Error('Falha ao processar com IA');
+      }
+    } catch (error) {
+      toast({
+        title: "Erro",
+        description: "Falha ao processar mensagens com IA.",
+        variant: "destructive"
+      });
+    } finally {
+      setIsProcessingAI(false);
+    }
+  };
+
   if (isLoading) {
     return <div>Carregando...</div>;
   }
@@ -860,67 +916,212 @@ export default function EditPage() {
               </Form>
             </TabsContent>
 
-            <TabsContent value="elements" className="p-4 space-y-4">
-              <div className="flex gap-2">
-                <Button 
-                  variant="outline" 
-                  size="sm" 
-                  onClick={() => addElement("text")}
-                  className="flex-1"
-                >
-                  <Type className="w-4 h-4 mr-1" />
-                  Texto
-                </Button>
-                <Button 
-                  variant="outline" 
-                  size="sm" 
-                  onClick={() => addElement("image")}
-                  className="flex-1"
-                >
-                  <Image className="w-4 h-4 mr-1" />
-                  Imagem
-                </Button>
-              </div>
-
-              <div className="space-y-2">
-                {customElements.map((element) => (
-                  <Card key={element.id} className="p-3">
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-2">
-                        {element.type === "text" ? (
-                          <Type className="w-4 h-4" />
-                        ) : (
-                          <Image className="w-4 h-4" />
-                        )}
-                        <div>
-                          <div className="font-medium text-sm">
-                            {element.type === "text" ? "Texto" : "Imagem"}
+            <TabsContent value="chat" className="p-4 space-y-4">
+              <Form {...form}>
+                <div className="space-y-4">
+                  <FormField
+                    control={form.control}
+                    name="chatEnabled"
+                    render={({ field }) => (
+                      <FormItem className="flex flex-row items-center justify-between rounded-lg border p-3">
+                        <div className="space-y-0.5">
+                          <FormLabel>Habilitar Chat</FormLabel>
+                          <div className="text-sm text-muted-foreground">
+                            Ativar chat antes do checkout
                           </div>
-                          <div className="text-xs text-gray-600 truncate max-w-32">
-                            {element.content}
+                        </div>
+                        <FormControl>
+                          <Switch
+                            checked={field.value}
+                            onCheckedChange={field.onChange}
+                          />
+                        </FormControl>
+                      </FormItem>
+                    )}
+                  />
+
+                  {form.watch("chatEnabled") && (
+                    <>
+                      <Separator />
+                      
+                      <div className="space-y-4">
+                        <h3 className="text-sm font-medium">Configurações do Atendente</h3>
+                        
+                        <FormField
+                          control={form.control}
+                          name="chatProfilePhoto"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>Foto do Perfil</FormLabel>
+                              <FormControl>
+                                <Input {...field} placeholder="URL da foto do atendente" />
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+
+                        <FormField
+                          control={form.control}
+                          name="chatAttendantName"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>Nome da Atendente de RH</FormLabel>
+                              <FormControl>
+                                <Input {...field} placeholder="Ex: Tereza Alencar" />
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                      </div>
+
+                      <Separator />
+
+                      <div className="space-y-4">
+                        <h3 className="text-sm font-medium">IA - Personalização de Mensagens</h3>
+                        
+                        <div className="space-y-2">
+                          <Textarea
+                            placeholder="Descreva como você quer que o chat funcione. Ex: 'Faça o chat mais convincente para vendas de curso' ou 'Adicione mais urgência nas mensagens'"
+                            value={aiPrompt}
+                            onChange={(e) => setAiPrompt(e.target.value)}
+                            rows={3}
+                          />
+                          <Button 
+                            onClick={processWithAI}
+                            disabled={isProcessingAI || !aiPrompt.trim()}
+                            size="sm"
+                            className="w-full"
+                          >
+                            {isProcessingAI ? (
+                              <>
+                                <div className="animate-spin h-4 w-4 mr-2 border-2 border-white border-t-transparent rounded-full"></div>
+                                Processando...
+                              </>
+                            ) : (
+                              <>
+                                <Send className="w-4 h-4 mr-2" />
+                                Processar com IA
+                              </>
+                            )}
+                          </Button>
+                        </div>
+                      </div>
+
+                      <Separator />
+
+                      <div className="space-y-4">
+                        <div className="flex items-center justify-between">
+                          <h3 className="text-sm font-medium">Mensagens do Chat</h3>
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            onClick={() => addMessage('attendant', 'Nova mensagem')}
+                          >
+                            <MessageCircle className="w-4 h-4 mr-1" />
+                            Adicionar
+                          </Button>
+                        </div>
+
+                        <div className="space-y-2 max-h-96 overflow-y-auto">
+                          {chatMessages.map((message, index) => (
+                            <Card key={index} className="p-3">
+                              <div className="space-y-2">
+                                <div className="flex items-center justify-between">
+                                  <div className="flex items-center gap-2">
+                                    <User className="w-4 h-4" />
+                                    <Badge variant={message.type === 'attendant' ? 'default' : 'secondary'}>
+                                      {message.type === 'attendant' ? 'Atendente' : 'Cliente'}
+                                    </Badge>
+                                    <span className="text-xs text-gray-500">
+                                      Delay: {message.delay || 1000}ms
+                                    </span>
+                                  </div>
+                                  <div className="flex gap-1">
+                                    <Button
+                                      variant="ghost"
+                                      size="sm"
+                                      onClick={() => setEditingMessageIndex(index)}
+                                    >
+                                      <Edit className="w-3 h-3" />
+                                    </Button>
+                                    <Button
+                                      variant="ghost"
+                                      size="sm"
+                                      onClick={() => deleteMessage(index)}
+                                    >
+                                      <Trash2 className="w-3 h-3" />
+                                    </Button>
+                                  </div>
+                                </div>
+                                
+                                {editingMessageIndex === index ? (
+                                  <div className="space-y-2">
+                                    <Textarea
+                                      value={message.content}
+                                      onChange={(e) => {
+                                        const newMessages = [...chatMessages];
+                                        newMessages[index].content = e.target.value;
+                                        setChatMessages(newMessages);
+                                      }}
+                                      rows={2}
+                                    />
+                                    <div className="flex gap-2">
+                                      <Button
+                                        size="sm"
+                                        onClick={() => setEditingMessageIndex(null)}
+                                      >
+                                        Salvar
+                                      </Button>
+                                      <Button
+                                        size="sm"
+                                        variant="outline"
+                                        onClick={() => setEditingMessageIndex(null)}
+                                      >
+                                        Cancelar
+                                      </Button>
+                                    </div>
+                                  </div>
+                                ) : (
+                                  <div className="text-sm text-gray-700 whitespace-pre-wrap">
+                                    {message.content}
+                                  </div>
+                                )}
+                              </div>
+                            </Card>
+                          ))}
+                        </div>
+
+                        {chatMessages.length === 0 && (
+                          <div className="text-center text-gray-500 py-8">
+                            <MessageCircle className="w-8 h-8 mx-auto mb-2 opacity-50" />
+                            <p>Nenhuma mensagem configurada</p>
+                            <p className="text-xs">Use a IA para gerar mensagens ou adicione manualmente</p>
+                          </div>
+                        )}
+                      </div>
+
+                      <Separator />
+
+                      <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                        <div className="flex items-start gap-2">
+                          <Info className="w-4 h-4 text-blue-600 mt-0.5" />
+                          <div className="text-sm text-blue-800">
+                            <p className="font-medium">Como funciona o Chat:</p>
+                            <ul className="mt-1 list-disc list-inside space-y-1 text-xs">
+                              <li>O chat aparece antes do formulário de checkout</li>
+                              <li>Mensagens são exibidas em sequência com delays configuráveis</li>
+                              <li>Ao final do chat, aparece o botão de pagamento</li>
+                              <li>Use a IA para otimizar as mensagens para conversão</li>
+                            </ul>
                           </div>
                         </div>
                       </div>
-                      <div className="flex gap-1">
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => setEditingElement(element.id)}
-                        >
-                          <Edit className="w-3 h-3" />
-                        </Button>
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => deleteElement(element.id)}
-                        >
-                          <X className="w-3 h-3" />
-                        </Button>
-                      </div>
-                    </div>
-                  </Card>
-                ))}
-              </div>
+                    </>
+                  )}
+                </div>
+              </Form>
             </TabsContent>
           </Tabs>
         </div>

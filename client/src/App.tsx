@@ -5,6 +5,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import Dashboard from "@/pages/dashboard";
 import CheckoutFinal from "@/pages/checkout-final";
+import Chat from "@/pages/chat";
 import EditPage from "@/pages/edit-page";
 import HtmlEditor from "@/pages/html-editor";
 import NotFound from "@/pages/not-found";
