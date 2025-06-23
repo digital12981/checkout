@@ -50,8 +50,8 @@ export default function Chat() {
       const currentMessage = chatMessages[currentMessageIndex];
       const timer = setTimeout(() => {
         setIsTyping(true);
-        // Force scroll when typing starts
-        scrollToBottom(false);
+        // Scroll when typing starts
+        scrollToBottom();
         
         setTimeout(() => {
           setIsTyping(false);
@@ -63,19 +63,15 @@ export default function Chat() {
           });
           setCurrentMessageIndex(prev => prev + 1);
           
-          // Force scroll after message appears
-          scrollToBottom(false);
-          setTimeout(() => scrollToBottom(false), 100);
-          setTimeout(() => scrollToBottom(false), 300);
+          // Scroll after message appears
+          scrollToBottom();
           
           // Show options after last message
           if (currentMessageIndex === chatMessages.length - 1) {
             setTimeout(() => {
               setShowResponseOptions(true);
-              // Force scroll for options
-              scrollToBottom(false);
-              setTimeout(() => scrollToBottom(false), 200);
-              setTimeout(() => scrollToBottom(false), 400);
+              // Scroll for options
+              scrollToBottom();
             }, 1000);
           }
         }, 2000);
@@ -101,9 +97,8 @@ export default function Chat() {
     };
     
     setMessages(prev => [...prev, userMessage]);
-    // Force scroll for user message
-    scrollToBottom(false);
-    setTimeout(() => scrollToBottom(false), 100);
+    // Scroll for user message
+    scrollToBottom();
     
     // Handle different responses
     if (option === 'sim') {
@@ -122,9 +117,8 @@ export default function Chat() {
           
           setTimeout(() => {
             setShowPaymentOptions(true);
-            // Ensure scroll after payment options appear
-            scrollToBottom(false);
-            setTimeout(() => scrollToBottom(false), 100);
+            // Scroll after payment options appear
+            scrollToBottom();
           }, 1000);
         }, 2000);
       }, 1000);
@@ -144,9 +138,8 @@ export default function Chat() {
           
           setTimeout(() => {
             setShowProceedButton(true);
-            // Ensure scroll after proceed button appears
-            scrollToBottom(false);
-            setTimeout(() => scrollToBottom(false), 100);
+            // Scroll after proceed button appears
+            scrollToBottom();
           }, 1000);
         }, 2000);
       }, 1000);
@@ -172,54 +165,17 @@ export default function Chat() {
     setLocation(`/checkout/${id}`);
   };
 
-  // Reliable mobile-first scroll function
-  const scrollToBottom = (smooth = false) => {
-    if (!chatContainerRef.current) return;
-    
-    const container = chatContainerRef.current;
-    
-    const doScroll = () => {
-      // Simple, direct scroll to bottom - most reliable approach
-      container.scrollTop = container.scrollHeight;
-    };
-    
-    // Execute immediately and with multiple fallbacks
-    doScroll();
-    requestAnimationFrame(doScroll);
-    
-    // Additional scrolls to handle timing issues
-    setTimeout(doScroll, 10);
-    setTimeout(doScroll, 50);
-    setTimeout(doScroll, 150);
-    setTimeout(doScroll, 300);
+  // Simple and reliable scroll - based on working HTML example
+  const scrollToBottom = () => {
+    if (chatContainerRef.current) {
+      chatContainerRef.current.scrollTop = chatContainerRef.current.scrollHeight;
+    }
   };
 
-  // Aggressive auto-scroll system
+  // Simple scroll trigger - matches working HTML pattern
   useEffect(() => {
-    // Immediate scroll when content changes
-    scrollToBottom(false);
-    
-    // Multiple follow-up scrolls to ensure content is visible
-    const timeouts = [
-      setTimeout(() => scrollToBottom(false), 10),
-      setTimeout(() => scrollToBottom(false), 50),
-      setTimeout(() => scrollToBottom(false), 100),
-      setTimeout(() => scrollToBottom(false), 200),
-      setTimeout(() => scrollToBottom(false), 400),
-      setTimeout(() => scrollToBottom(false), 600),
-      setTimeout(() => scrollToBottom(false), 1000)
-    ];
-    
-    return () => timeouts.forEach(clearTimeout);
+    scrollToBottom();
   }, [messages, showResponseOptions, showPaymentOptions, showProceedButton, isTyping]);
-
-  // Additional scroll trigger for typing indicator
-  useEffect(() => {
-    if (isTyping) {
-      scrollToBottom(false);
-      setTimeout(() => scrollToBottom(false), 100);
-    }
-  }, [isTyping]);
 
   if (isLoading) {
     return (
@@ -239,9 +195,11 @@ export default function Chat() {
 
   return (
     <div 
-      className="w-full"
       style={{ 
-        backgroundColor: '#FFFFFF',
+        fontFamily: 'Sora, sans-serif',
+        backgroundColor: '#fff',
+        color: '#333',
+        lineHeight: '1.6',
         height: '100vh',
         maxHeight: '100vh',
         overflow: 'hidden',
@@ -249,20 +207,27 @@ export default function Chat() {
         top: 0,
         left: 0,
         right: 0,
-        bottom: 0
+        bottom: 0,
+        width: '100%'
       }}
     >
       {/* Brand Header */}
       <div 
-        className="py-2 sm:py-3"
-        style={{ backgroundColor: page.primaryColor || '#044785' }}
+        style={{ 
+          background: `linear-gradient(90deg, ${page.primaryColor || '#044785'} 0%, #666666 100%)`,
+          color: 'white',
+          padding: '12px 20px',
+          position: 'relative',
+          borderRadius: '0px',
+          boxShadow: '0 8px 24px rgba(0,0,0,0.08)'
+        }}
       >
-        <div className="container mx-auto px-4 text-center">
+        <div style={{ maxWidth: '1200px', margin: '0 auto', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
           {page.showLogo && page.logoUrl && (
             <img 
               src={page.logoUrl} 
               alt="Logo" 
-              className="h-8 sm:h-12 mx-auto object-contain" 
+              style={{ height: '32px' }}
             />
           )}
         </div>
@@ -271,83 +236,72 @@ export default function Chat() {
       {/* Attendant Info */}
       <div 
         style={{ 
-          backgroundColor: '#f3f4f6',
-          background: '#f3f4f6',
-          color: '#374151',
-          padding: window.innerWidth > 768 ? '12px 16px' : '8px 12px',
-          borderBottom: '1px solid #e5e7eb'
+          background: `linear-gradient(90deg, ${page.primaryColor || '#044785'} 0%, #666666 100%)`,
+          color: 'white',
+          padding: '12px 20px',
+          position: 'relative',
+          borderRadius: '12px',
+          boxShadow: '0 8px 24px rgba(0,0,0,0.08)',
+          margin: '0',
+          borderTopLeftRadius: '0',
+          borderTopRightRadius: '0'
         }}
       >
-        <div style={{ maxWidth: '1280px', margin: '0 auto' }}>
-          <div style={{ display: 'flex', alignItems: 'center', width: '100%' }}>
-            <div style={{ marginRight: window.innerWidth > 768 ? '16px' : '12px', position: 'relative' }}>
-              <img 
-                src={profilePhoto}
-                style={{ 
-                  width: window.innerWidth > 768 ? '48px' : '40px', 
-                  height: window.innerWidth > 768 ? '48px' : '40px', 
-                  borderRadius: '50%', 
-                  objectFit: 'cover',
-                  border: `2px solid ${page.primaryColor || '#044785'}`
-                }}
-                alt={attendantName}
-              />
-              <span 
-                style={{ 
-                  position: 'absolute',
-                  bottom: '0',
-                  right: '0',
-                  width: window.innerWidth > 768 ? '12px' : '10px',
-                  height: window.innerWidth > 768 ? '12px' : '10px',
-                  borderRadius: '50%',
-                  border: '2px solid white',
-                  backgroundColor: '#28a745'
-                }}
-              ></span>
-            </div>
-            <div style={{ flex: '1' }}>
-              <h2 style={{ 
-                color: '#374151', 
-                fontSize: window.innerWidth > 768 ? '18px' : '16px', 
-                fontWeight: '600', 
-                margin: '0' 
-              }}>{attendantName}</h2>
-              <p style={{ 
-                color: '#6b7280', 
-                fontSize: window.innerWidth > 768 ? '14px' : '12px', 
-                margin: '0' 
-              }}>Coordenadora de RH</p>
-            </div>
+        <div style={{ maxWidth: '1200px', margin: '0 auto', display: 'flex', alignItems: 'center' }}>
+          <div style={{ position: 'relative', marginRight: '15px', flexShrink: 0 }}>
+            <img 
+              src={profilePhoto}
+              style={{ 
+                width: '46px', 
+                height: '46px', 
+                borderRadius: '50%', 
+                objectFit: 'cover',
+                border: `2px solid ${page.primaryColor || '#044785'}`,
+                boxShadow: '0 2px 5px rgba(0,0,0,0.2)'
+              }}
+              alt={attendantName}
+            />
+            <span 
+              style={{ 
+                position: 'absolute',
+                bottom: '0',
+                right: '0',
+                width: '14px',
+                height: '14px',
+                borderRadius: '50%',
+                backgroundColor: '#28a745',
+                border: '2px solid white'
+              }}
+            />
+          </div>
+          <div style={{ flex: '1' }}>
+            <h2 style={{ 
+              margin: '0', 
+              fontWeight: '600', 
+              fontSize: '1.1rem' 
+            }}>{attendantName}</h2>
+            <p style={{ 
+              margin: '0', 
+              fontSize: '0.85rem', 
+              opacity: '0.8' 
+            }}>Coordenadora de RH</p>
           </div>
         </div>
       </div>
 
       {/* Chat Container */}
-      <main 
-        className="w-full px-0 flex-1"
+      <div 
+        ref={chatContainerRef}
         style={{ 
-          height: window.innerWidth > 768 ? 'calc(100vh - 150px)' : 'calc(100vh - 120px)',
-          maxHeight: window.innerWidth > 768 ? 'calc(100vh - 150px)' : 'calc(100vh - 120px)',
-          overflow: 'hidden',
-          position: 'relative'
+          overflowY: 'auto',
+          padding: '10px 20px',
+          scrollBehavior: 'smooth',
+          display: 'flex',
+          flexDirection: 'column',
+          height: window.innerWidth > 576 ? 'calc(100vh - 140px)' : '55vh',
+          backgroundColor: '#fff'
         }}
       >
-        <div className="w-full h-full">
-          <div className="overflow-hidden h-full">
-            <div 
-              ref={chatContainerRef}
-              className="chat-container overflow-y-auto px-2 sm:px-4 py-2 sm:py-4 flex flex-col"
-              style={{ 
-                height: window.innerWidth > 768 ? 'calc(100vh - 150px)' : 'calc(100vh - 120px)',
-                maxHeight: window.innerWidth > 768 ? 'calc(100vh - 150px)' : 'calc(100vh - 120px)',
-                backgroundColor: '#FFFFFF',
-                width: '100%',
-                overflowY: 'auto',
-                overflowX: 'hidden',
-                position: 'relative',
-                WebkitOverflowScrolling: 'touch'
-              }}
-            >
               {messages.map((message, index) => (
                 <div 
                   key={index} 
