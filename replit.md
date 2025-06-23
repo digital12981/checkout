@@ -96,10 +96,6 @@ CheckoutFy is a full-stack web application for creating and managing customizabl
 
 ## Changelog
 
-- June 23, 2025: PostgreSQL database successfully integrated
-  - Migrated from in-memory storage to Neon PostgreSQL database
-  - DatabaseStorage class now handles all data persistence
-  - All database tables created and schema pushed successfully
 - June 19, 2025: Implementado rodapé configurável com logo
   - Adicionado rodapé com cor do header e texto branco
   - Logo redimensionável e texto editável ("INSS 2025")
