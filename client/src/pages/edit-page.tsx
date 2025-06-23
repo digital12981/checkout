@@ -1241,7 +1241,7 @@ export default function EditPage() {
                         {chatMessages.slice(0, 2).map((message, index) => (
                           <div key={index} className="flex justify-start">
                             <div 
-                              className="max-w-xs px-4 py-3 rounded-lg text-white text-sm ml-16"
+                              className="max-w-xs px-4 py-3 rounded-lg text-white text-sm"
                               style={{ backgroundColor: formData.primaryColor || '#044785' }}
                             >
                               {message.content}

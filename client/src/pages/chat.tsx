@@ -40,13 +40,13 @@ export default function Chat() {
       const timer = setTimeout(() => {
         setIsTyping(true);
         
-        // Show typing indicator for a short time
+        // Show typing indicator for a short time, then show message
         setTimeout(() => {
           setIsTyping(false);
           setMessages(prev => [...prev, currentMessage]);
           setCurrentMessageIndex(prev => prev + 1);
-        }, Math.min(currentMessage.delay / 3, 2000));
-      }, currentMessageIndex === 0 ? 1000 : 500);
+        }, 2000); // Fixed 2 second typing time
+      }, currentMessageIndex === 0 ? 1000 : currentMessage.delay);
 
       return () => clearTimeout(timer);
     }
@@ -126,7 +126,7 @@ export default function Chat() {
               {messages.map((message, index) => (
                 <div key={index} className="flex justify-start">
                   <div 
-                    className="max-w-xs lg:max-w-md px-4 py-3 rounded-lg text-white ml-16"
+                    className="max-w-xs lg:max-w-md px-4 py-3 rounded-lg text-white"
                     style={{ backgroundColor: page.primaryColor || '#044785' }}
                   >
                     <p className="text-sm leading-relaxed whitespace-pre-wrap">
@@ -139,7 +139,7 @@ export default function Chat() {
               {isTyping && (
                 <div className="flex justify-start">
                   <div 
-                    className="px-4 py-3 rounded-lg ml-16"
+                    className="px-4 py-3 rounded-lg"
                     style={{ backgroundColor: '#f1f1f1' }}
                   >
                     <div className="flex space-x-1">
