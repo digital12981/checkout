@@ -165,11 +165,15 @@ export default function Chat() {
     setLocation(`/checkout/${id}`);
   };
 
-  // Auto-scroll function
+  // Auto-scroll function with offset for better readability
   const scrollToBottom = (smooth = true) => {
     if (chatContainerRef.current) {
-      chatContainerRef.current.scrollTo({
-        top: chatContainerRef.current.scrollHeight,
+      const container = chatContainerRef.current;
+      const offset = window.innerWidth > 768 ? 80 : 60; // More space on desktop, less on mobile
+      const targetScroll = Math.max(0, container.scrollHeight - container.clientHeight - offset);
+      
+      container.scrollTo({
+        top: targetScroll,
         behavior: smooth ? 'smooth' : 'auto'
       });
     }
