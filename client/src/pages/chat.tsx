@@ -103,8 +103,13 @@ export default function Chat() {
             delay: 0
           }]);
           
+          // Scroll after message
+          setTimeout(() => scrollToBottom(true), 100);
+          
           setTimeout(() => {
             setShowPaymentOptions(true);
+            // Ensure scroll after payment options appear
+            setTimeout(() => scrollToBottom(true), 100);
           }, 1000);
         }, 2000);
       }, 1000);
@@ -119,8 +124,13 @@ export default function Chat() {
             delay: 0
           }]);
           
+          // Scroll after message
+          setTimeout(() => scrollToBottom(true), 100);
+          
           setTimeout(() => {
             setShowProceedButton(true);
+            // Ensure scroll after proceed button appears
+            setTimeout(() => scrollToBottom(true), 100);
           }, 1000);
         }, 2000);
       }, 1000);
@@ -134,6 +144,9 @@ export default function Chat() {
             content: 'Entendo sua decisão. Obrigada pelo seu tempo. Caso mude de ideia, estaremos aqui.',
             delay: 0
           }]);
+          
+          // Scroll after message
+          setTimeout(() => scrollToBottom(true), 100);
         }, 2000);
       }, 1000);
     }
@@ -144,19 +157,37 @@ export default function Chat() {
   };
 
   // Auto-scroll function
-  const scrollToBottom = () => {
+  const scrollToBottom = (smooth = true) => {
     if (chatContainerRef.current) {
-      chatContainerRef.current.scrollTop = chatContainerRef.current.scrollHeight;
+      chatContainerRef.current.scrollTo({
+        top: chatContainerRef.current.scrollHeight,
+        behavior: smooth ? 'smooth' : 'auto'
+      });
     }
   };
 
   // Auto-scroll when messages change
   useEffect(() => {
     const timeoutId = setTimeout(() => {
-      scrollToBottom();
+      scrollToBottom(true);
+    }, 200);
+    return () => clearTimeout(timeoutId);
+  }, [messages]);
+
+  // Separate effect for UI state changes
+  useEffect(() => {
+    const timeoutId = setTimeout(() => {
+      scrollToBottom(true);
     }, 100);
     return () => clearTimeout(timeoutId);
-  }, [messages, showResponseOptions, showPaymentOptions, typingVisible]);
+  }, [showResponseOptions, showPaymentOptions, typingVisible, isTyping]);
+
+  // Scroll immediately when new content appears
+  useEffect(() => {
+    if (messages.length > 0) {
+      scrollToBottom(false);
+    }
+  }, [messages.length]);
 
   if (isLoading) {
     return (
@@ -243,12 +274,13 @@ export default function Chat() {
           <div className="overflow-hidden">
             <div 
               ref={chatContainerRef}
-              className="chat-container overflow-y-auto scroll-smooth px-2 sm:px-4 py-4 flex flex-col"
+              className="chat-container overflow-y-auto px-2 sm:px-4 py-4 flex flex-col"
               style={{ 
                 height: 'calc(100vh - 140px)', 
                 minHeight: '100vh',
                 backgroundColor: '#FFFFFF',
-                width: '100%'
+                width: '100%',
+                scrollBehavior: 'smooth'
               }}
             >
               {messages.map((message, index) => (
