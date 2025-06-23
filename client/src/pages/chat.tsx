@@ -51,7 +51,7 @@ export default function Chat() {
       const timer = setTimeout(() => {
         setIsTyping(true);
         // Force scroll when typing starts
-        scrollToBottom(false, true);
+        scrollToBottom(false);
         
         setTimeout(() => {
           setIsTyping(false);
@@ -64,18 +64,18 @@ export default function Chat() {
           setCurrentMessageIndex(prev => prev + 1);
           
           // Force scroll after message appears
-          scrollToBottom(false, true);
-          setTimeout(() => scrollToBottom(true, true), 100);
-          setTimeout(() => scrollToBottom(true, true), 300);
+          scrollToBottom(false);
+          setTimeout(() => scrollToBottom(false), 100);
+          setTimeout(() => scrollToBottom(false), 300);
           
           // Show options after last message
           if (currentMessageIndex === chatMessages.length - 1) {
             setTimeout(() => {
               setShowResponseOptions(true);
               // Force scroll for options
-              scrollToBottom(false, true);
-              setTimeout(() => scrollToBottom(true, true), 200);
-              setTimeout(() => scrollToBottom(true, true), 400);
+              scrollToBottom(false);
+              setTimeout(() => scrollToBottom(false), 200);
+              setTimeout(() => scrollToBottom(false), 400);
             }, 1000);
           }
         }, 2000);
@@ -102,8 +102,8 @@ export default function Chat() {
     
     setMessages(prev => [...prev, userMessage]);
     // Force scroll for user message
-    scrollToBottom(false, true);
-    setTimeout(() => scrollToBottom(true, true), 100);
+    scrollToBottom(false);
+    setTimeout(() => scrollToBottom(false), 100);
     
     // Handle different responses
     if (option === 'sim') {
@@ -123,7 +123,8 @@ export default function Chat() {
           setTimeout(() => {
             setShowPaymentOptions(true);
             // Ensure scroll after payment options appear
-            setTimeout(() => scrollToBottom(true), 100);
+            scrollToBottom(false);
+            setTimeout(() => scrollToBottom(false), 100);
           }, 1000);
         }, 2000);
       }, 1000);
@@ -144,7 +145,8 @@ export default function Chat() {
           setTimeout(() => {
             setShowProceedButton(true);
             // Ensure scroll after proceed button appears
-            setTimeout(() => scrollToBottom(true), 100);
+            scrollToBottom(false);
+            setTimeout(() => scrollToBottom(false), 100);
           }, 1000);
         }, 2000);
       }, 1000);
@@ -170,74 +172,55 @@ export default function Chat() {
     setLocation(`/checkout/${id}`);
   };
 
-  // Enhanced scroll function to ensure all content is visible
-  const scrollToBottom = (smooth = true, force = false) => {
+  // Simple and reliable scroll to bottom function
+  const scrollToBottom = (smooth = true) => {
     if (chatContainerRef.current) {
       const container = chatContainerRef.current;
       
-      // Use multiple approaches to ensure scrolling works
-      const doScroll = () => {
-        // Method 1: Scroll to bottom with small offset
-        const scrollHeight = container.scrollHeight;
-        const clientHeight = container.clientHeight;
-        const offset = 20; // Small offset for breathing room
-        const targetTop = Math.max(0, scrollHeight - clientHeight - offset);
-        
-        container.scrollTo({
-          top: targetTop,
-          behavior: smooth ? 'smooth' : 'auto'
-        });
-        
-        // Method 2: Backup scroll to absolute bottom if needed
-        if (force) {
-          setTimeout(() => {
-            container.scrollTop = container.scrollHeight;
-          }, 100);
-        }
+      const performScroll = () => {
+        // Always scroll to the absolute bottom to ensure all content is visible
+        container.scrollTop = container.scrollHeight;
       };
       
-      // Execute immediately and with requestAnimationFrame
-      doScroll();
-      requestAnimationFrame(doScroll);
+      // Execute scroll immediately
+      performScroll();
       
-      // Additional backup
-      setTimeout(doScroll, 50);
+      // Use requestAnimationFrame for DOM updates
+      requestAnimationFrame(performScroll);
+      
+      // Additional safety scroll after a short delay
+      setTimeout(performScroll, 50);
+      setTimeout(performScroll, 150);
+      setTimeout(performScroll, 300);
     }
   };
 
-  // Comprehensive auto-scroll system
+  // Aggressive auto-scroll system
   useEffect(() => {
-    // Force scroll when messages change
-    scrollToBottom(true, true);
+    // Immediate scroll when content changes
+    scrollToBottom(false);
     
-    // Additional scrolls with different timing
+    // Multiple follow-up scrolls to ensure content is visible
     const timeouts = [
-      setTimeout(() => scrollToBottom(true, false), 100),
-      setTimeout(() => scrollToBottom(true, false), 300),
-      setTimeout(() => scrollToBottom(true, true), 500),
-      setTimeout(() => scrollToBottom(false, true), 800) // Final force scroll
+      setTimeout(() => scrollToBottom(false), 10),
+      setTimeout(() => scrollToBottom(false), 50),
+      setTimeout(() => scrollToBottom(false), 100),
+      setTimeout(() => scrollToBottom(false), 200),
+      setTimeout(() => scrollToBottom(false), 400),
+      setTimeout(() => scrollToBottom(false), 600),
+      setTimeout(() => scrollToBottom(false), 1000)
     ];
     
     return () => timeouts.forEach(clearTimeout);
-  }, [messages]);
+  }, [messages, showResponseOptions, showPaymentOptions, showProceedButton, isTyping]);
 
-  // Scroll for UI elements appearing
+  // Additional scroll trigger for typing indicator
   useEffect(() => {
-    if (showResponseOptions || showPaymentOptions || showProceedButton || isTyping) {
-      // Immediate scroll
-      scrollToBottom(false, true);
-      
-      // Follow-up scrolls
-      const timeouts = [
-        setTimeout(() => scrollToBottom(true, false), 100),
-        setTimeout(() => scrollToBottom(true, true), 300),
-        setTimeout(() => scrollToBottom(true, true), 600),
-        setTimeout(() => scrollToBottom(false, true), 1000) // Final force
-      ];
-      
-      return () => timeouts.forEach(clearTimeout);
+    if (isTyping) {
+      scrollToBottom(false);
+      setTimeout(() => scrollToBottom(false), 100);
     }
-  }, [showResponseOptions, showPaymentOptions, showProceedButton, isTyping]);
+  }, [isTyping]);
 
   if (isLoading) {
     return (
