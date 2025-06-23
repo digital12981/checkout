@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useRoute } from "wouter";
+import { useRoute, useLocation } from "wouter";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { formatCpf, formatPhone } from "@/lib/utils";
 import UnifiedTemplateRenderer from "@/components/unified-template-renderer";
@@ -7,8 +7,10 @@ import CheckoutLoading from "@/components/checkout-loading";
 
 export default function CheckoutFinal() {
   const [, params] = useRoute("/checkout/:id");
+  const [location] = useLocation();
   const [pixPayment, setPixPayment] = useState<any>(null);
   const [timeLeft, setTimeLeft] = useState(15 * 60);
+  const [isProcessingAutoPayment, setIsProcessingAutoPayment] = useState(false);
 
   const pageQuery = useQuery({
     queryKey: [`/api/payment-pages/${params?.id}`],
@@ -16,16 +18,7 @@ export default function CheckoutFinal() {
   });
 
   const createPaymentMutation = useMutation({
-    mutationFn: async (formData: FormData) => {
-      const data = {
-        paymentPageId: parseInt(params?.id || "0"),
-        customerName: formData.get('customerName'),
-        customerEmail: formData.get('customerEmail'),
-        customerCpf: formData.get('customerCpf')?.toString().replace(/[^0-9]/g, ''),
-        customerPhone: formData.get('customerPhone'),
-        amount: (pageQuery.data as any)?.price?.toString()
-      };
-      
+    mutationFn: async (data: any) => {
       const response = await fetch('/api/pix-payments', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -40,8 +33,38 @@ export default function CheckoutFinal() {
     },
     onSuccess: (payment: any) => {
       setPixPayment(payment);
+      setIsProcessingAutoPayment(false);
     },
+    onError: () => {
+      setIsProcessingAutoPayment(false);
+    }
   });
+
+  // Auto-process payment when skipForm is enabled and URL has query params
+  useEffect(() => {
+    if (pageQuery.data && (pageQuery.data as any).skipForm && !pixPayment && !isProcessingAutoPayment) {
+      const urlParams = new URLSearchParams(window.location.search);
+      const customerName = urlParams.get('name') || urlParams.get('customerName');
+      const customerEmail = urlParams.get('email') || urlParams.get('customerEmail');
+      const customerCpf = urlParams.get('cpf') || urlParams.get('customerCpf');
+      const customerPhone = urlParams.get('phone') || urlParams.get('customerPhone');
+
+      if (customerName && customerEmail && customerCpf) {
+        setIsProcessingAutoPayment(true);
+        
+        const data = {
+          paymentPageId: parseInt(params?.id || "0"),
+          customerName: customerName || '',
+          customerEmail: customerEmail || '',
+          customerCpf: customerCpf.replace(/[^0-9]/g, ''),
+          customerPhone: customerPhone || '',
+          amount: (pageQuery.data as any)?.price?.toString() || '0'
+        };
+        
+        createPaymentMutation.mutate(data);
+      }
+    }
+  }, [pageQuery.data, pixPayment, isProcessingAutoPayment]);
 
   // Timer countdown
   useEffect(() => {
@@ -80,7 +103,7 @@ export default function CheckoutFinal() {
     return `${minutes.toString().padStart(2, '0')}:${remainingSeconds.toString().padStart(2, '0')}`;
   };
 
-  if (pageQuery.isLoading) {
+  if (pageQuery.isLoading || isProcessingAutoPayment) {
     return <CheckoutLoading pageId={params?.id} />;
   }
 
@@ -98,7 +121,17 @@ export default function CheckoutFinal() {
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     const formData = new FormData(e.currentTarget);
-    createPaymentMutation.mutate(formData);
+    
+    const data = {
+      paymentPageId: parseInt(params?.id || "0"),
+      customerName: formData.get('customerName') || '',
+      customerEmail: formData.get('customerEmail') || '',
+      customerCpf: formData.get('customerCpf')?.toString().replace(/[^0-9]/g, '') || '',
+      customerPhone: formData.get('customerPhone') || '',
+      amount: page?.price?.toString() || '0'
+    };
+    
+    createPaymentMutation.mutate(data);
   };
 
   const handleCpfChange = (e: React.ChangeEvent<HTMLInputElement>) => {
