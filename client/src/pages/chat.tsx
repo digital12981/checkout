@@ -177,8 +177,12 @@ export default function Chat() {
 
       {/* Attendant Info */}
       <div 
-        className="text-gray-800 px-4 md:px-8 py-3"
-        style={{ backgroundColor: '#f3f4f6' }}
+        className="px-4 md:px-8 py-3"
+        style={{ 
+          backgroundColor: '#f3f4f6 !important',
+          background: '#f3f4f6 !important',
+          color: '#374151'
+        }}
       >
         <div className="max-w-7xl mx-auto">
           <div className="flex items-center w-full">
@@ -195,8 +199,8 @@ export default function Chat() {
               ></span>
             </div>
             <div className="flex-1">
-              <h2 className="text-gray-800 text-lg font-semibold">{attendantName}</h2>
-              <p className="text-gray-600 text-sm">Coordenadora de RH</p>
+              <h2 style={{ color: '#374151' }} className="text-lg font-semibold">{attendantName}</h2>
+              <p style={{ color: '#6b7280' }} className="text-sm">Coordenadora de RH</p>
             </div>
           </div>
         </div>
@@ -220,7 +224,7 @@ export default function Chat() {
                     position: 'relative',
                     display: 'flex',
                     flexDirection: 'column',
-                    marginLeft: message.type === 'attendant' ? '-10px' : 'auto',
+                    marginLeft: message.type === 'attendant' ? '-20px' : 'auto',
                     paddingLeft: message.type === 'attendant' ? '0px' : '0px'
                   }}
                 >
@@ -256,7 +260,7 @@ export default function Chat() {
                     position: 'relative',
                     display: 'flex',
                     flexDirection: 'column',
-                    marginLeft: '-10px',
+                    marginLeft: '-20px',
                     paddingLeft: '0px'
                   }}
                 >
@@ -280,7 +284,7 @@ export default function Chat() {
               {showResponseOptions && (
                 <div 
                   className="chat-options max-w-[75%] flex flex-col gap-3 mt-4 mb-5"
-                  style={{ marginLeft: '-10px', paddingLeft: '0px' }}
+                  style={{ marginLeft: '-20px', paddingLeft: '0px' }}
                 >
                   <button 
                     className="option-button w-full text-left px-5 py-4 rounded-lg font-medium text-gray-800 transition-all duration-200 transform hover:-translate-y-0.5 hover:shadow-lg"
@@ -312,7 +316,7 @@ export default function Chat() {
               {showPaymentOptions && (
                 <div 
                   className="chat-options max-w-[75%] flex flex-col gap-3 mt-4 mb-5"
-                  style={{ marginLeft: '-10px', paddingLeft: '0px' }}
+                  style={{ marginLeft: '-20px', paddingLeft: '0px' }}
                 >
                   <button 
                     className="option-button w-full text-left px-5 py-4 rounded-lg font-medium text-gray-800 transition-all duration-200 transform hover:-translate-y-0.5 hover:shadow-lg"
