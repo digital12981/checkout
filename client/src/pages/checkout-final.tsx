@@ -31,25 +31,8 @@ export default function CheckoutFinal() {
   const urlParams = new URLSearchParams(window.location.search);
   const fromChat = urlParams.get('fromChat');
 
-  // If chat is enabled and user didn't come from chat, show chat redirect message
-  if (page.chatEnabled && !fromChat) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-50">
-        <div className="max-w-md mx-auto text-center p-6 bg-white rounded-lg shadow-lg">
-          <h2 className="text-2xl font-bold text-gray-900 mb-4">Bem-vindo!</h2>
-          <p className="text-gray-600 mb-6">
-            Para uma melhor experiência, vamos iniciar com um chat rápido.
-          </p>
-          <button
-            onClick={() => setLocation(`/chat/${params?.id}`)}
-            className="w-full bg-blue-600 text-white py-3 px-6 rounded-lg hover:bg-blue-700 transition-colors"
-          >
-            Iniciar Chat
-          </button>
-        </div>
-      </div>
-    );
-  }
+  // Allow direct access to checkout regardless of chat setting
+  // The chat redirect is now optional - users can access checkout directly
 
   const createPaymentMutation = useMutation({
     mutationFn: async (data: any) => {
