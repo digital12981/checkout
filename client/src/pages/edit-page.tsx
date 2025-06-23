@@ -116,15 +116,6 @@ export default function EditPage() {
   const queryClient = useQueryClient();
   const [currentTab, setCurrentTab] = useState("config");
   const [previewTab, setPreviewTab] = useState("form");
-
-  // Update preview tab when chat is enabled/disabled
-  useEffect(() => {
-    if (form.watch("chatEnabled")) {
-      setPreviewTab("chat");
-    } else {
-      setPreviewTab("form");
-    }
-  }, [form.watch("chatEnabled")]);
   const [customElements, setCustomElements] = useState<CustomElement[]>([]);
   const [editingElement, setEditingElement] = useState<string | null>(null);
   const [capturedHTML, setCapturedHTML] = useState<string>("");
@@ -1178,7 +1169,7 @@ export default function EditPage() {
         <div className="w-[28rem] bg-gray-50 overflow-auto border-l">
           <Tabs value={previewTab} onValueChange={setPreviewTab} className="h-full">
             <TabsList className="m-4">
-              {form.watch("chatEnabled") ? (
+              {formData.chatEnabled ? (
                 <TabsTrigger value="chat">
                   <MessageCircle className="w-4 h-4 mr-2" />
                   Chat
@@ -1223,10 +1214,10 @@ export default function EditPage() {
                         <div className="flex items-center">
                           <div className="mr-4 relative">
                             <img 
-                              src={form.watch("chatProfilePhoto") || "https://i.ibb.co/BHcYZ8tf/assets-task-01jy21c21yewes4neft2x006sh-1750267829-img-1-11zon.webp"}
+                              src={formData.chatProfilePhoto || "https://i.ibb.co/BHcYZ8tf/assets-task-01jy21c21yewes4neft2x006sh-1750267829-img-1-11zon.webp"}
                               className="w-12 h-12 rounded-full object-cover border-2"
                               style={{ borderColor: formData.primaryColor || '#044785' }}
-                              alt={form.watch("chatAttendantName") || "Atendente"}
+                              alt={formData.chatAttendantName || "Atendente"}
                             />
                             <span 
                               className="absolute bottom-0 right-0 w-3 h-3 rounded-full border-2 border-white"
@@ -1235,7 +1226,7 @@ export default function EditPage() {
                           </div>
                           <div>
                             <h2 className="text-gray-800 text-lg font-semibold">
-                              {form.watch("chatAttendantName") || "Atendente"}
+                              {formData.chatAttendantName || "Atendente"}
                             </h2>
                             <p className="text-gray-600 text-sm">Coordenadora de RH</p>
                           </div>
@@ -1246,7 +1237,7 @@ export default function EditPage() {
                         {chatMessages.slice(0, 2).map((message, index) => (
                           <div key={index} className="flex items-start space-x-3">
                             <img 
-                              src={form.watch("chatProfilePhoto") || "https://i.ibb.co/BHcYZ8tf/assets-task-01jy21c21yewes4neft2x006sh-1750267829-img-1-11zon.webp"}
+                              src={formData.chatProfilePhoto || "https://i.ibb.co/BHcYZ8tf/assets-task-01jy21c21yewes4neft2x006sh-1750267829-img-1-11zon.webp"}
                               className="w-10 h-10 rounded-full object-cover flex-shrink-0"
                               alt="Atendente"
                             />
