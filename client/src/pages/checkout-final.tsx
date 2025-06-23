@@ -20,19 +20,18 @@ export default function CheckoutFinal() {
   const [, setLocation] = useLocation();
   const redirectedRef = useRef(false);
 
-  // Redirect to chat if enabled and not coming from chat
+  // Handle redirect once when data loads
   useEffect(() => {
-    if (pageQuery.isLoading || redirectedRef.current) return;
+    if (!pageQuery.data || pageQuery.isLoading || redirectedRef.current) return;
     
     const page = pageQuery.data as any;
-    const urlParams = new URLSearchParams(window.location.search);
-    const fromChat = urlParams.get('fromChat');
+    const fromChat = new URLSearchParams(window.location.search).get('fromChat');
     
-    if (page?.chatEnabled && !fromChat) {
+    if (page.chatEnabled && !fromChat) {
       redirectedRef.current = true;
       setLocation(`/chat/${params?.id}`);
     }
-  }, [pageQuery.data, pageQuery.isLoading, params?.id]);
+  }, [pageQuery.data, pageQuery.isLoading]);
 
   const createPaymentMutation = useMutation({
     mutationFn: async (data: any) => {
