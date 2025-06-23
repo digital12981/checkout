@@ -17,23 +17,6 @@ export default function CheckoutFinal() {
     enabled: !!params?.id,
   });
 
-  // Show loading if data is still loading
-  if (pageQuery.isLoading) {
-    return <CheckoutLoading pageId={params?.id} />;
-  }
-
-  // If no data found, redirect to home
-  if (!pageQuery.data) {
-    return <div>Página não encontrada</div>;
-  }
-
-  const page = pageQuery.data as any;
-  const urlParams = new URLSearchParams(window.location.search);
-  const fromChat = urlParams.get('fromChat');
-
-  // Allow direct access to checkout regardless of chat setting
-  // The chat redirect is now optional - users can access checkout directly
-
   const createPaymentMutation = useMutation({
     mutationFn: async (data: any) => {
       const response = await fetch('/api/pix-payments', {
@@ -120,6 +103,7 @@ export default function CheckoutFinal() {
     return `${minutes.toString().padStart(2, '0')}:${remainingSeconds.toString().padStart(2, '0')}`;
   };
 
+  // Early returns after all hooks have been called
   if (pageQuery.isLoading || isProcessingAutoPayment) {
     return <CheckoutLoading pageId={params?.id} />;
   }
@@ -128,6 +112,7 @@ export default function CheckoutFinal() {
     return <div className="min-h-screen flex items-center justify-center">Página não encontrada</div>;
   }
 
+  const page = pageQuery.data as any;
   console.log("Loading page data:", page);
   console.log("Loaded custom elements:", page.customElements ? JSON.parse(page.customElements) : []);
 
