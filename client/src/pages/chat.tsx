@@ -39,30 +39,33 @@ export default function Chat() {
 
   useEffect(() => {
     if (!page?.chatEnabled || chatMessages.length === 0) {
-      // If chat is disabled or no messages, redirect to checkout
       setLocation(`/checkout/${id}`);
       return;
     }
 
-    // Start the chat sequence
+    // Only proceed if we haven't finished all messages and user hasn't responded
     if (currentMessageIndex < chatMessages.length && !userResponded) {
       const currentMessage = chatMessages[currentMessageIndex];
       const timer = setTimeout(() => {
         setIsTyping(true);
         
-        // Show typing indicator for a short time, then show message
         setTimeout(() => {
           setIsTyping(false);
-          setMessages(prev => [...prev, currentMessage]);
+          setMessages(prev => {
+            // Prevent duplicate messages by checking if this message already exists
+            const messageExists = prev.some(msg => msg.content === currentMessage.content);
+            if (messageExists) return prev;
+            return [...prev, currentMessage];
+          });
           setCurrentMessageIndex(prev => prev + 1);
           
-          // Check if this is the last message, show options
+          // Show options after last message
           if (currentMessageIndex === chatMessages.length - 1) {
             setTimeout(() => {
               setShowResponseOptions(true);
             }, 1000);
           }
-        }, 2000); // Fixed 2 second typing time
+        }, 2000);
       }, currentMessageIndex === 0 ? 1000 : currentMessage.delay);
 
       return () => clearTimeout(timer);
