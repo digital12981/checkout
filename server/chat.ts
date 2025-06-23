@@ -25,19 +25,24 @@ export async function processMessagesWithAI(
     Produto: ${productName}
     Preço: R$ ${price}
     
-    IMPORTANTE: Mantenha sempre estas ${defaultMessages.length} mensagens na estrutura. Apenas altere o CONTEÚDO (field "content").
+    IMPORTANTE: Mantenha exatamente ${defaultMessages.length} mensagens. Apenas altere o CONTEÚDO (field "content").
     
     Diretrizes para o conteúdo:
-    - Use técnicas de persuasão e urgência quando apropriado
+    - Use técnicas de persuasão e urgência
     - Mantenha um tom profissional mas amigável
-    - Inclua gatilhos de escassez e autoridade quando relevante
+    - Inclua gatilhos de escassez e autoridade
     - As mensagens devem conduzir naturalmente ao pagamento
     - Personalize para o produto específico
     
-    Responda APENAS com um objeto JSON no formato:
-    {"messages": [{"type": "attendant", "content": "nova mensagem", "delay": 3000}, ...]}
+    Responda APENAS com um JSON válido no formato exato:
+    {
+      "messages": [
+        {"type": "attendant", "content": "primeira mensagem melhorada", "delay": 3000},
+        {"type": "attendant", "content": "segunda mensagem melhorada", "delay": 8000}
+      ]
+    }
     
-    Use os delays originais das mensagens base.`;
+    Use os delays originais das mensagens base. Não adicione comentários ou texto extra.`;
 
     const userPrompt = `${prompt}
 
