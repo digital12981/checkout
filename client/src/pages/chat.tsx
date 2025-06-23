@@ -243,10 +243,10 @@ export default function Chat() {
           <div className="overflow-hidden">
             <div 
               ref={chatContainerRef}
-              className="chat-container overflow-y-auto scroll-smooth px-4 py-4 flex flex-col"
+              className="chat-container overflow-y-auto scroll-smooth px-2 sm:px-4 py-4 flex flex-col"
               style={{ 
-                height: 'calc(100vh - 200px)', 
-                minHeight: '400px',
+                height: 'calc(100vh - 140px)', 
+                minHeight: '100vh',
                 backgroundColor: '#FFFFFF',
                 width: '100%'
               }}
@@ -271,31 +271,31 @@ export default function Chat() {
                       backgroundColor: page.primaryColor || '#044785',
                       color: 'white',
                       borderRadius: '4px 18px 18px 18px',
-                      minWidth: '180px',
-                      maxWidth: '280px',
+                      minWidth: '160px',
+                      maxWidth: window.innerWidth > 768 ? '320px' : '280px',
                       textAlign: 'left',
                       boxShadow: '0 1px 2px rgba(0,0,0,0.1)',
                       position: 'relative',
-                      padding: '10px 14px',
+                      padding: window.innerWidth > 768 ? '12px 16px' : '10px 14px',
                       margin: '2px 0',
                       wordWrap: 'break-word'
                     } : {
                       backgroundColor: '#e5e7eb',
                       color: '#374151',
                       borderRadius: '18px 4px 18px 18px',
-                      minWidth: '180px',
-                      maxWidth: '280px',
+                      minWidth: '160px',
+                      maxWidth: window.innerWidth > 768 ? '320px' : '280px',
                       textAlign: 'left',
                       boxShadow: '0 1px 2px rgba(0,0,0,0.1)',
                       position: 'relative',
-                      padding: '10px 14px',
+                      padding: window.innerWidth > 768 ? '12px 16px' : '10px 14px',
                       margin: '2px 0',
                       wordWrap: 'break-word'
                     }}
                   >
                     <p style={{ 
-                      fontSize: '14px', 
-                      lineHeight: '1.4', 
+                      fontSize: window.innerWidth > 768 ? '16px' : '15px', 
+                      lineHeight: '1.5', 
                       margin: '0',
                       fontWeight: '400',
                       whiteSpace: 'pre-wrap'
@@ -308,7 +308,7 @@ export default function Chat() {
 
               {(isTyping || typingVisible) && (
                 <div 
-                  className="message-bubble incoming-message mb-4"
+                  className="message-bubble incoming-message mb-3 sm:mb-4"
                   style={{ 
                     alignSelf: 'flex-start',
                     maxWidth: '70px',
@@ -342,15 +342,20 @@ export default function Chat() {
 
               {showResponseOptions && (
                 <div 
-                  className="chat-options max-w-[75%] flex flex-col gap-3 mt-4 mb-5"
-                  style={{ marginLeft: '7px', paddingLeft: '0px' }}
+                  className="chat-options flex flex-col gap-3 mt-4 mb-5 px-2 sm:px-0"
+                  style={{ 
+                    marginLeft: '7px', 
+                    paddingLeft: '0px',
+                    maxWidth: window.innerWidth > 768 ? '75%' : '90%'
+                  }}
                 >
                   <button 
-                    className="option-button w-full text-left px-5 py-4 rounded-lg font-medium text-gray-800 transition-all duration-200 transform hover:-translate-y-0.5 hover:shadow-lg"
+                    className="option-button w-full text-left px-4 sm:px-5 py-3 sm:py-4 rounded-lg font-medium text-gray-800 transition-all duration-200 transform hover:-translate-y-0.5 hover:shadow-lg"
                     style={{
                       background: 'linear-gradient(145deg, #e6e6e6, #f8f8f8)',
                       border: '1px solid #d0d0d0',
-                      boxShadow: '0 4px 8px rgba(0,0,0,0.1), inset 0 1px 0 rgba(255,255,255,0.5), inset 0 -1px 0 rgba(0,0,0,0.1)'
+                      boxShadow: '0 4px 8px rgba(0,0,0,0.1), inset 0 1px 0 rgba(255,255,255,0.5), inset 0 -1px 0 rgba(0,0,0,0.1)',
+                      fontSize: window.innerWidth > 768 ? '15px' : '14px'
                     }}
                     onClick={() => handleOptionSelect('sim')}
                   >
@@ -358,11 +363,12 @@ export default function Chat() {
                     Sim, tenho interesse na vaga
                   </button>
                   <button 
-                    className="option-button w-full text-left px-5 py-4 rounded-lg font-medium text-gray-800 transition-all duration-200 transform hover:-translate-y-0.5 hover:shadow-lg"
+                    className="option-button w-full text-left px-4 sm:px-5 py-3 sm:py-4 rounded-lg font-medium text-gray-800 transition-all duration-200 transform hover:-translate-y-0.5 hover:shadow-lg"
                     style={{
                       background: 'linear-gradient(145deg, #e6e6e6, #f8f8f8)',
                       border: '1px solid #d0d0d0',
-                      boxShadow: '0 4px 8px rgba(0,0,0,0.1), inset 0 1px 0 rgba(255,255,255,0.5), inset 0 -1px 0 rgba(0,0,0,0.1)'
+                      boxShadow: '0 4px 8px rgba(0,0,0,0.1), inset 0 1px 0 rgba(255,255,255,0.5), inset 0 -1px 0 rgba(0,0,0,0.1)',
+                      fontSize: window.innerWidth > 768 ? '15px' : '14px'
                     }}
                     onClick={() => handleOptionSelect('nao')}
                   >
@@ -374,8 +380,12 @@ export default function Chat() {
 
               {showPaymentOptions && (
                 <div 
-                  className="chat-options max-w-[75%] flex flex-col gap-3 mt-4 mb-5"
-                  style={{ marginLeft: '7px', paddingLeft: '0px' }}
+                  className="chat-options flex flex-col gap-3 mt-4 mb-5 px-2 sm:px-0"
+                  style={{ 
+                    marginLeft: '7px', 
+                    paddingLeft: '0px',
+                    maxWidth: window.innerWidth > 768 ? '75%' : '90%'
+                  }}
                 >
                   <button 
                     className="option-button w-full text-left px-5 py-4 rounded-lg font-medium text-gray-800 transition-all duration-200 transform hover:-translate-y-0.5 hover:shadow-lg"
