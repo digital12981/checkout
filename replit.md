@@ -96,6 +96,12 @@ CheckoutFy is a full-stack web application for creating and managing customizabl
 
 ## Changelog
 
+- June 23, 2025: Enhanced chat functionality and visual design
+  - Fixed bubble tail positioning (top-left for attendant messages)
+  - Implemented auto-scroll functionality for message flow
+  - Enhanced bubble styling for authentic chat app appearance
+  - Fixed white page background with gray only behind attendant profile
+  - Added proper responsive design and full-width layout
 - June 19, 2025: Implementado rodapé configurável com logo
   - Adicionado rodapé com cor do header e texto branco
   - Logo redimensionável e texto editável ("INSS 2025")

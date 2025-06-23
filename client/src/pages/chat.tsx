@@ -25,6 +25,7 @@ export default function Chat() {
   const [isTyping, setIsTyping] = useState(false);
   const [showResponseOptions, setShowResponseOptions] = useState(false);
   const [showPaymentOptions, setShowPaymentOptions] = useState(false);
+  const [typingVisible, setTypingVisible] = useState(false);
   const chatContainerRef = useRef<HTMLDivElement>(null);
   const [showProceedButton, setShowProceedButton] = useState(false);
   const [userResponded, setUserResponded] = useState(false);
@@ -305,7 +306,7 @@ export default function Chat() {
                 </div>
               ))}
 
-              {isTyping && (
+              {(isTyping || typingVisible) && (
                 <div 
                   className="message-bubble incoming-message mb-4"
                   style={{ 
