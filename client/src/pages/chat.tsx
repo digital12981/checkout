@@ -50,6 +50,8 @@ export default function Chat() {
       const currentMessage = chatMessages[currentMessageIndex];
       const timer = setTimeout(() => {
         setIsTyping(true);
+        // Scroll when typing starts
+        setTimeout(() => scrollToBottom(true), 100);
         
         setTimeout(() => {
           setIsTyping(false);
@@ -61,10 +63,15 @@ export default function Chat() {
           });
           setCurrentMessageIndex(prev => prev + 1);
           
+          // Scroll after message appears
+          setTimeout(() => scrollToBottom(true), 100);
+          
           // Show options after last message
           if (currentMessageIndex === chatMessages.length - 1) {
             setTimeout(() => {
               setShowResponseOptions(true);
+              // Scroll after options appear
+              setTimeout(() => scrollToBottom(true), 200);
             }, 1000);
           }
         }, 2000);
@@ -90,6 +97,8 @@ export default function Chat() {
     };
     
     setMessages(prev => [...prev, userMessage]);
+    // Scroll after user message
+    setTimeout(() => scrollToBottom(true), 100);
     
     // Handle different responses
     if (option === 'sim') {
@@ -166,28 +175,33 @@ export default function Chat() {
     }
   };
 
-  // Auto-scroll when messages change
+  // Auto-scroll when messages change with improved timing
   useEffect(() => {
     const timeoutId = setTimeout(() => {
       scrollToBottom(true);
-    }, 200);
+    }, 300);
     return () => clearTimeout(timeoutId);
   }, [messages]);
 
-  // Separate effect for UI state changes
+  // Scroll for UI state changes
   useEffect(() => {
-    const timeoutId = setTimeout(() => {
-      scrollToBottom(true);
-    }, 100);
-    return () => clearTimeout(timeoutId);
-  }, [showResponseOptions, showPaymentOptions, typingVisible, isTyping]);
-
-  // Scroll immediately when new content appears
-  useEffect(() => {
-    if (messages.length > 0) {
-      scrollToBottom(false);
+    if (showResponseOptions || showPaymentOptions || showProceedButton) {
+      const timeoutId = setTimeout(() => {
+        scrollToBottom(true);
+      }, 200);
+      return () => clearTimeout(timeoutId);
     }
-  }, [messages.length]);
+  }, [showResponseOptions, showPaymentOptions, showProceedButton]);
+
+  // Scroll when typing indicator appears
+  useEffect(() => {
+    if (isTyping) {
+      const timeoutId = setTimeout(() => {
+        scrollToBottom(true);
+      }, 150);
+      return () => clearTimeout(timeoutId);
+    }
+  }, [isTyping]);
 
   if (isLoading) {
     return (
