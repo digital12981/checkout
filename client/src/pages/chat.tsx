@@ -50,8 +50,8 @@ export default function Chat() {
       const currentMessage = chatMessages[currentMessageIndex];
       const timer = setTimeout(() => {
         setIsTyping(true);
-        // Scroll when typing starts
-        setTimeout(() => scrollToBottom(true), 100);
+        // Force scroll when typing starts
+        scrollToBottom(false, true);
         
         setTimeout(() => {
           setIsTyping(false);
@@ -63,19 +63,19 @@ export default function Chat() {
           });
           setCurrentMessageIndex(prev => prev + 1);
           
-          // Multiple scroll attempts to ensure message visibility
-          setTimeout(() => scrollToBottom(true), 50);
-          setTimeout(() => scrollToBottom(true), 200);
-          setTimeout(() => scrollToBottom(true), 400);
+          // Force scroll after message appears
+          scrollToBottom(false, true);
+          setTimeout(() => scrollToBottom(true, true), 100);
+          setTimeout(() => scrollToBottom(true, true), 300);
           
           // Show options after last message
           if (currentMessageIndex === chatMessages.length - 1) {
             setTimeout(() => {
               setShowResponseOptions(true);
-              // Multiple scroll attempts for options
-              setTimeout(() => scrollToBottom(true), 100);
-              setTimeout(() => scrollToBottom(true), 300);
-              setTimeout(() => scrollToBottom(true), 500);
+              // Force scroll for options
+              scrollToBottom(false, true);
+              setTimeout(() => scrollToBottom(true, true), 200);
+              setTimeout(() => scrollToBottom(true, true), 400);
             }, 1000);
           }
         }, 2000);
@@ -101,9 +101,9 @@ export default function Chat() {
     };
     
     setMessages(prev => [...prev, userMessage]);
-    // Ensure user message is visible
-    setTimeout(() => scrollToBottom(true), 50);
-    setTimeout(() => scrollToBottom(true), 200);
+    // Force scroll for user message
+    scrollToBottom(false, true);
+    setTimeout(() => scrollToBottom(true, true), 100);
     
     // Handle different responses
     if (option === 'sim') {
@@ -170,58 +170,74 @@ export default function Chat() {
     setLocation(`/checkout/${id}`);
   };
 
-  // Auto-scroll function with offset for better readability
-  const scrollToBottom = (smooth = true) => {
+  // Enhanced scroll function to ensure all content is visible
+  const scrollToBottom = (smooth = true, force = false) => {
     if (chatContainerRef.current) {
       const container = chatContainerRef.current;
-      const offset = window.innerWidth > 768 ? 40 : 30; // Smaller offset to ensure content is visible
       
-      // Use requestAnimationFrame to ensure DOM has updated
-      requestAnimationFrame(() => {
-        const maxScroll = container.scrollHeight - container.clientHeight;
-        const targetScroll = Math.max(0, maxScroll - offset);
+      // Use multiple approaches to ensure scrolling works
+      const doScroll = () => {
+        // Method 1: Scroll to bottom with small offset
+        const scrollHeight = container.scrollHeight;
+        const clientHeight = container.clientHeight;
+        const offset = 20; // Small offset for breathing room
+        const targetTop = Math.max(0, scrollHeight - clientHeight - offset);
         
         container.scrollTo({
-          top: targetScroll,
+          top: targetTop,
           behavior: smooth ? 'smooth' : 'auto'
         });
-      });
+        
+        // Method 2: Backup scroll to absolute bottom if needed
+        if (force) {
+          setTimeout(() => {
+            container.scrollTop = container.scrollHeight;
+          }, 100);
+        }
+      };
+      
+      // Execute immediately and with requestAnimationFrame
+      doScroll();
+      requestAnimationFrame(doScroll);
+      
+      // Additional backup
+      setTimeout(doScroll, 50);
     }
   };
 
-  // Auto-scroll when messages change
+  // Comprehensive auto-scroll system
   useEffect(() => {
-    const timeoutId = setTimeout(() => {
-      scrollToBottom(true);
-    }, 100);
-    return () => clearTimeout(timeoutId);
+    // Force scroll when messages change
+    scrollToBottom(true, true);
+    
+    // Additional scrolls with different timing
+    const timeouts = [
+      setTimeout(() => scrollToBottom(true, false), 100),
+      setTimeout(() => scrollToBottom(true, false), 300),
+      setTimeout(() => scrollToBottom(true, true), 500),
+      setTimeout(() => scrollToBottom(false, true), 800) // Final force scroll
+    ];
+    
+    return () => timeouts.forEach(clearTimeout);
   }, [messages]);
 
-  // Additional scroll for when content length changes
+  // Scroll for UI elements appearing
   useEffect(() => {
-    const timeoutId = setTimeout(() => {
-      scrollToBottom(true);
-    }, 500); // Longer delay to ensure content has rendered
-    return () => clearTimeout(timeoutId);
-  }, [messages.length]);
-
-  // Scroll for UI state changes
-  useEffect(() => {
-    if (showResponseOptions || showPaymentOptions || showProceedButton) {
-      // Multiple scroll attempts to ensure visibility
-      setTimeout(() => scrollToBottom(true), 100);
-      setTimeout(() => scrollToBottom(true), 300);
-      setTimeout(() => scrollToBottom(true), 600);
+    if (showResponseOptions || showPaymentOptions || showProceedButton || isTyping) {
+      // Immediate scroll
+      scrollToBottom(false, true);
+      
+      // Follow-up scrolls
+      const timeouts = [
+        setTimeout(() => scrollToBottom(true, false), 100),
+        setTimeout(() => scrollToBottom(true, true), 300),
+        setTimeout(() => scrollToBottom(true, true), 600),
+        setTimeout(() => scrollToBottom(false, true), 1000) // Final force
+      ];
+      
+      return () => timeouts.forEach(clearTimeout);
     }
-  }, [showResponseOptions, showPaymentOptions, showProceedButton]);
-
-  // Scroll when typing indicator appears/disappears
-  useEffect(() => {
-    const timeoutId = setTimeout(() => {
-      scrollToBottom(true);
-    }, 100);
-    return () => clearTimeout(timeoutId);
-  }, [isTyping]);
+  }, [showResponseOptions, showPaymentOptions, showProceedButton, isTyping]);
 
   if (isLoading) {
     return (
