@@ -14,11 +14,15 @@ export default function Chat() {
   const [, setLocation] = useLocation();
   const id = params?.id;
 
+  console.log('Chat component loaded with ID:', id);
+
   const { data: page, isLoading } = useQuery({
     queryKey: ['/api/payment-pages', id],
     queryFn: getQueryFn({ on401: 'returnNull' }),
     enabled: !!id,
   });
+
+  console.log('Page data in chat:', page);
 
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [isTyping, setIsTyping] = useState(false);
@@ -147,7 +151,12 @@ export default function Chat() {
     );
   }
 
-  if (!page || !page.chatEnabled) {
+  if (!page) {
+    return <div>Página não encontrada</div>;
+  }
+
+  // If chat is disabled, redirect to checkout
+  if (!page.chatEnabled) {
     setLocation(`/checkout/${id}`);
     return null;
   }
