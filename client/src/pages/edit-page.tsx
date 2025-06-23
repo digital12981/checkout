@@ -208,6 +208,10 @@ export default function EditPage() {
         footerText: pageData.footerText || "INSS 2025",
         showFooterLogo: pageData.showFooterLogo ?? true,
         footerLogoSize: pageData.footerLogoSize || 48,
+        chatEnabled: pageData.chatEnabled || false,
+        chatProfilePhoto: pageData.chatProfilePhoto || "",
+        chatAttendantName: pageData.chatAttendantName || "",
+        chatMessages: pageData.chatMessages || "",
       });
 
       try {
