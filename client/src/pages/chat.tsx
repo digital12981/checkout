@@ -158,7 +158,7 @@ export default function Chat() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-100">
+    <div className="min-h-screen" style={{ backgroundColor: '#FFFFFF' }}>
       {/* Brand Header */}
       <div 
         className="py-3"
