@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useParams, useLocation } from "wouter";
 import { useQuery } from "@tanstack/react-query";
 import type { PaymentPage } from "@shared/schema";
@@ -25,6 +25,7 @@ export default function Chat() {
   const [isTyping, setIsTyping] = useState(false);
   const [showResponseOptions, setShowResponseOptions] = useState(false);
   const [showPaymentOptions, setShowPaymentOptions] = useState(false);
+  const chatContainerRef = useRef<HTMLDivElement>(null);
   const [showProceedButton, setShowProceedButton] = useState(false);
   const [userResponded, setUserResponded] = useState(false);
 
@@ -141,6 +142,21 @@ export default function Chat() {
     setLocation(`/checkout/${id}`);
   };
 
+  // Auto-scroll function
+  const scrollToBottom = () => {
+    if (chatContainerRef.current) {
+      chatContainerRef.current.scrollTop = chatContainerRef.current.scrollHeight;
+    }
+  };
+
+  // Auto-scroll when messages change
+  useEffect(() => {
+    const timeoutId = setTimeout(() => {
+      scrollToBottom();
+    }, 100);
+    return () => clearTimeout(timeoutId);
+  }, [messages, showResponseOptions, showPaymentOptions, typingVisible]);
+
   if (isLoading) {
     return (
       <div className="min-h-screen bg-gray-100 flex items-center justify-center">
@@ -225,6 +241,7 @@ export default function Chat() {
         <div className="w-full">
           <div className="overflow-hidden">
             <div 
+              ref={chatContainerRef}
               className="chat-container overflow-y-auto scroll-smooth px-4 py-4 flex flex-col"
               style={{ 
                 height: 'calc(100vh - 200px)', 
@@ -252,7 +269,7 @@ export default function Chat() {
                     style={message.type === 'attendant' ? {
                       backgroundColor: page.primaryColor || '#044785',
                       color: 'white',
-                      borderRadius: '18px 18px 18px 4px',
+                      borderRadius: '4px 18px 18px 18px',
                       minWidth: '180px',
                       maxWidth: '280px',
                       textAlign: 'left',
@@ -264,7 +281,7 @@ export default function Chat() {
                     } : {
                       backgroundColor: '#e5e7eb',
                       color: '#374151',
-                      borderRadius: '18px 18px 4px 18px',
+                      borderRadius: '18px 4px 18px 18px',
                       minWidth: '180px',
                       maxWidth: '280px',
                       textAlign: 'left',
@@ -305,7 +322,7 @@ export default function Chat() {
                     className="message-content"
                     style={{
                       backgroundColor: page.primaryColor || '#044785',
-                      borderRadius: '18px 18px 18px 4px',
+                      borderRadius: '4px 18px 18px 18px',
                       minWidth: '60px',
                       maxWidth: '80px',
                       boxShadow: '0 1px 2px rgba(0,0,0,0.1)',
