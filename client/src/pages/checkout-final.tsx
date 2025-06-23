@@ -25,10 +25,10 @@ export default function CheckoutFinal() {
     const urlParams = new URLSearchParams(window.location.search);
     const fromChat = urlParams.get('fromChat');
     
-    if (page?.chatEnabled && !fromChat) {
+    if (page?.chatEnabled && !fromChat && !pageQuery.isLoading) {
       setLocation(`/chat/${params?.id}`);
     }
-  }, [pageQuery.data, params?.id, setLocation]);
+  }, [pageQuery.data?.chatEnabled, params?.id, pageQuery.isLoading]);
 
   const createPaymentMutation = useMutation({
     mutationFn: async (data: any) => {

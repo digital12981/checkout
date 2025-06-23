@@ -96,14 +96,14 @@ CheckoutFy is a full-stack web application for creating and managing customizabl
 
 ## Changelog
 
-- June 23, 2025: Enhanced chat functionality and visual design
-  - Fixed bubble tail positioning (top-left for attendant messages)
-  - Implemented auto-scroll functionality with proper offset for readability
-  - Enhanced bubble styling for authentic chat app appearance
-  - Fixed white page background with gray only behind attendant profile
-  - Added proper responsive design and full-width layout
-  - Improved scroll behavior to keep messages above bottom edge
-  - Increased font sizes for better mobile and desktop readability
+- June 23, 2025: Fixed chat scroll and mobile responsiveness
+  - Completely rebuilt chat component using working HTML template structure
+  - Fixed infinite loop error in checkout component with proper URL parameter handling
+  - Implemented authentic message bubbles with proper positioning and styling
+  - Added working typing animation with CSS keyframes
+  - Fixed viewport and mobile responsiveness with proper height calculations
+  - Simplified scroll function to match working HTML example pattern
+  - Enhanced chat visual design with gradient headers and professional styling
 - June 19, 2025: Implementado rodapé configurável com logo
   - Adicionado rodapé com cor do header e texto branco
   - Logo redimensionável e texto editável ("INSS 2025")

@@ -136,7 +136,7 @@ export default function Chat() {
   };
 
   const handleProceedToPayment = () => {
-    setLocation(`/checkout/${id}`);
+    setLocation(`/checkout/${id}?fromChat=true`);
   };
 
   if (isLoading) {
