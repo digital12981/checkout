@@ -176,7 +176,10 @@ export default function Chat() {
       </div>
 
       {/* Attendant Info */}
-      <div className="bg-gray-100 text-gray-800 px-4 md:px-8 py-3">
+      <div 
+        className="text-gray-800 px-4 md:px-8 py-3"
+        style={{ backgroundColor: '#f3f4f6' }}
+      >
         <div className="max-w-7xl mx-auto">
           <div className="flex items-center w-full">
             <div className="mr-4 relative">
@@ -216,7 +219,9 @@ export default function Chat() {
                     maxWidth: '75%',
                     position: 'relative',
                     display: 'flex',
-                    flexDirection: 'column'
+                    flexDirection: 'column',
+                    marginLeft: message.type === 'attendant' ? '-10px' : 'auto',
+                    paddingLeft: message.type === 'attendant' ? '0px' : '0px'
                   }}
                 >
                   <div 
@@ -250,7 +255,9 @@ export default function Chat() {
                     maxWidth: '70px',
                     position: 'relative',
                     display: 'flex',
-                    flexDirection: 'column'
+                    flexDirection: 'column',
+                    marginLeft: '-10px',
+                    paddingLeft: '0px'
                   }}
                 >
                   <div 
@@ -271,7 +278,10 @@ export default function Chat() {
               )}
 
               {showResponseOptions && (
-                <div className="chat-options max-w-[75%] flex flex-col gap-3 mt-4 mb-5">
+                <div 
+                  className="chat-options max-w-[75%] flex flex-col gap-3 mt-4 mb-5"
+                  style={{ marginLeft: '-10px', paddingLeft: '0px' }}
+                >
                   <button 
                     className="option-button w-full text-left px-5 py-4 rounded-lg font-medium text-gray-800 transition-all duration-200 transform hover:-translate-y-0.5 hover:shadow-lg"
                     style={{
@@ -300,7 +310,10 @@ export default function Chat() {
               )}
 
               {showPaymentOptions && (
-                <div className="chat-options max-w-[75%] flex flex-col gap-3 mt-4 mb-5">
+                <div 
+                  className="chat-options max-w-[75%] flex flex-col gap-3 mt-4 mb-5"
+                  style={{ marginLeft: '-10px', paddingLeft: '0px' }}
+                >
                   <button 
                     className="option-button w-full text-left px-5 py-4 rounded-lg font-medium text-gray-800 transition-all duration-200 transform hover:-translate-y-0.5 hover:shadow-lg"
                     style={{
