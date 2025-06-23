@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect } from "react";
 import { useRoute, useLocation } from "wouter";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { formatCpf, formatPhone } from "@/lib/utils";
@@ -7,7 +7,7 @@ import CheckoutLoading from "@/components/checkout-loading";
 
 export default function CheckoutFinal() {
   const [, params] = useRoute("/checkout/:id");
-  const [, setLocation] = useLocation();
+  const [location] = useLocation();
   const [pixPayment, setPixPayment] = useState<any>(null);
   const [timeLeft, setTimeLeft] = useState(15 * 60);
   const [isProcessingAutoPayment, setIsProcessingAutoPayment] = useState(false);
@@ -16,6 +16,19 @@ export default function CheckoutFinal() {
     queryKey: [`/api/payment-pages/${params?.id}`],
     enabled: !!params?.id,
   });
+
+  const [, setLocation] = useLocation();
+
+  // Redirect to chat if enabled and not coming from chat
+  useEffect(() => {
+    const page = pageQuery.data as any;
+    const urlParams = new URLSearchParams(window.location.search);
+    const fromChat = urlParams.get('fromChat');
+    
+    if (page?.chatEnabled && !fromChat) {
+      setLocation(`/chat/${params?.id}`);
+    }
+  }, [pageQuery.data, params?.id, setLocation]);
 
   const createPaymentMutation = useMutation({
     mutationFn: async (data: any) => {
@@ -103,7 +116,6 @@ export default function CheckoutFinal() {
     return `${minutes.toString().padStart(2, '0')}:${remainingSeconds.toString().padStart(2, '0')}`;
   };
 
-  // Early returns after all hooks have been called
   if (pageQuery.isLoading || isProcessingAutoPayment) {
     return <CheckoutLoading pageId={params?.id} />;
   }
@@ -113,29 +125,6 @@ export default function CheckoutFinal() {
   }
 
   const page = pageQuery.data as any;
-  const urlParams = new URLSearchParams(window.location.search);
-  const fromChat = urlParams.get('fromChat');
-  
-  // If chat is enabled and user didn't come from chat, redirect to chat
-  if (page.chatEnabled && !fromChat) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-50">
-        <div className="max-w-md mx-auto text-center p-6 bg-white rounded-lg shadow-lg">
-          <h2 className="text-2xl font-bold text-gray-900 mb-4">Bem-vindo!</h2>
-          <p className="text-gray-600 mb-6">
-            Para uma melhor experiência, vamos iniciar com um chat rápido.
-          </p>
-          <button
-            onClick={() => setLocation(`/chat/${params?.id}`)}
-            className="w-full bg-blue-600 text-white py-3 px-6 rounded-lg hover:bg-blue-700 transition-colors"
-          >
-            Iniciar Chat
-          </button>
-        </div>
-      </div>
-    );
-  }
-  
   console.log("Loading page data:", page);
   console.log("Loaded custom elements:", page.customElements ? JSON.parse(page.customElements) : []);
 
