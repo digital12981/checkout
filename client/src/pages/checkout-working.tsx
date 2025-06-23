@@ -37,11 +37,7 @@ export default function CheckoutWorking() {
   const page = pageQuery.data;
 
   if (pageQuery.isLoading) {
-    return <CheckoutLoading 
-      logoUrl={pageQuery.data?.logoUrl} 
-      primaryColor={pageQuery.data?.primaryColor}
-      logoSize={pageQuery.data?.logoSize}
-    />;
+    return <CheckoutLoading pageId={params?.id} />;
   }
 
   if (!page) {

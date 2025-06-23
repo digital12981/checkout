@@ -81,11 +81,7 @@ export default function CheckoutFinal() {
   };
 
   if (pageQuery.isLoading) {
-    return <CheckoutLoading 
-      logoUrl={pageQuery.data?.logoUrl} 
-      primaryColor={pageQuery.data?.primaryColor}
-      logoSize={pageQuery.data?.logoSize}
-    />;
+    return <CheckoutLoading pageId={params?.id} />;
   }
 
   if (!pageQuery.data) {
