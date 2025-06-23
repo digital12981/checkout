@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useRoute, useLocation } from "wouter";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { formatCpf, formatPhone } from "@/lib/utils";
@@ -18,17 +18,21 @@ export default function CheckoutFinal() {
   });
 
   const [, setLocation] = useLocation();
+  const redirectedRef = useRef(false);
 
   // Redirect to chat if enabled and not coming from chat
   useEffect(() => {
+    if (pageQuery.isLoading || redirectedRef.current) return;
+    
     const page = pageQuery.data as any;
     const urlParams = new URLSearchParams(window.location.search);
     const fromChat = urlParams.get('fromChat');
     
-    if (page?.chatEnabled && !fromChat && !pageQuery.isLoading) {
+    if (page?.chatEnabled && !fromChat) {
+      redirectedRef.current = true;
       setLocation(`/chat/${params?.id}`);
     }
-  }, [pageQuery.data?.chatEnabled, params?.id, pageQuery.isLoading]);
+  }, [pageQuery.data, pageQuery.isLoading, params?.id]);
 
   const createPaymentMutation = useMutation({
     mutationFn: async (data: any) => {
