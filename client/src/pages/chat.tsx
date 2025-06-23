@@ -177,30 +177,44 @@ export default function Chat() {
 
       {/* Attendant Info */}
       <div 
-        className="px-4 md:px-8 py-3"
         style={{ 
-          backgroundColor: '#f3f4f6 !important',
-          background: '#f3f4f6 !important',
-          color: '#374151'
+          backgroundColor: '#f3f4f6',
+          background: '#f3f4f6',
+          color: '#374151',
+          padding: '12px 16px',
+          borderBottom: '1px solid #e5e7eb'
         }}
       >
-        <div className="max-w-7xl mx-auto">
-          <div className="flex items-center w-full">
-            <div className="mr-4 relative">
+        <div style={{ maxWidth: '1280px', margin: '0 auto' }}>
+          <div style={{ display: 'flex', alignItems: 'center', width: '100%' }}>
+            <div style={{ marginRight: '16px', position: 'relative' }}>
               <img 
                 src={profilePhoto}
-                className="w-12 h-12 rounded-full object-cover border-2"
-                style={{ borderColor: page.primaryColor || '#044785' }}
+                style={{ 
+                  width: '48px', 
+                  height: '48px', 
+                  borderRadius: '50%', 
+                  objectFit: 'cover',
+                  border: `2px solid ${page.primaryColor || '#044785'}`
+                }}
                 alt={attendantName}
               />
               <span 
-                className="absolute bottom-0 right-0 w-3 h-3 rounded-full border-2 border-white"
-                style={{ backgroundColor: '#28a745' }}
+                style={{ 
+                  position: 'absolute',
+                  bottom: '0',
+                  right: '0',
+                  width: '12px',
+                  height: '12px',
+                  borderRadius: '50%',
+                  border: '2px solid white',
+                  backgroundColor: '#28a745'
+                }}
               ></span>
             </div>
-            <div className="flex-1">
-              <h2 style={{ color: '#374151' }} className="text-lg font-semibold">{attendantName}</h2>
-              <p style={{ color: '#6b7280' }} className="text-sm">Coordenadora de RH</p>
+            <div style={{ flex: '1' }}>
+              <h2 style={{ color: '#374151', fontSize: '18px', fontWeight: '600', margin: '0' }}>{attendantName}</h2>
+              <p style={{ color: '#6b7280', fontSize: '14px', margin: '0' }}>Coordenadora de RH</p>
             </div>
           </div>
         </div>
@@ -212,7 +226,13 @@ export default function Chat() {
           <div className="overflow-hidden">
             <div 
               className="chat-container overflow-y-auto scroll-smooth p-4 flex flex-col"
-              style={{ height: 'calc(100vh - 200px)', minHeight: '400px' }}
+              style={{ 
+                height: 'calc(100vh - 200px)', 
+                minHeight: '400px',
+                backgroundColor: '#f9fafb',
+                backgroundImage: 'radial-gradient(circle at 1px 1px, rgba(0,0,0,0.03) 1px, transparent 0)',
+                backgroundSize: '20px 20px'
+              }}
             >
               {messages.map((message, index) => (
                 <div 
@@ -224,7 +244,7 @@ export default function Chat() {
                     position: 'relative',
                     display: 'flex',
                     flexDirection: 'column',
-                    marginLeft: message.type === 'attendant' ? '-20px' : 'auto',
+                    marginLeft: message.type === 'attendant' ? '-5px' : 'auto',
                     paddingLeft: message.type === 'attendant' ? '0px' : '0px'
                   }}
                 >
@@ -234,17 +254,32 @@ export default function Chat() {
                       backgroundColor: page.primaryColor || '#044785',
                       color: 'white',
                       borderTopLeftRadius: '2px',
+                      borderBottomLeftRadius: '2px',
+                      borderTopRightRadius: '18px',
+                      borderBottomRightRadius: '18px',
                       minWidth: '200px',
-                      textAlign: 'left'
+                      textAlign: 'left',
+                      boxShadow: '0 1px 2px rgba(0,0,0,0.1)',
+                      position: 'relative'
                     } : {
-                      backgroundColor: '#d4d4d4',
-                      color: '#333',
+                      backgroundColor: '#e5e7eb',
+                      color: '#374151',
+                      borderTopLeftRadius: '18px',
+                      borderBottomLeftRadius: '18px',
                       borderTopRightRadius: '2px',
-                      borderRight: '2px solid #999',
-                      textAlign: 'right'
+                      borderBottomRightRadius: '2px',
+                      textAlign: 'left',
+                      boxShadow: '0 1px 2px rgba(0,0,0,0.1)',
+                      position: 'relative'
                     }}
                   >
-                    <p className="text-sm leading-relaxed whitespace-pre-wrap">
+                    <p style={{ 
+                      fontSize: '15px', 
+                      lineHeight: '1.4', 
+                      margin: '0',
+                      fontWeight: '400',
+                      whiteSpace: 'pre-wrap'
+                    }}>
                       {message.content}
                     </p>
                   </div>
@@ -260,7 +295,7 @@ export default function Chat() {
                     position: 'relative',
                     display: 'flex',
                     flexDirection: 'column',
-                    marginLeft: '-20px',
+                    marginLeft: '-5px',
                     paddingLeft: '0px'
                   }}
                 >
@@ -269,7 +304,11 @@ export default function Chat() {
                     style={{
                       backgroundColor: page.primaryColor || '#044785',
                       borderTopLeftRadius: '2px',
-                      minWidth: '70px'
+                      borderBottomLeftRadius: '2px',
+                      borderTopRightRadius: '18px',
+                      borderBottomRightRadius: '18px',
+                      minWidth: '70px',
+                      boxShadow: '0 1px 2px rgba(0,0,0,0.1)'
                     }}
                   >
                     <div className="flex space-x-1">
@@ -284,7 +323,7 @@ export default function Chat() {
               {showResponseOptions && (
                 <div 
                   className="chat-options max-w-[75%] flex flex-col gap-3 mt-4 mb-5"
-                  style={{ marginLeft: '-20px', paddingLeft: '0px' }}
+                  style={{ marginLeft: '-5px', paddingLeft: '0px' }}
                 >
                   <button 
                     className="option-button w-full text-left px-5 py-4 rounded-lg font-medium text-gray-800 transition-all duration-200 transform hover:-translate-y-0.5 hover:shadow-lg"
@@ -316,7 +355,7 @@ export default function Chat() {
               {showPaymentOptions && (
                 <div 
                   className="chat-options max-w-[75%] flex flex-col gap-3 mt-4 mb-5"
-                  style={{ marginLeft: '-20px', paddingLeft: '0px' }}
+                  style={{ marginLeft: '-5px', paddingLeft: '0px' }}
                 >
                   <button 
                     className="option-button w-full text-left px-5 py-4 rounded-lg font-medium text-gray-800 transition-all duration-200 transform hover:-translate-y-0.5 hover:shadow-lg"
