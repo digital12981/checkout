@@ -16,27 +16,34 @@ export async function processMessagesWithAI(
   price: string
 ): Promise<ChatMessage[]> {
   try {
+    // Get default messages as base structure
+    const defaultMessages = getDefaultChatMessages(productName, "Atendente");
+    
     const systemPrompt = `Você é um especialista em copywriting e conversão para vendas online. 
-    Sua tarefa é criar ou melhorar mensagens de chat para uma página de vendas.
+    Sua tarefa é melhorar o CONTEÚDO das mensagens de chat mantendo a estrutura original.
     
     Produto: ${productName}
     Preço: R$ ${price}
     
-    Diretrizes:
-    - Crie mensagens naturais e convincentes de uma atendente de RH
+    IMPORTANTE: Mantenha sempre estas ${defaultMessages.length} mensagens na estrutura. Apenas altere o CONTEÚDO (field "content").
+    
+    Diretrizes para o conteúdo:
     - Use técnicas de persuasão e urgência quando apropriado
     - Mantenha um tom profissional mas amigável
     - Inclua gatilhos de escassez e autoridade quando relevante
     - As mensagens devem conduzir naturalmente ao pagamento
-    - Responda APENAS com um JSON válido no formato: [{"type": "attendant", "content": "mensagem", "delay": 3000}]
-    - Use delays entre 2000-8000ms para mensagens normais, mais tempo para mensagens longas
-    - Máximo 6-8 mensagens por sequência`;
+    - Personalize para o produto específico
+    
+    Responda APENAS com um objeto JSON no formato:
+    {"messages": [{"type": "attendant", "content": "nova mensagem", "delay": 3000}, ...]}
+    
+    Use os delays originais das mensagens base.`;
 
     const userPrompt = `${prompt}
 
-    Mensagens atuais: ${JSON.stringify(currentMessages)}
+    Estrutura base de mensagens: ${JSON.stringify(defaultMessages)}
     
-    Crie uma sequência de mensagens otimizada baseada na solicitação acima.`;
+    Melhore apenas o CONTEÚDO das mensagens seguindo as diretrizes acima.`;
 
     const response = await openai.chat.completions.create({
       model: "gpt-4o",
@@ -49,19 +56,39 @@ export async function processMessagesWithAI(
       max_tokens: 2000
     });
 
-    const result = JSON.parse(response.choices[0].message.content || "[]");
+    const responseContent = response.choices[0].message.content;
+    console.log("AI Response:", responseContent);
+
+    if (!responseContent) {
+      console.log("No AI response content, returning defaults");
+      return defaultMessages;
+    }
+
+    let result;
+    try {
+      result = JSON.parse(responseContent);
+    } catch (parseError) {
+      console.error("Failed to parse AI response:", parseError);
+      return defaultMessages;
+    }
     
-    // Ensure the result is an array
-    if (Array.isArray(result)) {
-      return result;
-    } else if (result.messages && Array.isArray(result.messages)) {
-      return result.messages;
+    // Ensure we have the messages array and it matches the expected structure
+    if (result.messages && Array.isArray(result.messages) && result.messages.length > 0) {
+      console.log("Processing AI messages:", result.messages.length);
+      // Validate and fix structure if needed
+      return result.messages.map((msg: any, index: number) => ({
+        type: msg.type || "attendant",
+        content: msg.content || defaultMessages[index]?.content || "Mensagem padrão",
+        delay: msg.delay || defaultMessages[index]?.delay || 3000
+      }));
     } else {
-      throw new Error("Invalid AI response format");
+      console.log("Invalid AI response structure, returning defaults");
+      return defaultMessages;
     }
   } catch (error) {
     console.error("Error processing messages with AI:", error);
-    throw new Error("Failed to process messages with AI");
+    // Return default messages if AI processing fails
+    return getDefaultChatMessages(productName, "Atendente");
   }
 }
 
@@ -71,23 +98,38 @@ export function getDefaultChatMessages(productName: string, attendantName: strin
   return [
     {
       type: "attendant",
-      content: `Olá ${firstName}, tudo bem? Aqui é a ${attendantName || "Tereza"}, atendente de RH.`,
+      content: `Olá ${firstName}, tudo bem? Aqui é a ${attendantName || "Tereza"}, Coordenadora de RH.`,
       delay: 3000
     },
     {
       type: "attendant", 
-      content: `Estou entrando em contato sobre ${productName}. Você tem interesse em saber mais detalhes?`,
-      delay: 4000
+      content: `Estou entrando em contato porque sua inscrição para ${productName} ainda não foi concluída. Entre os candidatos selecionados, alguns já confirmaram o agendamento, outros já realizaram e só está faltando você confirmar.`,
+      delay: 8000
     },
     {
       type: "attendant",
-      content: "Se tiver interesse, posso te explicar todos os benefícios e como funciona o processo.",
+      content: "Para finalizar o processo, vou apenas confirmar alguns dados rapidamente com você.",
       delay: 3000
     },
     {
       type: "attendant",
-      content: "Para prosseguir, você pode realizar o pagamento clicando no botão abaixo:",
-      delay: 2000
+      content: "Se ainda tiver interesse na vaga você vai receber excelentes benefícios e estabilidade no serviço público.",
+      delay: 4000
+    },
+    {
+      type: "attendant",
+      content: "Verifiquei aqui que você ainda não confirmou o agendamento. Todos os outros candidatos já confirmaram e vão ser convocados ainda essa semana.",
+      delay: 6000
+    },
+    {
+      type: "attendant",
+      content: "Se você conseguir realizar o pagamento e confirmar em até 10 minutos, consigo segurar sua vaga e não passar para outro candidato.",
+      delay: 4500
+    },
+    {
+      type: "attendant",
+      content: `${firstName}, você vai realizar o pagamento e confirmar ou deseja desistir da vaga?`,
+      delay: 2800
     }
   ];
 }

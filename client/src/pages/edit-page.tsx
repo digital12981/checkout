@@ -261,19 +261,44 @@ export default function EditPage() {
 
       try {
         const messages = JSON.parse(pageData.chatMessages || "[]");
-        setChatMessages(messages);
+        setChatMessages(messages.length > 0 ? messages : [
+          { type: "attendant", content: `Olá! Aqui é a Tereza, atendente de RH. Como está?`, delay: 2000 },
+          { type: "attendant", content: `Vi que você tem interesse em ${pageData.productName}. É isso mesmo?`, delay: 3000 },
+          { type: "attendant", content: "Estou aqui para esclarecer qualquer dúvida sobre o processo de inscrição.", delay: 3500 },
+          { type: "attendant", content: "O processo é bem simples e rápido. Você realiza o pagamento e já fica inscrito!", delay: 4000 },
+          { type: "attendant", content: "⚡ ATENÇÃO: As vagas são limitadas e estão acabando rapidamente!", delay: 3000 },
+          { type: "attendant", content: "Não perca essa oportunidade! Clique no botão abaixo para garantir sua vaga:", delay: 2500 }
+        ]);
       } catch {
-        setChatMessages([]);
+        setChatMessages([
+          { type: "attendant", content: `Olá! Aqui é a Tereza, atendente de RH. Como está?`, delay: 2000 },
+          { type: "attendant", content: `Vi que você tem interesse em ${pageData.productName || "nosso produto"}. É isso mesmo?`, delay: 3000 },
+          { type: "attendant", content: "Estou aqui para esclarecer qualquer dúvida sobre o processo de inscrição.", delay: 3500 },
+          { type: "attendant", content: "O processo é bem simples e rápido. Você realiza o pagamento e já fica inscrito!", delay: 4000 },
+          { type: "attendant", content: "⚡ ATENÇÃO: As vagas são limitadas e estão acabando rapidamente!", delay: 3000 },
+          { type: "attendant", content: "Não perca essa oportunidade! Clique no botão abaixo para garantir sua vaga:", delay: 2500 }
+        ]);
       }
 
       // Load chat messages
       try {
         const messages = JSON.parse(pageData.chatMessages || "[]");
-        setChatMessages(messages);
+        setChatMessages(messages.length > 0 ? messages : [
+          { type: "attendant", content: `Olá! Aqui é a Tereza, atendente de RH. Como está?`, delay: 2000 },
+          { type: "attendant", content: `Vi que você tem interesse em ${pageData.productName}. É isso mesmo?`, delay: 3000 },
+          { type: "attendant", content: "Estou aqui para esclarecer qualquer dúvida sobre o processo de inscrição.", delay: 3500 },
+          { type: "attendant", content: "O processo é bem simples e rápido. Você realiza o pagamento e já fica inscrito!", delay: 4000 },
+          { type: "attendant", content: "⚡ ATENÇÃO: As vagas são limitadas e estão acabando rapidamente!", delay: 3000 },
+          { type: "attendant", content: "Não perca essa oportunidade! Clique no botão abaixo para garantir sua vaga:", delay: 2500 }
+        ]);
       } catch {
         setChatMessages([
-          { type: "attendant", content: "Olá! Como posso ajudá-lo hoje?", delay: 1000 },
-          { type: "attendant", content: "Estou aqui para tirar suas dúvidas sobre nossos serviços.", delay: 2000 }
+          { type: "attendant", content: `Olá! Aqui é a Tereza, atendente de RH. Como está?`, delay: 2000 },
+          { type: "attendant", content: `Vi que você tem interesse em ${pageData.productName || "nosso produto"}. É isso mesmo?`, delay: 3000 },
+          { type: "attendant", content: "Estou aqui para esclarecer qualquer dúvida sobre o processo de inscrição.", delay: 3500 },
+          { type: "attendant", content: "O processo é bem simples e rápido. Você realiza o pagamento e já fica inscrito!", delay: 4000 },
+          { type: "attendant", content: "⚡ ATENÇÃO: As vagas são limitadas e estão acabando rapidamente!", delay: 3000 },
+          { type: "attendant", content: "Não perca essa oportunidade! Clique no botão abaixo para garantir sua vaga:", delay: 2500 }
         ]);
       }
     }
@@ -463,7 +488,7 @@ export default function EditPage() {
   }, []);
 
   // Chat functions
-  const addMessage = (type: 'attendant' | 'user', content: string, delay: number = 1000) => {
+  const addMessage = (type: 'attendant' | 'user', content: string, delay: number = 3000) => {
     const newMessage = { type, content, delay };
     setChatMessages(prev => [...prev, newMessage]);
     setNewMessage("");
@@ -1112,7 +1137,7 @@ export default function EditPage() {
                           <div className="text-center text-gray-500 py-8">
                             <MessageCircle className="w-8 h-8 mx-auto mb-2 opacity-50" />
                             <p>Nenhuma mensagem configurada</p>
-                            <p className="text-xs">Use a IA para gerar mensagens ou adicione manualmente</p>
+                            <p className="text-xs">Habilite o chat para carregar mensagens padrão</p>
                           </div>
                         )}
                       </div>
