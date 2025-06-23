@@ -7,7 +7,7 @@ import CheckoutLoading from "@/components/checkout-loading";
 
 export default function CheckoutFinal() {
   const [, params] = useRoute("/checkout/:id");
-  const [location] = useLocation();
+  const [, setLocation] = useLocation();
   const [pixPayment, setPixPayment] = useState<any>(null);
   const [timeLeft, setTimeLeft] = useState(15 * 60);
   const [isProcessingAutoPayment, setIsProcessingAutoPayment] = useState(false);
@@ -17,19 +17,38 @@ export default function CheckoutFinal() {
     enabled: !!params?.id,
   });
 
-  const [, setLocation] = useLocation();
+  // Show loading if data is still loading
+  if (pageQuery.isLoading) {
+    return <CheckoutLoading pageId={params?.id} />;
+  }
 
-  // Check if we should redirect to chat (outside useEffect to avoid infinite loops)
-  if (pageQuery.data && !pageQuery.isLoading) {
-    const page = pageQuery.data as any;
-    const fromChat = new URLSearchParams(window.location.search).get('fromChat');
-    
-    if (page.chatEnabled && !fromChat) {
-      // Redirect immediately without useEffect
-      window.history.replaceState(null, '', `/chat/${params?.id}`);
-      window.location.reload();
-      return null;
-    }
+  // If no data found, redirect to home
+  if (!pageQuery.data) {
+    return <div>Página não encontrada</div>;
+  }
+
+  const page = pageQuery.data as any;
+  const urlParams = new URLSearchParams(window.location.search);
+  const fromChat = urlParams.get('fromChat');
+
+  // If chat is enabled and user didn't come from chat, show chat redirect message
+  if (page.chatEnabled && !fromChat) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-50">
+        <div className="max-w-md mx-auto text-center p-6 bg-white rounded-lg shadow-lg">
+          <h2 className="text-2xl font-bold text-gray-900 mb-4">Bem-vindo!</h2>
+          <p className="text-gray-600 mb-6">
+            Para uma melhor experiência, vamos iniciar com um chat rápido.
+          </p>
+          <button
+            onClick={() => setLocation(`/chat/${params?.id}`)}
+            className="w-full bg-blue-600 text-white py-3 px-6 rounded-lg hover:bg-blue-700 transition-colors"
+          >
+            Iniciar Chat
+          </button>
+        </div>
+      </div>
+    );
   }
 
   const createPaymentMutation = useMutation({
@@ -126,7 +145,6 @@ export default function CheckoutFinal() {
     return <div className="min-h-screen flex items-center justify-center">Página não encontrada</div>;
   }
 
-  const page = pageQuery.data as any;
   console.log("Loading page data:", page);
   console.log("Loaded custom elements:", page.customElements ? JSON.parse(page.customElements) : []);
 
