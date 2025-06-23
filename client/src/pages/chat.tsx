@@ -172,27 +172,26 @@ export default function Chat() {
     setLocation(`/checkout/${id}`);
   };
 
-  // Simple and reliable scroll to bottom function
-  const scrollToBottom = (smooth = true) => {
-    if (chatContainerRef.current) {
-      const container = chatContainerRef.current;
-      
-      const performScroll = () => {
-        // Always scroll to the absolute bottom to ensure all content is visible
-        container.scrollTop = container.scrollHeight;
-      };
-      
-      // Execute scroll immediately
-      performScroll();
-      
-      // Use requestAnimationFrame for DOM updates
-      requestAnimationFrame(performScroll);
-      
-      // Additional safety scroll after a short delay
-      setTimeout(performScroll, 50);
-      setTimeout(performScroll, 150);
-      setTimeout(performScroll, 300);
-    }
+  // Reliable mobile-first scroll function
+  const scrollToBottom = (smooth = false) => {
+    if (!chatContainerRef.current) return;
+    
+    const container = chatContainerRef.current;
+    
+    const doScroll = () => {
+      // Simple, direct scroll to bottom - most reliable approach
+      container.scrollTop = container.scrollHeight;
+    };
+    
+    // Execute immediately and with multiple fallbacks
+    doScroll();
+    requestAnimationFrame(doScroll);
+    
+    // Additional scrolls to handle timing issues
+    setTimeout(doScroll, 10);
+    setTimeout(doScroll, 50);
+    setTimeout(doScroll, 150);
+    setTimeout(doScroll, 300);
   };
 
   // Aggressive auto-scroll system
@@ -239,10 +238,23 @@ export default function Chat() {
   }
 
   return (
-    <div className="min-h-screen" style={{ backgroundColor: '#FFFFFF' }}>
+    <div 
+      className="w-full"
+      style={{ 
+        backgroundColor: '#FFFFFF',
+        height: '100vh',
+        maxHeight: '100vh',
+        overflow: 'hidden',
+        position: 'fixed',
+        top: 0,
+        left: 0,
+        right: 0,
+        bottom: 0
+      }}
+    >
       {/* Brand Header */}
       <div 
-        className="py-3"
+        className="py-2 sm:py-3"
         style={{ backgroundColor: page.primaryColor || '#044785' }}
       >
         <div className="container mx-auto px-4 text-center">
@@ -250,7 +262,7 @@ export default function Chat() {
             <img 
               src={page.logoUrl} 
               alt="Logo" 
-              className="h-8 mx-auto object-contain" 
+              className="h-8 sm:h-12 mx-auto object-contain" 
             />
           )}
         </div>
@@ -262,18 +274,18 @@ export default function Chat() {
           backgroundColor: '#f3f4f6',
           background: '#f3f4f6',
           color: '#374151',
-          padding: '12px 16px',
+          padding: window.innerWidth > 768 ? '12px 16px' : '8px 12px',
           borderBottom: '1px solid #e5e7eb'
         }}
       >
         <div style={{ maxWidth: '1280px', margin: '0 auto' }}>
           <div style={{ display: 'flex', alignItems: 'center', width: '100%' }}>
-            <div style={{ marginRight: '16px', position: 'relative' }}>
+            <div style={{ marginRight: window.innerWidth > 768 ? '16px' : '12px', position: 'relative' }}>
               <img 
                 src={profilePhoto}
                 style={{ 
-                  width: '48px', 
-                  height: '48px', 
+                  width: window.innerWidth > 768 ? '48px' : '40px', 
+                  height: window.innerWidth > 768 ? '48px' : '40px', 
                   borderRadius: '50%', 
                   objectFit: 'cover',
                   border: `2px solid ${page.primaryColor || '#044785'}`
@@ -285,8 +297,8 @@ export default function Chat() {
                   position: 'absolute',
                   bottom: '0',
                   right: '0',
-                  width: '12px',
-                  height: '12px',
+                  width: window.innerWidth > 768 ? '12px' : '10px',
+                  height: window.innerWidth > 768 ? '12px' : '10px',
                   borderRadius: '50%',
                   border: '2px solid white',
                   backgroundColor: '#28a745'
@@ -294,26 +306,46 @@ export default function Chat() {
               ></span>
             </div>
             <div style={{ flex: '1' }}>
-              <h2 style={{ color: '#374151', fontSize: '18px', fontWeight: '600', margin: '0' }}>{attendantName}</h2>
-              <p style={{ color: '#6b7280', fontSize: '14px', margin: '0' }}>Coordenadora de RH</p>
+              <h2 style={{ 
+                color: '#374151', 
+                fontSize: window.innerWidth > 768 ? '18px' : '16px', 
+                fontWeight: '600', 
+                margin: '0' 
+              }}>{attendantName}</h2>
+              <p style={{ 
+                color: '#6b7280', 
+                fontSize: window.innerWidth > 768 ? '14px' : '12px', 
+                margin: '0' 
+              }}>Coordenadora de RH</p>
             </div>
           </div>
         </div>
       </div>
 
       {/* Chat Container */}
-      <main className="w-full px-0 py-2">
-        <div className="w-full">
-          <div className="overflow-hidden">
+      <main 
+        className="w-full px-0 flex-1"
+        style={{ 
+          height: window.innerWidth > 768 ? 'calc(100vh - 150px)' : 'calc(100vh - 120px)',
+          maxHeight: window.innerWidth > 768 ? 'calc(100vh - 150px)' : 'calc(100vh - 120px)',
+          overflow: 'hidden',
+          position: 'relative'
+        }}
+      >
+        <div className="w-full h-full">
+          <div className="overflow-hidden h-full">
             <div 
               ref={chatContainerRef}
-              className="chat-container overflow-y-auto px-2 sm:px-4 py-4 flex flex-col"
+              className="chat-container overflow-y-auto px-2 sm:px-4 py-2 sm:py-4 flex flex-col"
               style={{ 
-                height: 'calc(100vh - 140px)', 
-                minHeight: '100vh',
+                height: window.innerWidth > 768 ? 'calc(100vh - 150px)' : 'calc(100vh - 120px)',
+                maxHeight: window.innerWidth > 768 ? 'calc(100vh - 150px)' : 'calc(100vh - 120px)',
                 backgroundColor: '#FFFFFF',
                 width: '100%',
-                scrollBehavior: 'smooth'
+                overflowY: 'auto',
+                overflowX: 'hidden',
+                position: 'relative',
+                WebkitOverflowScrolling: 'touch'
               }}
             >
               {messages.map((message, index) => (
