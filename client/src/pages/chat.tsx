@@ -221,17 +221,16 @@ export default function Chat() {
       </div>
 
       {/* Chat Container */}
-      <main className="container mx-auto px-4 py-2">
-        <div className="max-w-6xl mx-auto">
+      <main className="w-full px-0 py-2">
+        <div className="w-full">
           <div className="overflow-hidden">
             <div 
-              className="chat-container overflow-y-auto scroll-smooth p-4 flex flex-col"
+              className="chat-container overflow-y-auto scroll-smooth px-4 py-4 flex flex-col"
               style={{ 
                 height: 'calc(100vh - 200px)', 
                 minHeight: '400px',
-                backgroundColor: '#f9fafb',
-                backgroundImage: 'radial-gradient(circle at 1px 1px, rgba(0,0,0,0.03) 1px, transparent 0)',
-                backgroundSize: '20px 20px'
+                backgroundColor: '#FFFFFF',
+                width: '100%'
               }}
             >
               {messages.map((message, index) => (
@@ -244,33 +243,35 @@ export default function Chat() {
                     position: 'relative',
                     display: 'flex',
                     flexDirection: 'column',
-                    marginLeft: message.type === 'attendant' ? '-5px' : 'auto',
+                    marginLeft: message.type === 'attendant' ? '10px' : 'auto',
                     paddingLeft: message.type === 'attendant' ? '0px' : '0px'
                   }}
                 >
                   <div 
-                    className="message-content px-4 py-3 rounded-lg"
+                    className="message-content"
                     style={message.type === 'attendant' ? {
                       backgroundColor: page.primaryColor || '#044785',
                       color: 'white',
-                      borderTopLeftRadius: '2px',
-                      borderBottomLeftRadius: '2px',
+                      borderTopLeftRadius: '4px',
+                      borderBottomLeftRadius: '4px',
                       borderTopRightRadius: '18px',
                       borderBottomRightRadius: '18px',
                       minWidth: '200px',
                       textAlign: 'left',
-                      boxShadow: '0 1px 2px rgba(0,0,0,0.1)',
-                      position: 'relative'
+                      boxShadow: '0 2px 8px rgba(0,0,0,0.15)',
+                      position: 'relative',
+                      padding: '12px 16px'
                     } : {
-                      backgroundColor: '#e5e7eb',
+                      backgroundColor: '#f3f4f6',
                       color: '#374151',
                       borderTopLeftRadius: '18px',
                       borderBottomLeftRadius: '18px',
-                      borderTopRightRadius: '2px',
-                      borderBottomRightRadius: '2px',
+                      borderTopRightRadius: '4px',
+                      borderBottomRightRadius: '4px',
                       textAlign: 'left',
-                      boxShadow: '0 1px 2px rgba(0,0,0,0.1)',
-                      position: 'relative'
+                      boxShadow: '0 2px 8px rgba(0,0,0,0.15)',
+                      position: 'relative',
+                      padding: '12px 16px'
                     }}
                   >
                     <p style={{ 
@@ -295,20 +296,21 @@ export default function Chat() {
                     position: 'relative',
                     display: 'flex',
                     flexDirection: 'column',
-                    marginLeft: '-5px',
+                    marginLeft: '10px',
                     paddingLeft: '0px'
                   }}
                 >
                   <div 
-                    className="message-content px-4 py-3 rounded-lg"
+                    className="message-content"
                     style={{
                       backgroundColor: page.primaryColor || '#044785',
-                      borderTopLeftRadius: '2px',
-                      borderBottomLeftRadius: '2px',
+                      borderTopLeftRadius: '4px',
+                      borderBottomLeftRadius: '4px',
                       borderTopRightRadius: '18px',
                       borderBottomRightRadius: '18px',
                       minWidth: '70px',
-                      boxShadow: '0 1px 2px rgba(0,0,0,0.1)'
+                      boxShadow: '0 2px 8px rgba(0,0,0,0.15)',
+                      padding: '12px 16px'
                     }}
                   >
                     <div className="flex space-x-1">
@@ -323,7 +325,7 @@ export default function Chat() {
               {showResponseOptions && (
                 <div 
                   className="chat-options max-w-[75%] flex flex-col gap-3 mt-4 mb-5"
-                  style={{ marginLeft: '-5px', paddingLeft: '0px' }}
+                  style={{ marginLeft: '10px', paddingLeft: '0px' }}
                 >
                   <button 
                     className="option-button w-full text-left px-5 py-4 rounded-lg font-medium text-gray-800 transition-all duration-200 transform hover:-translate-y-0.5 hover:shadow-lg"
@@ -355,7 +357,7 @@ export default function Chat() {
               {showPaymentOptions && (
                 <div 
                   className="chat-options max-w-[75%] flex flex-col gap-3 mt-4 mb-5"
-                  style={{ marginLeft: '-5px', paddingLeft: '0px' }}
+                  style={{ marginLeft: '10px', paddingLeft: '0px' }}
                 >
                   <button 
                     className="option-button w-full text-left px-5 py-4 rounded-lg font-medium text-gray-800 transition-all duration-200 transform hover:-translate-y-0.5 hover:shadow-lg"
