@@ -1239,14 +1239,9 @@ export default function EditPage() {
 
                       <div className="p-4 space-y-4 flex-1 overflow-y-auto">
                         {chatMessages.slice(0, 2).map((message, index) => (
-                          <div key={index} className="flex items-start space-x-3">
-                            <img 
-                              src={formData.chatProfilePhoto || "https://i.ibb.co/BHcYZ8tf/assets-task-01jy21c21yewes4neft2x006sh-1750267829-img-1-11zon.webp"}
-                              className="w-10 h-10 rounded-full object-cover flex-shrink-0"
-                              alt="Atendente"
-                            />
+                          <div key={index} className="flex justify-start">
                             <div 
-                              className="max-w-xs px-4 py-3 rounded-lg text-white text-sm"
+                              className="max-w-xs px-4 py-3 rounded-lg text-white text-sm ml-16"
                               style={{ backgroundColor: formData.primaryColor || '#044785' }}
                             >
                               {message.content}
