@@ -3,6 +3,7 @@ import { useRoute } from "wouter";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { formatCpf, formatPhone } from "@/lib/utils";
 import UnifiedTemplateRenderer from "@/components/unified-template-renderer";
+import CheckoutLoading from "@/components/checkout-loading";
 
 export default function CheckoutFinal() {
   const [, params] = useRoute("/checkout/:id");
