@@ -63,15 +63,19 @@ export default function Chat() {
           });
           setCurrentMessageIndex(prev => prev + 1);
           
-          // Scroll after message appears
-          setTimeout(() => scrollToBottom(true), 100);
+          // Multiple scroll attempts to ensure message visibility
+          setTimeout(() => scrollToBottom(true), 50);
+          setTimeout(() => scrollToBottom(true), 200);
+          setTimeout(() => scrollToBottom(true), 400);
           
           // Show options after last message
           if (currentMessageIndex === chatMessages.length - 1) {
             setTimeout(() => {
               setShowResponseOptions(true);
-              // Scroll after options appear
-              setTimeout(() => scrollToBottom(true), 200);
+              // Multiple scroll attempts for options
+              setTimeout(() => scrollToBottom(true), 100);
+              setTimeout(() => scrollToBottom(true), 300);
+              setTimeout(() => scrollToBottom(true), 500);
             }, 1000);
           }
         }, 2000);
@@ -97,8 +101,9 @@ export default function Chat() {
     };
     
     setMessages(prev => [...prev, userMessage]);
-    // Scroll after user message
-    setTimeout(() => scrollToBottom(true), 100);
+    // Ensure user message is visible
+    setTimeout(() => scrollToBottom(true), 50);
+    setTimeout(() => scrollToBottom(true), 200);
     
     // Handle different responses
     if (option === 'sim') {
@@ -169,42 +174,53 @@ export default function Chat() {
   const scrollToBottom = (smooth = true) => {
     if (chatContainerRef.current) {
       const container = chatContainerRef.current;
-      const offset = window.innerWidth > 768 ? 80 : 60; // More space on desktop, less on mobile
-      const targetScroll = Math.max(0, container.scrollHeight - container.clientHeight - offset);
+      const offset = window.innerWidth > 768 ? 40 : 30; // Smaller offset to ensure content is visible
       
-      container.scrollTo({
-        top: targetScroll,
-        behavior: smooth ? 'smooth' : 'auto'
+      // Use requestAnimationFrame to ensure DOM has updated
+      requestAnimationFrame(() => {
+        const maxScroll = container.scrollHeight - container.clientHeight;
+        const targetScroll = Math.max(0, maxScroll - offset);
+        
+        container.scrollTo({
+          top: targetScroll,
+          behavior: smooth ? 'smooth' : 'auto'
+        });
       });
     }
   };
 
-  // Auto-scroll when messages change with improved timing
+  // Auto-scroll when messages change
   useEffect(() => {
     const timeoutId = setTimeout(() => {
       scrollToBottom(true);
-    }, 300);
+    }, 100);
     return () => clearTimeout(timeoutId);
   }, [messages]);
+
+  // Additional scroll for when content length changes
+  useEffect(() => {
+    const timeoutId = setTimeout(() => {
+      scrollToBottom(true);
+    }, 500); // Longer delay to ensure content has rendered
+    return () => clearTimeout(timeoutId);
+  }, [messages.length]);
 
   // Scroll for UI state changes
   useEffect(() => {
     if (showResponseOptions || showPaymentOptions || showProceedButton) {
-      const timeoutId = setTimeout(() => {
-        scrollToBottom(true);
-      }, 200);
-      return () => clearTimeout(timeoutId);
+      // Multiple scroll attempts to ensure visibility
+      setTimeout(() => scrollToBottom(true), 100);
+      setTimeout(() => scrollToBottom(true), 300);
+      setTimeout(() => scrollToBottom(true), 600);
     }
   }, [showResponseOptions, showPaymentOptions, showProceedButton]);
 
-  // Scroll when typing indicator appears
+  // Scroll when typing indicator appears/disappears
   useEffect(() => {
-    if (isTyping) {
-      const timeoutId = setTimeout(() => {
-        scrollToBottom(true);
-      }, 150);
-      return () => clearTimeout(timeoutId);
-    }
+    const timeoutId = setTimeout(() => {
+      scrollToBottom(true);
+    }, 100);
+    return () => clearTimeout(timeoutId);
   }, [isTyping]);
 
   if (isLoading) {
