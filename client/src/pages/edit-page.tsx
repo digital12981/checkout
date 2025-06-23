@@ -259,6 +259,13 @@ export default function EditPage() {
         setCustomElements([]);
       }
 
+      try {
+        const messages = JSON.parse(pageData.chatMessages || "[]");
+        setChatMessages(messages);
+      } catch {
+        setChatMessages([]);
+      }
+
       // Load chat messages
       try {
         const messages = JSON.parse(pageData.chatMessages || "[]");
