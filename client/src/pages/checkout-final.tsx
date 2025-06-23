@@ -19,10 +19,13 @@ export default function CheckoutFinal() {
 
   const [, setLocation] = useLocation();
 
-  // Redirect to chat if enabled and no query params (not coming from chat)
+  // Redirect to chat if enabled and not coming from chat
   useEffect(() => {
     const page = pageQuery.data as any;
-    if (page?.chatEnabled && !window.location.search) {
+    const urlParams = new URLSearchParams(window.location.search);
+    const fromChat = urlParams.get('fromChat');
+    
+    if (page?.chatEnabled && !fromChat) {
       setLocation(`/chat/${params?.id}`);
     }
   }, [pageQuery.data, params?.id, setLocation]);
