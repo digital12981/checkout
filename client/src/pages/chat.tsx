@@ -17,6 +17,10 @@ export default function Chat() {
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [currentMessageIndex, setCurrentMessageIndex] = useState(0);
   const [isTyping, setIsTyping] = useState(false);
+  const [showResponseOptions, setShowResponseOptions] = useState(false);
+  const [showPaymentOptions, setShowPaymentOptions] = useState(false);
+  const [showProceedButton, setShowProceedButton] = useState(false);
+  const [userResponded, setUserResponded] = useState(false);
 
   const { data: page, isLoading } = useQuery<PaymentPage>({
     queryKey: [`/api/payment-pages/${id}`],
@@ -35,7 +39,7 @@ export default function Chat() {
     }
 
     // Start the chat sequence
-    if (currentMessageIndex < chatMessages.length) {
+    if (currentMessageIndex < chatMessages.length && !userResponded) {
       const currentMessage = chatMessages[currentMessageIndex];
       const timer = setTimeout(() => {
         setIsTyping(true);
@@ -45,6 +49,13 @@ export default function Chat() {
           setIsTyping(false);
           setMessages(prev => [...prev, currentMessage]);
           setCurrentMessageIndex(prev => prev + 1);
+          
+          // Check if this is the last message, show options
+          if (currentMessageIndex === chatMessages.length - 1) {
+            setTimeout(() => {
+              setShowResponseOptions(true);
+            }, 1000);
+          }
         }, 2000); // Fixed 2 second typing time
       }, currentMessageIndex === 0 ? 1000 : currentMessage.delay);
 

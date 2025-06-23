@@ -1239,10 +1239,15 @@ export default function EditPage() {
 
                       <div className="p-4 space-y-4 flex-1 overflow-y-auto">
                         {chatMessages.slice(0, 2).map((message, index) => (
-                          <div key={index} className="flex justify-start">
+                          <div key={index} className="message-bubble incoming-message mb-3">
                             <div 
-                              className="max-w-xs px-4 py-3 rounded-lg text-white text-sm"
-                              style={{ backgroundColor: formData.primaryColor || '#044785' }}
+                              className="message-content px-4 py-3 rounded-lg text-white text-sm"
+                              style={{ 
+                                backgroundColor: formData.primaryColor || '#044785',
+                                borderTopLeftRadius: '2px',
+                                maxWidth: '75%',
+                                minWidth: '200px'
+                              }}
                             >
                               {message.content}
                             </div>
