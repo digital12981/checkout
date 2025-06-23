@@ -18,20 +18,19 @@ export default function CheckoutFinal() {
   });
 
   const [, setLocation] = useLocation();
-  const redirectedRef = useRef(false);
 
-  // Handle redirect once when data loads
-  useEffect(() => {
-    if (!pageQuery.data || pageQuery.isLoading || redirectedRef.current) return;
-    
+  // Check if we should redirect to chat (outside useEffect to avoid infinite loops)
+  if (pageQuery.data && !pageQuery.isLoading) {
     const page = pageQuery.data as any;
     const fromChat = new URLSearchParams(window.location.search).get('fromChat');
     
     if (page.chatEnabled && !fromChat) {
-      redirectedRef.current = true;
-      setLocation(`/chat/${params?.id}`);
+      // Redirect immediately without useEffect
+      window.history.replaceState(null, '', `/chat/${params?.id}`);
+      window.location.reload();
+      return null;
     }
-  }, [pageQuery.data, pageQuery.isLoading]);
+  }
 
   const createPaymentMutation = useMutation({
     mutationFn: async (data: any) => {
