@@ -116,6 +116,15 @@ export default function EditPage() {
   const queryClient = useQueryClient();
   const [currentTab, setCurrentTab] = useState("config");
   const [previewTab, setPreviewTab] = useState("form");
+
+  // Update preview tab when chat is enabled/disabled
+  useEffect(() => {
+    if (form.watch("chatEnabled")) {
+      setPreviewTab("chat");
+    } else {
+      setPreviewTab("form");
+    }
+  }, [form.watch("chatEnabled")]);
   const [customElements, setCustomElements] = useState<CustomElement[]>([]);
   const [editingElement, setEditingElement] = useState<string | null>(null);
   const [capturedHTML, setCapturedHTML] = useState<string>("");
@@ -1169,16 +1178,118 @@ export default function EditPage() {
         <div className="w-[28rem] bg-gray-50 overflow-auto border-l">
           <Tabs value={previewTab} onValueChange={setPreviewTab} className="h-full">
             <TabsList className="m-4">
-              <TabsTrigger value="form">
-                <ShoppingBag className="w-4 h-4 mr-2" />
-                Formulário
-              </TabsTrigger>
+              {form.watch("chatEnabled") ? (
+                <TabsTrigger value="chat">
+                  <MessageCircle className="w-4 h-4 mr-2" />
+                  Chat
+                </TabsTrigger>
+              ) : (
+                <TabsTrigger value="form">
+                  <ShoppingBag className="w-4 h-4 mr-2" />
+                  Formulário
+                </TabsTrigger>
+              )}
               <TabsTrigger value="payment">
                 <QrCode className="w-4 h-4 mr-2" />
                 Pagamento
               </TabsTrigger>
             </TabsList>
             
+            <TabsContent value="chat" className="p-4 h-full">
+              <div className="flex justify-center h-full">
+                <div className="w-full max-w-md border bg-white overflow-auto shadow-lg" style={{ height: '100%', minHeight: '600px' }}>
+                  {chatMessages.length > 0 ? (
+                    <div className="h-full flex flex-col">
+                      <div className="bg-gray-800 text-white py-2 px-4">
+                        <div className="text-xs">Preview do Chat</div>
+                      </div>
+                      
+                      <div 
+                        className="py-3 px-4"
+                        style={{ backgroundColor: formData.primaryColor || '#044785' }}
+                      >
+                        <div className="text-center">
+                          {formData.showLogo && formData.logoUrl && (
+                            <img 
+                              src={formData.logoUrl} 
+                              alt="Logo" 
+                              className="h-8 mx-auto object-contain" 
+                            />
+                          )}
+                        </div>
+                      </div>
+
+                      <div className="bg-gray-100 text-gray-800 px-4 py-3">
+                        <div className="flex items-center">
+                          <div className="mr-4 relative">
+                            <img 
+                              src={form.watch("chatProfilePhoto") || "https://i.ibb.co/BHcYZ8tf/assets-task-01jy21c21yewes4neft2x006sh-1750267829-img-1-11zon.webp"}
+                              className="w-12 h-12 rounded-full object-cover border-2"
+                              style={{ borderColor: formData.primaryColor || '#044785' }}
+                              alt={form.watch("chatAttendantName") || "Atendente"}
+                            />
+                            <span 
+                              className="absolute bottom-0 right-0 w-3 h-3 rounded-full border-2 border-white"
+                              style={{ backgroundColor: '#28a745' }}
+                            ></span>
+                          </div>
+                          <div>
+                            <h2 className="text-gray-800 text-lg font-semibold">
+                              {form.watch("chatAttendantName") || "Atendente"}
+                            </h2>
+                            <p className="text-gray-600 text-sm">Coordenadora de RH</p>
+                          </div>
+                        </div>
+                      </div>
+
+                      <div className="p-4 space-y-4 flex-1 overflow-y-auto">
+                        {chatMessages.slice(0, 2).map((message, index) => (
+                          <div key={index} className="flex items-start space-x-3">
+                            <img 
+                              src={form.watch("chatProfilePhoto") || "https://i.ibb.co/BHcYZ8tf/assets-task-01jy21c21yewes4neft2x006sh-1750267829-img-1-11zon.webp"}
+                              className="w-10 h-10 rounded-full object-cover flex-shrink-0"
+                              alt="Atendente"
+                            />
+                            <div 
+                              className="max-w-xs px-4 py-3 rounded-lg text-white text-sm"
+                              style={{ backgroundColor: formData.primaryColor || '#044785' }}
+                            >
+                              {message.content}
+                            </div>
+                          </div>
+                        ))}
+                        
+                        {chatMessages.length > 2 && (
+                          <div className="text-center text-gray-500 text-sm">
+                            ... mais {chatMessages.length - 2} mensagens
+                          </div>
+                        )}
+
+                        <div className="text-center mt-4">
+                          <button 
+                            className="text-white font-semibold py-3 px-6 rounded-full text-sm"
+                            style={{ 
+                              background: `linear-gradient(90deg, ${formData.primaryColor || '#044785'} 0%, ${formData.accentColor || '#FFD700'} 100%)`,
+                            }}
+                          >
+                            Prosseguir para Pagamento
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="flex items-center justify-center h-full text-gray-500">
+                      <div className="text-center">
+                        <MessageCircle className="w-16 h-16 mx-auto mb-4 opacity-50" />
+                        <p>Nenhuma mensagem de chat configurada</p>
+                        <p className="text-sm">Configure o chat na aba Chat</p>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </div>
+            </TabsContent>
+
             <TabsContent value="form" className="p-4 h-full">
               <div className="flex justify-center h-full">
                 <div className="w-full max-w-md border bg-white overflow-auto shadow-lg" style={{ height: '100%', minHeight: '600px' }}>

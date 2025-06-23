@@ -17,6 +17,16 @@ export default function CheckoutFinal() {
     enabled: !!params?.id,
   });
 
+  const [, setLocation] = useLocation();
+
+  // Redirect to chat if enabled and no query params (not coming from chat)
+  useEffect(() => {
+    const page = pageQuery.data as any;
+    if (page?.chatEnabled && !window.location.search) {
+      setLocation(`/chat/${params?.id}`);
+    }
+  }, [pageQuery.data, params?.id, setLocation]);
+
   const createPaymentMutation = useMutation({
     mutationFn: async (data: any) => {
       const response = await fetch('/api/pix-payments', {
