@@ -217,6 +217,14 @@ export default function EditPage() {
       } catch {
         setCustomElements([]);
       }
+
+      try {
+        const messages = JSON.parse(pageData.chatMessages || "[]");
+        setChatMessages(messages);
+        console.log("Loaded chat messages:", messages);
+      } catch {
+        setChatMessages([]);
+      }
     } else if (page && !Array.isArray(page)) {
       const pageData = page as any;
       console.log("Loading single page data:", pageData);
@@ -410,7 +418,7 @@ export default function EditPage() {
         chatEnabled: data.chatEnabled,
         chatProfilePhoto: data.chatProfilePhoto,
         chatAttendantName: data.chatAttendantName,
-        chatMessages: JSON.stringify(chatMessages)
+        chatMessages: JSON.stringify(chatMessages || [])
       };
       
       updatePageMutation.mutate(updatedData);
