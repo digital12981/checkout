@@ -243,7 +243,7 @@ export default function Chat() {
                     position: 'relative',
                     display: 'flex',
                     flexDirection: 'column',
-                    marginLeft: message.type === 'attendant' ? '10px' : 'auto',
+                    marginLeft: message.type === 'attendant' ? '7px' : 'auto',
                     paddingLeft: message.type === 'attendant' ? '0px' : '0px'
                   }}
                 >
@@ -252,30 +252,31 @@ export default function Chat() {
                     style={message.type === 'attendant' ? {
                       backgroundColor: page.primaryColor || '#044785',
                       color: 'white',
-                      borderTopLeftRadius: '4px',
-                      borderBottomLeftRadius: '4px',
-                      borderTopRightRadius: '18px',
-                      borderBottomRightRadius: '18px',
-                      minWidth: '200px',
+                      borderRadius: '18px 18px 18px 4px',
+                      minWidth: '180px',
+                      maxWidth: '280px',
                       textAlign: 'left',
-                      boxShadow: '0 2px 8px rgba(0,0,0,0.15)',
+                      boxShadow: '0 1px 2px rgba(0,0,0,0.1)',
                       position: 'relative',
-                      padding: '12px 16px'
+                      padding: '10px 14px',
+                      margin: '2px 0',
+                      wordWrap: 'break-word'
                     } : {
-                      backgroundColor: '#f3f4f6',
+                      backgroundColor: '#e5e7eb',
                       color: '#374151',
-                      borderTopLeftRadius: '18px',
-                      borderBottomLeftRadius: '18px',
-                      borderTopRightRadius: '4px',
-                      borderBottomRightRadius: '4px',
+                      borderRadius: '18px 18px 4px 18px',
+                      minWidth: '180px',
+                      maxWidth: '280px',
                       textAlign: 'left',
-                      boxShadow: '0 2px 8px rgba(0,0,0,0.15)',
+                      boxShadow: '0 1px 2px rgba(0,0,0,0.1)',
                       position: 'relative',
-                      padding: '12px 16px'
+                      padding: '10px 14px',
+                      margin: '2px 0',
+                      wordWrap: 'break-word'
                     }}
                   >
                     <p style={{ 
-                      fontSize: '15px', 
+                      fontSize: '14px', 
                       lineHeight: '1.4', 
                       margin: '0',
                       fontWeight: '400',
@@ -296,7 +297,7 @@ export default function Chat() {
                     position: 'relative',
                     display: 'flex',
                     flexDirection: 'column',
-                    marginLeft: '10px',
+                    marginLeft: '7px',
                     paddingLeft: '0px'
                   }}
                 >
@@ -304,13 +305,12 @@ export default function Chat() {
                     className="message-content"
                     style={{
                       backgroundColor: page.primaryColor || '#044785',
-                      borderTopLeftRadius: '4px',
-                      borderBottomLeftRadius: '4px',
-                      borderTopRightRadius: '18px',
-                      borderBottomRightRadius: '18px',
-                      minWidth: '70px',
-                      boxShadow: '0 2px 8px rgba(0,0,0,0.15)',
-                      padding: '12px 16px'
+                      borderRadius: '18px 18px 18px 4px',
+                      minWidth: '60px',
+                      maxWidth: '80px',
+                      boxShadow: '0 1px 2px rgba(0,0,0,0.1)',
+                      padding: '8px 12px',
+                      margin: '2px 0'
                     }}
                   >
                     <div className="flex space-x-1">
@@ -325,7 +325,7 @@ export default function Chat() {
               {showResponseOptions && (
                 <div 
                   className="chat-options max-w-[75%] flex flex-col gap-3 mt-4 mb-5"
-                  style={{ marginLeft: '10px', paddingLeft: '0px' }}
+                  style={{ marginLeft: '7px', paddingLeft: '0px' }}
                 >
                   <button 
                     className="option-button w-full text-left px-5 py-4 rounded-lg font-medium text-gray-800 transition-all duration-200 transform hover:-translate-y-0.5 hover:shadow-lg"
@@ -357,7 +357,7 @@ export default function Chat() {
               {showPaymentOptions && (
                 <div 
                   className="chat-options max-w-[75%] flex flex-col gap-3 mt-4 mb-5"
-                  style={{ marginLeft: '10px', paddingLeft: '0px' }}
+                  style={{ marginLeft: '7px', paddingLeft: '0px' }}
                 >
                   <button 
                     className="option-button w-full text-left px-5 py-4 rounded-lg font-medium text-gray-800 transition-all duration-200 transform hover:-translate-y-0.5 hover:shadow-lg"
