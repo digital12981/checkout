@@ -75,19 +75,6 @@ export default function Chat() {
 
   return (
     <div className="min-h-screen bg-gray-100">
-      {/* Header */}
-      <div className="bg-gray-800 text-white py-2">
-        <div className="container mx-auto flex justify-between items-center px-4">
-          <div className="font-bold text-sm">
-            <img 
-              src="https://i.ibb.co/TDkn2RR4/Imagem-29-03-2025-a-s-17-32.jpg" 
-              alt="Logo" 
-              className="h-6" 
-            />
-          </div>
-        </div>
-      </div>
-
       {/* Brand Header */}
       <div 
         className="py-3"
@@ -137,14 +124,9 @@ export default function Chat() {
               style={{ height: 'calc(100vh - 200px)', minHeight: '400px' }}
             >
               {messages.map((message, index) => (
-                <div key={index} className="flex items-start space-x-3">
-                  <img 
-                    src={profilePhoto}
-                    className="w-10 h-10 rounded-full object-cover flex-shrink-0"
-                    alt={attendantName}
-                  />
+                <div key={index} className="flex justify-start">
                   <div 
-                    className="max-w-xs lg:max-w-md px-4 py-3 rounded-lg text-white"
+                    className="max-w-xs lg:max-w-md px-4 py-3 rounded-lg text-white ml-16"
                     style={{ backgroundColor: page.primaryColor || '#044785' }}
                   >
                     <p className="text-sm leading-relaxed whitespace-pre-wrap">
@@ -155,14 +137,9 @@ export default function Chat() {
               ))}
 
               {isTyping && (
-                <div className="flex items-start space-x-3">
-                  <img 
-                    src={profilePhoto}
-                    className="w-10 h-10 rounded-full object-cover flex-shrink-0"
-                    alt={attendantName}
-                  />
+                <div className="flex justify-start">
                   <div 
-                    className="px-4 py-3 rounded-lg"
+                    className="px-4 py-3 rounded-lg ml-16"
                     style={{ backgroundColor: '#f1f1f1' }}
                   >
                     <div className="flex space-x-1">
