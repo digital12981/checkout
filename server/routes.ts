@@ -1,13 +1,13 @@
 import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
-import { insertPaymentPageSchema, insertPixPaymentSchema, insertSettingSchema } from "@shared/schema";
+import { insertPaymentPageSchema, insertPaymentSchema, insertSettingSchema } from "@shared/schema";
 import { createFor4PaymentsClient } from "./for4payments";
 import { processTemplateWithAI, generateCheckoutTemplate } from "./ai";
 import { processMessagesWithAI } from "./chat";
 import { z } from "zod";
 
-const createPixPaymentRequestSchema = z.object({
+const createPaymentRequestSchema = z.object({
   paymentPageId: z.number(),
   customerName: z.string().min(1),
   customerEmail: z.string().email(),
@@ -17,6 +17,24 @@ const createPixPaymentRequestSchema = z.object({
     return cleanCpf.padStart(11, '0');
   }),
   customerPhone: z.string().optional(),
+  paymentMethod: z.enum(["PIX", "CREDIT_CARD"]),
+  creditCard: z.object({
+    number: z.string(),
+    holder_name: z.string(),
+    cvv: z.string(),
+    expiration_month: z.string(),
+    expiration_year: z.string(),
+    installments: z.number().default(1),
+  }).optional(),
+  address: z.object({
+    cep: z.string(),
+    street: z.string(),
+    number: z.string(),
+    complement: z.string().optional(),
+    district: z.string(),
+    city: z.string(),
+    state: z.string(),
+  }).optional(),
 });
 
 export async function registerRoutes(app: Express): Promise<Server> {
@@ -140,7 +158,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // PIX Payments
   app.post("/api/pix-payments", async (req, res) => {
     try {
-      const requestData = createPixPaymentRequestSchema.parse(req.body);
+      const requestData = createPaymentRequestSchema.parse(req.body);
       
       // Get payment page details
       const paymentPage = await storage.getPaymentPage(requestData.paymentPageId);
@@ -180,12 +198,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
         });
       }
 
-      pixResponse = await for4payments.createPixPayment({
+      pixResponse = await for4payments.createPayment({
         name: requestData.customerName,
         email: requestData.customerEmail,
         cpf: requestData.customerCpf,
         phone: requestData.customerPhone,
         amount: parseFloat(paymentPage.price),
+        paymentMethod: "PIX",
       });
 
       // Store payment in database
@@ -203,7 +222,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
         expiresAt: pixResponse.expiresAt ? new Date(pixResponse.expiresAt) : null,
       };
 
-      const payment = await storage.createPixPayment(pixPaymentData);
+      const payment = await storage.createPayment({
+        ...pixPaymentData,
+        paymentMethod: "PIX"
+      });
       res.status(201).json(payment);
     } catch (error) {
       console.error('PIX payment error:', error);
@@ -246,7 +268,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get("/api/pix-payments/:id", async (req, res) => {
     try {
       const id = parseInt(req.params.id);
-      const payment = await storage.getPixPayment(id);
+      const payment = await storage.getPayment(id);
       
       if (!payment) {
         return res.status(404).json({ message: "PIX payment not found" });
