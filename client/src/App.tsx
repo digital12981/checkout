@@ -5,6 +5,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import Dashboard from "@/pages/dashboard";
 import CheckoutFinal from "@/pages/checkout-final";
+import CheckoutUnified from "@/pages/checkout-unified";
 import Chat from "@/pages/chat";
 import EditPage from "@/pages/edit-page";
 import HtmlEditor from "@/pages/html-editor";
@@ -20,8 +21,8 @@ function Router() {
       <Route path="/pages/edit/:id" component={EditPage} />
       <Route path="/pages/html-edit/:id" component={HtmlEditor} />
       <Route path="/chat/:id" component={Chat} />
-      <Route path="/checkout/:id" component={CheckoutFinal} />
-      <Route path="/pagamento/:id" component={CheckoutFinal} />
+      <Route path="/checkout/:id" component={CheckoutUnified} />
+      <Route path="/pagamento/:id" component={CheckoutUnified} />
       <Route component={NotFound} />
     </Switch>
   );
