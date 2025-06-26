@@ -50,16 +50,36 @@ export class For4PaymentsAPI {
     return `${ddd}${number}`;
   }
 
-  async createPixPayment(data: {
+  async createPayment(data: {
     name: string;
     email: string;
     cpf: string;
     phone?: string;
     amount: number;
+    paymentMethod: "PIX" | "CREDIT_CARD";
+    creditCard?: {
+      token?: string;
+      installments?: number;
+      number?: string;
+      holder_name?: string;
+      cvv?: string;
+      expiration_month?: string;
+      expiration_year?: string;
+    };
+    address?: {
+      cep?: string;
+      street?: string;
+      number?: string;
+      complement?: string;
+      district?: string;
+      city?: string;
+      state?: string;
+    };
   }): Promise<{
     id: string;
-    pixCode: string;
+    pixCode?: string;
     pixQrCode?: string;
+    cardToken?: string;
     expiresAt?: string;
     status: string;
   }> {
