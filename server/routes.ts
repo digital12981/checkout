@@ -2,7 +2,7 @@ import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { insertPaymentPageSchema, insertPaymentSchema, insertSettingSchema } from "@shared/schema";
-import { createFor4PaymentsClient } from "./for4payments";
+import { createFor4PaymentsClient } from "./for4payments-simple";
 import { processTemplateWithAI, generateCheckoutTemplate } from "./ai";
 import { processMessagesWithAI } from "./chat";
 import { z } from "zod";
@@ -183,7 +183,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         });
       }
       
-      const { For4PaymentsAPI } = await import("./for4payments");
+      const { For4PaymentsAPI } = await import("./for4payments-simple");
       const for4payments = new For4PaymentsAPI(apiKey);
       console.log("For4Payments client created successfully with key:", apiKey.substring(0, 8) + "...");
       

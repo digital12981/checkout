@@ -95,11 +95,7 @@ export default function CheckoutUnified() {
   // Create payment mutation
   const createPaymentMutation = useMutation({
     mutationFn: async (paymentData: any): Promise<Payment> => {
-      const response = await apiRequest({
-        url: "/api/payments",
-        method: "POST",
-        body: paymentData,
-      });
+      const response = await apiRequest("/api/payments", "POST", paymentData);
       return response as Payment;
     },
     onSuccess: (paymentData: Payment) => {
