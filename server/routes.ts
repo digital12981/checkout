@@ -155,8 +155,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // PIX Payments
-  app.post("/api/pix-payments", async (req, res) => {
+  // Payments (PIX and Credit Card)
+  app.post("/api/payments", async (req, res) => {
     try {
       const requestData = createPaymentRequestSchema.parse(req.body);
       
@@ -198,34 +198,44 @@ export async function registerRoutes(app: Express): Promise<Server> {
         });
       }
 
-      pixResponse = await for4payments.createPayment({
+      const paymentResponse = await for4payments.createPayment({
         name: requestData.customerName,
         email: requestData.customerEmail,
         cpf: requestData.customerCpf,
         phone: requestData.customerPhone,
         amount: parseFloat(paymentPage.price),
-        paymentMethod: "PIX",
+        paymentMethod: requestData.paymentMethod,
+        creditCard: requestData.creditCard,
+        address: requestData.address,
       });
 
       // Store payment in database
-      const pixPaymentData = {
+      const paymentData = {
         paymentPageId: requestData.paymentPageId,
         customerName: requestData.customerName,
         customerEmail: requestData.customerEmail,
         customerCpf: requestData.customerCpf,
         customerPhone: requestData.customerPhone || null,
         amount: paymentPage.price,
-        pixCode: pixResponse.pixCode,
-        pixQrCode: pixResponse.pixQrCode || null,
-        transactionId: pixResponse.id,
-        status: pixResponse.status,
-        expiresAt: pixResponse.expiresAt ? new Date(pixResponse.expiresAt) : null,
+        paymentMethod: requestData.paymentMethod,
+        pixCode: paymentResponse.pixCode || null,
+        pixQrCode: paymentResponse.pixQrCode || null,
+        cardToken: paymentResponse.cardToken || null,
+        cardInstallments: requestData.creditCard?.installments || null,
+        cardLastFour: requestData.creditCard?.number?.slice(-4) || null,
+        cep: requestData.address?.cep || null,
+        street: requestData.address?.street || null,
+        number: requestData.address?.number || null,
+        complement: requestData.address?.complement || null,
+        district: requestData.address?.district || null,
+        city: requestData.address?.city || null,
+        state: requestData.address?.state || null,
+        transactionId: paymentResponse.id,
+        status: paymentResponse.status,
+        expiresAt: paymentResponse.expiresAt ? new Date(paymentResponse.expiresAt) : null,
       };
 
-      const payment = await storage.createPayment({
-        ...pixPaymentData,
-        paymentMethod: "PIX"
-      });
+      const payment = await storage.createPayment(paymentData);
       res.status(201).json(payment);
     } catch (error) {
       console.error('PIX payment error:', error);
@@ -258,7 +268,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.get("/api/pix-payments", async (req, res) => {
     try {
-      const payments = await storage.getPixPayments();
+      const payments = await storage.getPayments();
       res.json(payments);
     } catch (error) {
       res.status(500).json({ message: "Failed to fetch PIX payments" });
@@ -284,23 +294,23 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get("/api/stats", async (req, res) => {
     try {
       const pages = await storage.getPaymentPages();
-      const payments = await storage.getPixPayments();
+      const payments = await storage.getPayments();
       
       const today = new Date();
       today.setHours(0, 0, 0, 0);
       
-      const paymentsToday = payments.filter(p => {
+      const paymentsToday = payments.filter((p: any) => {
         const paymentDate = new Date(p.createdAt);
         paymentDate.setHours(0, 0, 0, 0);
         return paymentDate.getTime() === today.getTime();
       });
 
       const totalRevenue = payments
-        .filter(p => p.status === 'paid' || p.status === 'completed')
-        .reduce((sum, p) => sum + parseFloat(p.amount), 0);
+        .filter((p: any) => p.status === 'paid' || p.status === 'completed')
+        .reduce((sum: number, p: any) => sum + parseFloat(p.amount), 0);
 
       const conversionRate = payments.length > 0 
-        ? (payments.filter(p => p.status === 'paid' || p.status === 'completed').length / payments.length) * 100
+        ? (payments.filter((p: any) => p.status === 'paid' || p.status === 'completed').length / payments.length) * 100
         : 0;
 
       res.json({
