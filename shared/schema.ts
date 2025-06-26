@@ -24,7 +24,7 @@ export const paymentPages = pgTable("payment_pages", {
   // Custom texts
   customTitle: text("custom_title"),
   customSubtitle: text("custom_subtitle"),
-  customButtonText: text("custom_button_text").default("Pagar com PIX"),
+  customButtonText: text("custom_button_text").default("Finalizar Pagamento"),
   customInstructions: text("custom_instructions"),
   
   // Layout options
@@ -62,7 +62,7 @@ export const paymentPages = pgTable("payment_pages", {
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
 });
 
-export const pixPayments = pgTable("pix_payments", {
+export const payments = pgTable("payments", {
   id: serial("id").primaryKey(),
   paymentPageId: integer("payment_page_id").references(() => paymentPages.id).notNull(),
   customerName: text("customer_name").notNull(),
@@ -70,8 +70,28 @@ export const pixPayments = pgTable("pix_payments", {
   customerCpf: text("customer_cpf").notNull(),
   customerPhone: text("customer_phone"),
   amount: decimal("amount", { precision: 10, scale: 2 }).notNull(),
+  paymentMethod: text("payment_method").notNull(), // "PIX" or "CREDIT_CARD"
+  
+  // PIX specific fields
   pixCode: text("pix_code"),
   pixQrCode: text("pix_qr_code"),
+  
+  // Credit card specific fields
+  cardToken: text("card_token"),
+  cardInstallments: integer("card_installments"),
+  cardLastFour: text("card_last_four"),
+  cardBrand: text("card_brand"),
+  
+  // Address fields for credit card
+  cep: text("cep"),
+  street: text("street"),
+  number: text("address_number"),
+  complement: text("complement"),
+  district: text("district"),
+  city: text("city"),
+  state: text("state"),
+  
+  // Transaction fields
   transactionId: text("transaction_id"),
   status: text("status").notNull().default("pending"),
   expiresAt: timestamp("expires_at"),
@@ -98,7 +118,7 @@ export const insertPaymentPageSchema = createInsertSchema(paymentPages).omit({
   updatedAt: true,
 });
 
-export const insertPixPaymentSchema = createInsertSchema(pixPayments).omit({
+export const insertPaymentSchema = createInsertSchema(payments).omit({
   id: true,
   createdAt: true,
   updatedAt: true,
@@ -116,8 +136,8 @@ export type User = typeof users.$inferSelect;
 export type InsertPaymentPage = z.infer<typeof insertPaymentPageSchema>;
 export type PaymentPage = typeof paymentPages.$inferSelect;
 
-export type InsertPixPayment = z.infer<typeof insertPixPaymentSchema>;
-export type PixPayment = typeof pixPayments.$inferSelect;
+export type InsertPayment = z.infer<typeof insertPaymentSchema>;
+export type Payment = typeof payments.$inferSelect;
 
 export type InsertSetting = z.infer<typeof insertSettingSchema>;
 export type Setting = typeof settings.$inferSelect;
