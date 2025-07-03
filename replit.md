@@ -109,6 +109,8 @@ CheckoutFy is a full-stack web application for creating and managing customizabl
   - Removido import estático do Vite no servidor, usando import dinâmico apenas em desenvolvimento
   - Criado build-server.js para compilação específica do servidor sem dependências de desenvolvimento
   - Testado servidor em modo produção com sucesso
+  - Criado server-production.js como alternativa estável para Heroku com rotas essenciais
+  - Atualizado Procfile para usar servidor simplificado que evita problemas de dependências
   - Criada documentação completa de deploy com troubleshooting
 - June 19, 2025: Implementado rodapé configurável com logo
   - Adicionado rodapé com cor do header e texto branco

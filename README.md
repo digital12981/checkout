@@ -112,10 +112,10 @@ heroku logs --tail
 
 2. **Erro ERR_MODULE_NOT_FOUND**: 
    ```bash
-   # Build do servidor
-   node build-server.js
-   git add dist/
-   git commit -m "Add server build"
+   # O Procfile usa server-production.js que é mais estável
+   # Apenas fazer deploy direto:
+   git add .
+   git commit -m "Deploy with production server"
    git push heroku main
    ```
 

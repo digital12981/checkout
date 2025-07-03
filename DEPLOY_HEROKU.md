@@ -54,7 +54,16 @@ heroku logs --tail
 
 Se a aplicação estiver crashando com ERR_MODULE_NOT_FOUND:
 
-### Método 1: Build Específico para Heroku
+### Método 1: Usar Servidor de Produção Simplificado
+```bash
+# O Procfile já está configurado para usar server-production.js
+# Apenas fazer deploy diretamente
+git add .
+git commit -m "Use production server for Heroku"
+git push heroku main
+```
+
+### Método 2: Build Específico para Heroku (se necessário)
 ```bash
 # Primeiro, buildar o servidor localmente
 node build-server.js
