@@ -101,7 +101,9 @@ CheckoutFy is a full-stack web application for creating and managing customizabl
   - Ajustado servidor para usar variável PORT do Heroku
   - Movidas dependências de build para produção
   - Adicionado suporte a PostgreSQL do Heroku
-  - Criada documentação completa de deploy
+  - Removido runtime.txt que causava conflito com buildpack Python
+  - Configurado engines no package.json para forçar Node.js
+  - Criada documentação completa de deploy com troubleshooting
 - June 19, 2025: Implementado rodapé configurável com logo
   - Adicionado rodapé com cor do header e texto branco
   - Logo redimensionável e texto editável ("INSS 2025")

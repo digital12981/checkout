@@ -30,24 +30,29 @@ heroku login
 heroku create your-app-name
 ```
 
-4. **Adicionar PostgreSQL**
+4. **Definir buildpack Node.js explicitamente**
+```bash
+heroku buildpacks:set heroku/nodejs
+```
+
+5. **Adicionar PostgreSQL**
 ```bash
 heroku addons:create heroku-postgresql:essential-0
 ```
 
-5. **Configurar variáveis de ambiente**
+6. **Configurar variáveis de ambiente**
 ```bash
 heroku config:set NODE_ENV=production
 heroku config:set FOR4PAYMENTS_API_KEY=your_api_key_here
 heroku config:set ANTHROPIC_API_KEY=your_api_key_here
 ```
 
-6. **Deploy**
+7. **Deploy**
 ```bash
 git push heroku main
 ```
 
-7. **Executar migrações do banco**
+8. **Executar migrações do banco**
 ```bash
 heroku run npm run db:push
 ```
@@ -97,9 +102,17 @@ heroku logs --tail
 
 ### Problemas Comuns
 
-1. **Erro de build**: Verifique se todas as dependências estão instaladas corretamente
-2. **Erro de banco**: Execute `heroku run npm run db:push` para aplicar migrações
-3. **Erro de porta**: O Heroku configura automaticamente a variável PORT
+1. **Erro de buildpack (Python detectado)**: 
+   ```bash
+   heroku buildpacks:clear
+   heroku buildpacks:set heroku/nodejs
+   ```
+
+2. **Erro de build**: Verifique se todas as dependências estão instaladas corretamente
+
+3. **Erro de banco**: Execute `heroku run npm run db:push` para aplicar migrações
+
+4. **Erro de porta**: O Heroku configura automaticamente a variável PORT
 
 ### Suporte
 
