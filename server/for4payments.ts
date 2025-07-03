@@ -50,36 +50,16 @@ export class For4PaymentsAPI {
     return `${ddd}${number}`;
   }
 
-  async createPayment(data: {
+  async createPixPayment(data: {
     name: string;
     email: string;
     cpf: string;
     phone?: string;
     amount: number;
-    paymentMethod: "PIX" | "CREDIT_CARD";
-    creditCard?: {
-      token?: string;
-      installments?: number;
-      number?: string;
-      holder_name?: string;
-      cvv?: string;
-      expiration_month?: string;
-      expiration_year?: string;
-    };
-    address?: {
-      cep?: string;
-      street?: string;
-      number?: string;
-      complement?: string;
-      district?: string;
-      city?: string;
-      state?: string;
-    };
   }): Promise<{
     id: string;
-    pixCode?: string;
+    pixCode: string;
     pixQrCode?: string;
-    cardToken?: string;
     expiresAt?: string;
     status: string;
   }> {
@@ -157,52 +137,52 @@ export class For4PaymentsAPI {
         console.log(`Phone not provided, generated automatically: ${phone}`);
       }
 
-      // Create payment payload based on method type
-      let paymentPayload: any = {
-        name: data.name,
-        email: email,
-        cpf: cpf,
-        phone: phone,
-        paymentMethod: data.paymentMethod,
-        amount: amountInCents,
-        traceable: true,
-        items: [{
-          title: "Produto",
-          quantity: 1,
-          unitPrice: amountInCents,
-          tangible: false
-        }]
-      };
-
-      // Add credit card specific fields if payment method is CREDIT_CARD
-      if (data.paymentMethod === "CREDIT_CARD" && data.creditCard) {
-        paymentPayload.creditCard = {
-          number: data.creditCard.number,
-          holder_name: data.creditCard.holder_name,
-          cvv: data.creditCard.cvv,
-          expiration_month: data.creditCard.expiration_month,
-          expiration_year: data.creditCard.expiration_year,
-          installments: data.creditCard.installments || 1
-        };
-
-        // Add address fields for credit card payments
-        if (data.address) {
-          paymentPayload = {
-            ...paymentPayload,
-            cep: data.address.cep,
-            street: data.address.street,
-            number: data.address.number,
-            complement: data.address.complement || "",
-            district: data.address.district,
-            city: data.address.city,
-            state: data.address.state
-          };
+      // Try different data structures based on For4Payments API variations
+      const paymentVariations = [
+        {
+          name: data.name,
+          email: email,
+          cpf: cpf,
+          phone: phone,
+          paymentMethod: "PIX",
+          amount: amountInCents,
+          items: [{
+            title: "Caixa com 25",
+            quantity: 1,
+            unitPrice: amountInCents,
+            tangible: false
+          }]
+        },
+        {
+          customer: {
+            name: data.name,
+            email: email,
+            cpf: cpf,
+            phone: phone
+          },
+          payment: {
+            method: "PIX",
+            amount: amountInCents
+          },
+          items: [{
+            title: "Caixa com 25",
+            quantity: 1,
+            unitPrice: amountInCents,
+            tangible: false
+          }]
+        },
+        {
+          customerName: data.name,
+          customerEmail: email,
+          customerCpf: cpf,
+          customerPhone: phone,
+          paymentMethod: "PIX",
+          amount: amountInCents,
+          description: "Caixa com 25"
         }
-      }
+      ];
 
-      console.log(`Creating ${data.paymentMethod} payment with payload structure`);
-
-      let paymentData = paymentPayload;
+      let paymentData = paymentVariations[0];
 
       console.log("Payment data formatted:", paymentData);
       console.log(`API Endpoint: ${this.apiUrl}/transaction.purchase`);

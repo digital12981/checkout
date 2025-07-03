@@ -1,14 +1,14 @@
 import { 
   users, 
   paymentPages, 
-  payments,
+  pixPayments,
   settings,
   type User, 
   type InsertUser,
   type PaymentPage,
   type InsertPaymentPage,
-  type Payment,
-  type InsertPayment,
+  type PixPayment,
+  type InsertPixPayment,
   type Setting,
   type InsertSetting
 } from "@shared/schema";
@@ -27,12 +27,12 @@ export interface IStorage {
   updatePaymentPage(id: number, page: Partial<InsertPaymentPage>): Promise<PaymentPage | undefined>;
   deletePaymentPage(id: number): Promise<boolean>;
   
-  // Payments (PIX and Credit Card)
-  getPayments(): Promise<Payment[]>;
-  getPayment(id: number): Promise<Payment | undefined>;
-  getPaymentsByPageId(pageId: number): Promise<Payment[]>;
-  createPayment(payment: InsertPayment): Promise<Payment>;
-  updatePayment(id: number, payment: Partial<InsertPayment>): Promise<Payment | undefined>;
+  // PIX Payments
+  getPixPayments(): Promise<PixPayment[]>;
+  getPixPayment(id: number): Promise<PixPayment | undefined>;
+  getPixPaymentsByPageId(pageId: number): Promise<PixPayment[]>;
+  createPixPayment(payment: InsertPixPayment): Promise<PixPayment>;
+  updatePixPayment(id: number, payment: Partial<InsertPixPayment>): Promise<PixPayment | undefined>;
   
   // Settings
   getSetting(key: string): Promise<Setting | undefined>;
@@ -90,33 +90,33 @@ export class DatabaseStorage implements IStorage {
     return (result.rowCount || 0) > 0;
   }
 
-  async getPayments(): Promise<Payment[]> {
-    return await db.select().from(payments).orderBy(desc(payments.createdAt));
+  async getPixPayments(): Promise<PixPayment[]> {
+    return await db.select().from(pixPayments).orderBy(desc(pixPayments.createdAt));
   }
 
-  async getPayment(id: number): Promise<Payment | undefined> {
-    const [payment] = await db.select().from(payments).where(eq(payments.id, id));
+  async getPixPayment(id: number): Promise<PixPayment | undefined> {
+    const [payment] = await db.select().from(pixPayments).where(eq(pixPayments.id, id));
     return payment || undefined;
   }
 
-  async getPaymentsByPageId(pageId: number): Promise<Payment[]> {
-    const allPayments = await db.select().from(payments).where(eq(payments.paymentPageId, pageId));
-    return allPayments;
+  async getPixPaymentsByPageId(pageId: number): Promise<PixPayment[]> {
+    const payments = await db.select().from(pixPayments).where(eq(pixPayments.paymentPageId, pageId));
+    return payments;
   }
 
-  async createPayment(insertPayment: InsertPayment): Promise<Payment> {
+  async createPixPayment(insertPayment: InsertPixPayment): Promise<PixPayment> {
     const [payment] = await db
-      .insert(payments)
+      .insert(pixPayments)
       .values(insertPayment)
       .returning();
     return payment;
   }
 
-  async updatePayment(id: number, updateData: Partial<InsertPayment>): Promise<Payment | undefined> {
+  async updatePixPayment(id: number, updateData: Partial<InsertPixPayment>): Promise<PixPayment | undefined> {
     const [payment] = await db
-      .update(payments)
+      .update(pixPayments)
       .set(updateData)
-      .where(eq(payments.id, id))
+      .where(eq(pixPayments.id, id))
       .returning();
     return payment || undefined;
   }

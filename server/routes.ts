@@ -1,13 +1,13 @@
 import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
-import { insertPaymentPageSchema, insertPaymentSchema, insertSettingSchema } from "@shared/schema";
-import { createFor4PaymentsClient } from "./for4payments-simple";
+import { insertPaymentPageSchema, insertPixPaymentSchema, insertSettingSchema } from "@shared/schema";
+import { createFor4PaymentsClient } from "./for4payments";
 import { processTemplateWithAI, generateCheckoutTemplate } from "./ai";
 import { processMessagesWithAI } from "./chat";
 import { z } from "zod";
 
-const createPaymentRequestSchema = z.object({
+const createPixPaymentRequestSchema = z.object({
   paymentPageId: z.number(),
   customerName: z.string().min(1),
   customerEmail: z.string().email(),
@@ -17,24 +17,6 @@ const createPaymentRequestSchema = z.object({
     return cleanCpf.padStart(11, '0');
   }),
   customerPhone: z.string().optional(),
-  paymentMethod: z.enum(["PIX", "CREDIT_CARD"]),
-  creditCard: z.object({
-    number: z.string(),
-    holder_name: z.string(),
-    cvv: z.string(),
-    expiration_month: z.string(),
-    expiration_year: z.string(),
-    installments: z.number().default(1),
-  }).optional(),
-  address: z.object({
-    cep: z.string(),
-    street: z.string(),
-    number: z.string(),
-    complement: z.string().optional(),
-    district: z.string(),
-    city: z.string(),
-    state: z.string(),
-  }).optional(),
 });
 
 export async function registerRoutes(app: Express): Promise<Server> {
@@ -155,10 +137,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Payments (PIX and Credit Card)
-  app.post("/api/payments", async (req, res) => {
+  // PIX Payments
+  app.post("/api/pix-payments", async (req, res) => {
     try {
-      const requestData = createPaymentRequestSchema.parse(req.body);
+      const requestData = createPixPaymentRequestSchema.parse(req.body);
       
       // Get payment page details
       const paymentPage = await storage.getPaymentPage(requestData.paymentPageId);
@@ -183,7 +165,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         });
       }
       
-      const { For4PaymentsAPI } = await import("./for4payments-simple");
+      const { For4PaymentsAPI } = await import("./for4payments");
       const for4payments = new For4PaymentsAPI(apiKey);
       console.log("For4Payments client created successfully with key:", apiKey.substring(0, 8) + "...");
       
@@ -198,44 +180,30 @@ export async function registerRoutes(app: Express): Promise<Server> {
         });
       }
 
-      const paymentResponse = await for4payments.createPayment({
+      pixResponse = await for4payments.createPixPayment({
         name: requestData.customerName,
         email: requestData.customerEmail,
         cpf: requestData.customerCpf,
         phone: requestData.customerPhone,
         amount: parseFloat(paymentPage.price),
-        paymentMethod: requestData.paymentMethod,
-        creditCard: requestData.creditCard,
-        address: requestData.address,
       });
 
       // Store payment in database
-      const paymentData = {
+      const pixPaymentData = {
         paymentPageId: requestData.paymentPageId,
         customerName: requestData.customerName,
         customerEmail: requestData.customerEmail,
         customerCpf: requestData.customerCpf,
         customerPhone: requestData.customerPhone || null,
         amount: paymentPage.price,
-        paymentMethod: requestData.paymentMethod,
-        pixCode: paymentResponse.pixCode || null,
-        pixQrCode: paymentResponse.pixQrCode || null,
-        cardToken: paymentResponse.cardToken || null,
-        cardInstallments: requestData.creditCard?.installments || null,
-        cardLastFour: requestData.creditCard?.number?.slice(-4) || null,
-        cep: requestData.address?.cep || null,
-        street: requestData.address?.street || null,
-        number: requestData.address?.number || null,
-        complement: requestData.address?.complement || null,
-        district: requestData.address?.district || null,
-        city: requestData.address?.city || null,
-        state: requestData.address?.state || null,
-        transactionId: paymentResponse.id,
-        status: paymentResponse.status,
-        expiresAt: paymentResponse.expiresAt ? new Date(paymentResponse.expiresAt) : null,
+        pixCode: pixResponse.pixCode,
+        pixQrCode: pixResponse.pixQrCode || null,
+        transactionId: pixResponse.id,
+        status: pixResponse.status,
+        expiresAt: pixResponse.expiresAt ? new Date(pixResponse.expiresAt) : null,
       };
 
-      const payment = await storage.createPayment(paymentData);
+      const payment = await storage.createPixPayment(pixPaymentData);
       res.status(201).json(payment);
     } catch (error) {
       console.error('PIX payment error:', error);
@@ -268,7 +236,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.get("/api/pix-payments", async (req, res) => {
     try {
-      const payments = await storage.getPayments();
+      const payments = await storage.getPixPayments();
       res.json(payments);
     } catch (error) {
       res.status(500).json({ message: "Failed to fetch PIX payments" });
@@ -278,7 +246,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get("/api/pix-payments/:id", async (req, res) => {
     try {
       const id = parseInt(req.params.id);
-      const payment = await storage.getPayment(id);
+      const payment = await storage.getPixPayment(id);
       
       if (!payment) {
         return res.status(404).json({ message: "PIX payment not found" });
@@ -294,23 +262,23 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get("/api/stats", async (req, res) => {
     try {
       const pages = await storage.getPaymentPages();
-      const payments = await storage.getPayments();
+      const payments = await storage.getPixPayments();
       
       const today = new Date();
       today.setHours(0, 0, 0, 0);
       
-      const paymentsToday = payments.filter((p: any) => {
+      const paymentsToday = payments.filter(p => {
         const paymentDate = new Date(p.createdAt);
         paymentDate.setHours(0, 0, 0, 0);
         return paymentDate.getTime() === today.getTime();
       });
 
       const totalRevenue = payments
-        .filter((p: any) => p.status === 'paid' || p.status === 'completed')
-        .reduce((sum: number, p: any) => sum + parseFloat(p.amount), 0);
+        .filter(p => p.status === 'paid' || p.status === 'completed')
+        .reduce((sum, p) => sum + parseFloat(p.amount), 0);
 
       const conversionRate = payments.length > 0 
-        ? (payments.filter((p: any) => p.status === 'paid' || p.status === 'completed').length / payments.length) * 100
+        ? (payments.filter(p => p.status === 'paid' || p.status === 'completed').length / payments.length) * 100
         : 0;
 
       res.json({
