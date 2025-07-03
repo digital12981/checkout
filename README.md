@@ -110,12 +110,12 @@ heroku logs --tail
    heroku buildpacks:set heroku/nodejs
    ```
 
-2. **Erro ERR_MODULE_NOT_FOUND**: 
+2. **Erro ERR_MODULE_NOT_FOUND**: ✅ **RESOLVIDO**
    ```bash
-   # O Procfile usa server-production.js que é mais estável
-   # Apenas fazer deploy direto:
+   # O servidor de produção está funcionando corretamente
+   # Para updates futuros:
    git add .
-   git commit -m "Deploy with production server"
+   git commit -m "Update application"
    git push heroku main
    ```
 
