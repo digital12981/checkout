@@ -47,11 +47,7 @@ import {
   Move,
   X,
   Edit,
-  Bold,
-  MessageCircle,
-  User,
-  Send,
-  Trash2
+  Bold
 } from "lucide-react";
 import UnifiedTemplateRenderer from "@/components/unified-template-renderer";
 
@@ -76,10 +72,6 @@ const editPageSchema = z.object({
   footerText: z.string().optional(),
   showFooterLogo: z.boolean(),
   footerLogoSize: z.number().min(20).max(100),
-  chatEnabled: z.boolean(),
-  chatProfilePhoto: z.string().optional(),
-  chatAttendantName: z.string().optional(),
-  chatMessages: z.string().optional(),
 });
 
 type EditPageForm = z.infer<typeof editPageSchema>;
@@ -119,12 +111,7 @@ export default function EditPage() {
   const [customElements, setCustomElements] = useState<CustomElement[]>([]);
   const [editingElement, setEditingElement] = useState<string | null>(null);
   const [capturedHTML, setCapturedHTML] = useState<string>("");
-  const [timeLeft, setTimeLeft] = useState(15 * 60); // 15 minutes
-  const [chatMessages, setChatMessages] = useState<any[]>([]);
-  const [editingMessageIndex, setEditingMessageIndex] = useState<number | null>(null);
-  const [newMessage, setNewMessage] = useState("");
-  const [aiPrompt, setAiPrompt] = useState("");
-  const [isProcessingAI, setIsProcessingAI] = useState(false);
+  const [timeLeft, setTimeLeft] = useState(15 * 60); // 15 minutes in seconds
 
   // Timer functionality
   useEffect(() => {
@@ -208,10 +195,6 @@ export default function EditPage() {
         footerText: pageData.footerText || "INSS 2025",
         showFooterLogo: pageData.showFooterLogo ?? true,
         footerLogoSize: pageData.footerLogoSize || 48,
-        chatEnabled: pageData.chatEnabled || false,
-        chatProfilePhoto: pageData.chatProfilePhoto || "",
-        chatAttendantName: pageData.chatAttendantName || "",
-        chatMessages: pageData.chatMessages || "",
       });
 
       try {
@@ -220,14 +203,6 @@ export default function EditPage() {
         console.log("Loaded custom elements:", elements);
       } catch {
         setCustomElements([]);
-      }
-
-      try {
-        const messages = JSON.parse(pageData.chatMessages || "[]");
-        setChatMessages(messages);
-        console.log("Loaded chat messages:", messages);
-      } catch {
-        setChatMessages([]);
       }
     } else if (page && !Array.isArray(page)) {
       const pageData = page as any;
@@ -261,49 +236,6 @@ export default function EditPage() {
         setCustomElements(elements);
       } catch {
         setCustomElements([]);
-      }
-
-      try {
-        const messages = JSON.parse(pageData.chatMessages || "[]");
-        setChatMessages(messages.length > 0 ? messages : [
-          { type: "attendant", content: `Olá! Aqui é a Tereza, atendente de RH. Como está?`, delay: 2000 },
-          { type: "attendant", content: `Vi que você tem interesse em ${pageData.productName}. É isso mesmo?`, delay: 3000 },
-          { type: "attendant", content: "Estou aqui para esclarecer qualquer dúvida sobre o processo de inscrição.", delay: 3500 },
-          { type: "attendant", content: "O processo é bem simples e rápido. Você realiza o pagamento e já fica inscrito!", delay: 4000 },
-          { type: "attendant", content: "⚡ ATENÇÃO: As vagas são limitadas e estão acabando rapidamente!", delay: 3000 },
-          { type: "attendant", content: "Não perca essa oportunidade! Clique no botão abaixo para garantir sua vaga:", delay: 2500 }
-        ]);
-      } catch {
-        setChatMessages([
-          { type: "attendant", content: `Olá! Aqui é a Tereza, atendente de RH. Como está?`, delay: 2000 },
-          { type: "attendant", content: `Vi que você tem interesse em ${pageData.productName || "nosso produto"}. É isso mesmo?`, delay: 3000 },
-          { type: "attendant", content: "Estou aqui para esclarecer qualquer dúvida sobre o processo de inscrição.", delay: 3500 },
-          { type: "attendant", content: "O processo é bem simples e rápido. Você realiza o pagamento e já fica inscrito!", delay: 4000 },
-          { type: "attendant", content: "⚡ ATENÇÃO: As vagas são limitadas e estão acabando rapidamente!", delay: 3000 },
-          { type: "attendant", content: "Não perca essa oportunidade! Clique no botão abaixo para garantir sua vaga:", delay: 2500 }
-        ]);
-      }
-
-      // Load chat messages
-      try {
-        const messages = JSON.parse(pageData.chatMessages || "[]");
-        setChatMessages(messages.length > 0 ? messages : [
-          { type: "attendant", content: `Olá! Aqui é a Tereza, atendente de RH. Como está?`, delay: 2000 },
-          { type: "attendant", content: `Vi que você tem interesse em ${pageData.productName}. É isso mesmo?`, delay: 3000 },
-          { type: "attendant", content: "Estou aqui para esclarecer qualquer dúvida sobre o processo de inscrição.", delay: 3500 },
-          { type: "attendant", content: "O processo é bem simples e rápido. Você realiza o pagamento e já fica inscrito!", delay: 4000 },
-          { type: "attendant", content: "⚡ ATENÇÃO: As vagas são limitadas e estão acabando rapidamente!", delay: 3000 },
-          { type: "attendant", content: "Não perca essa oportunidade! Clique no botão abaixo para garantir sua vaga:", delay: 2500 }
-        ]);
-      } catch {
-        setChatMessages([
-          { type: "attendant", content: `Olá! Aqui é a Tereza, atendente de RH. Como está?`, delay: 2000 },
-          { type: "attendant", content: `Vi que você tem interesse em ${pageData.productName || "nosso produto"}. É isso mesmo?`, delay: 3000 },
-          { type: "attendant", content: "Estou aqui para esclarecer qualquer dúvida sobre o processo de inscrição.", delay: 3500 },
-          { type: "attendant", content: "O processo é bem simples e rápido. Você realiza o pagamento e já fica inscrito!", delay: 4000 },
-          { type: "attendant", content: "⚡ ATENÇÃO: As vagas são limitadas e estão acabando rapidamente!", delay: 3000 },
-          { type: "attendant", content: "Não perca essa oportunidade! Clique no botão abaixo para garantir sua vaga:", delay: 2500 }
-        ]);
       }
     }
   }, [page, form]);
@@ -450,11 +382,7 @@ export default function EditPage() {
         customTitle: data.customTitle?.trim() || "",
         customSubtitle: data.customSubtitle?.trim() || "",
         customElements: JSON.stringify(customElements),
-        previewHtml: finalHTML,
-        chatEnabled: data.chatEnabled,
-        chatProfilePhoto: data.chatProfilePhoto,
-        chatAttendantName: data.chatAttendantName,
-        chatMessages: JSON.stringify(chatMessages || [])
+        previewHtml: finalHTML
       };
       
       updatePageMutation.mutate(updatedData);
@@ -490,62 +418,6 @@ export default function EditPage() {
     setCustomElements(prev => prev.filter(el => el.id !== id));
     setEditingElement(null);
   }, []);
-
-  // Chat functions
-  const addMessage = (type: 'attendant' | 'user', content: string, delay: number = 3000) => {
-    const newMessage = { type, content, delay };
-    setChatMessages(prev => [...prev, newMessage]);
-    setNewMessage("");
-  };
-
-  const updateMessage = (index: number, content: string) => {
-    setChatMessages(prev => 
-      prev.map((msg, i) => i === index ? { ...msg, content } : msg)
-    );
-    setEditingMessageIndex(null);
-  };
-
-  const deleteMessage = (index: number) => {
-    setChatMessages(prev => prev.filter((_, i) => i !== index));
-  };
-
-  const processWithAI = async () => {
-    if (!aiPrompt.trim()) return;
-    
-    setIsProcessingAI(true);
-    try {
-      const response = await fetch('/api/chat/process', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          prompt: aiPrompt,
-          currentMessages: chatMessages,
-          productName: form.getValues('productName'),
-          price: form.getValues('price')
-        })
-      });
-
-      if (response.ok) {
-        const result = await response.json();
-        setChatMessages(result.messages);
-        setAiPrompt("");
-        toast({
-          title: "Chat atualizado",
-          description: "As mensagens foram processadas com IA."
-        });
-      } else {
-        throw new Error('Falha ao processar com IA');
-      }
-    } catch (error) {
-      toast({
-        title: "Erro",
-        description: "Falha ao processar mensagens com IA.",
-        variant: "destructive"
-      });
-    } finally {
-      setIsProcessingAI(false);
-    }
-  };
 
   if (isLoading) {
     return <div>Carregando...</div>;
@@ -606,9 +478,9 @@ export default function EditPage() {
                 <Palette className="w-4 h-4 mr-1" />
                 Design
               </TabsTrigger>
-              <TabsTrigger value="chat">
-                <MessageCircle className="w-4 h-4 mr-1" />
-                Chat
+              <TabsTrigger value="elements">
+                <Layout className="w-4 h-4 mr-1" />
+                Elementos
               </TabsTrigger>
             </TabsList>
 
@@ -960,212 +832,67 @@ export default function EditPage() {
               </Form>
             </TabsContent>
 
-            <TabsContent value="chat" className="p-4 space-y-4">
-              <Form {...form}>
-                <div className="space-y-4">
-                  <FormField
-                    control={form.control}
-                    name="chatEnabled"
-                    render={({ field }) => (
-                      <FormItem className="flex flex-row items-center justify-between rounded-lg border p-3">
-                        <div className="space-y-0.5">
-                          <FormLabel>Habilitar Chat</FormLabel>
-                          <div className="text-sm text-muted-foreground">
-                            Ativar chat antes do checkout
-                          </div>
-                        </div>
-                        <FormControl>
-                          <Switch
-                            checked={field.value}
-                            onCheckedChange={field.onChange}
-                          />
-                        </FormControl>
-                      </FormItem>
-                    )}
-                  />
+            <TabsContent value="elements" className="p-4 space-y-4">
+              <div className="flex gap-2">
+                <Button 
+                  variant="outline" 
+                  size="sm" 
+                  onClick={() => addElement("text")}
+                  className="flex-1"
+                >
+                  <Type className="w-4 h-4 mr-1" />
+                  Texto
+                </Button>
+                <Button 
+                  variant="outline" 
+                  size="sm" 
+                  onClick={() => addElement("image")}
+                  className="flex-1"
+                >
+                  <Image className="w-4 h-4 mr-1" />
+                  Imagem
+                </Button>
+              </div>
 
-                  {form.watch("chatEnabled") && (
-                    <>
-                      <Separator />
-                      
-                      <div className="space-y-4">
-                        <h3 className="text-sm font-medium">Configurações do Atendente</h3>
-                        
-                        <FormField
-                          control={form.control}
-                          name="chatProfilePhoto"
-                          render={({ field }) => (
-                            <FormItem>
-                              <FormLabel>Foto do Perfil</FormLabel>
-                              <FormControl>
-                                <Input {...field} placeholder="URL da foto do atendente" />
-                              </FormControl>
-                              <FormMessage />
-                            </FormItem>
-                          )}
-                        />
-
-                        <FormField
-                          control={form.control}
-                          name="chatAttendantName"
-                          render={({ field }) => (
-                            <FormItem>
-                              <FormLabel>Nome da Atendente de RH</FormLabel>
-                              <FormControl>
-                                <Input {...field} placeholder="Ex: Tereza Alencar" />
-                              </FormControl>
-                              <FormMessage />
-                            </FormItem>
-                          )}
-                        />
-                      </div>
-
-                      <Separator />
-
-                      <div className="space-y-4">
-                        <h3 className="text-sm font-medium">IA - Personalização de Mensagens</h3>
-                        
-                        <div className="space-y-2">
-                          <Textarea
-                            placeholder="Descreva como você quer que o chat funcione. Ex: 'Faça o chat mais convincente para vendas de curso' ou 'Adicione mais urgência nas mensagens'"
-                            value={aiPrompt}
-                            onChange={(e) => setAiPrompt(e.target.value)}
-                            rows={3}
-                          />
-                          <Button 
-                            onClick={processWithAI}
-                            disabled={isProcessingAI || !aiPrompt.trim()}
-                            size="sm"
-                            className="w-full"
-                          >
-                            {isProcessingAI ? (
-                              <>
-                                <div className="animate-spin h-4 w-4 mr-2 border-2 border-white border-t-transparent rounded-full"></div>
-                                Processando...
-                              </>
-                            ) : (
-                              <>
-                                <Send className="w-4 h-4 mr-2" />
-                                Processar com IA
-                              </>
-                            )}
-                          </Button>
-                        </div>
-                      </div>
-
-                      <Separator />
-
-                      <div className="space-y-4">
-                        <div className="flex items-center justify-between">
-                          <h3 className="text-sm font-medium">Mensagens do Chat</h3>
-                          <Button
-                            size="sm"
-                            variant="outline"
-                            onClick={() => addMessage('attendant', 'Nova mensagem')}
-                          >
-                            <MessageCircle className="w-4 h-4 mr-1" />
-                            Adicionar
-                          </Button>
-                        </div>
-
-                        <div className="space-y-2 max-h-96 overflow-y-auto">
-                          {chatMessages.map((message, index) => (
-                            <Card key={index} className="p-3">
-                              <div className="space-y-2">
-                                <div className="flex items-center justify-between">
-                                  <div className="flex items-center gap-2">
-                                    <User className="w-4 h-4" />
-                                    <Badge variant={message.type === 'attendant' ? 'default' : 'secondary'}>
-                                      {message.type === 'attendant' ? 'Atendente' : 'Cliente'}
-                                    </Badge>
-                                    <span className="text-xs text-gray-500">
-                                      Delay: {message.delay || 1000}ms
-                                    </span>
-                                  </div>
-                                  <div className="flex gap-1">
-                                    <Button
-                                      variant="ghost"
-                                      size="sm"
-                                      onClick={() => setEditingMessageIndex(index)}
-                                    >
-                                      <Edit className="w-3 h-3" />
-                                    </Button>
-                                    <Button
-                                      variant="ghost"
-                                      size="sm"
-                                      onClick={() => deleteMessage(index)}
-                                    >
-                                      <Trash2 className="w-3 h-3" />
-                                    </Button>
-                                  </div>
-                                </div>
-                                
-                                {editingMessageIndex === index ? (
-                                  <div className="space-y-2">
-                                    <Textarea
-                                      value={message.content}
-                                      onChange={(e) => {
-                                        const newMessages = [...chatMessages];
-                                        newMessages[index].content = e.target.value;
-                                        setChatMessages(newMessages);
-                                      }}
-                                      rows={2}
-                                    />
-                                    <div className="flex gap-2">
-                                      <Button
-                                        size="sm"
-                                        onClick={() => setEditingMessageIndex(null)}
-                                      >
-                                        Salvar
-                                      </Button>
-                                      <Button
-                                        size="sm"
-                                        variant="outline"
-                                        onClick={() => setEditingMessageIndex(null)}
-                                      >
-                                        Cancelar
-                                      </Button>
-                                    </div>
-                                  </div>
-                                ) : (
-                                  <div className="text-sm text-gray-700 whitespace-pre-wrap">
-                                    {message.content}
-                                  </div>
-                                )}
-                              </div>
-                            </Card>
-                          ))}
-                        </div>
-
-                        {chatMessages.length === 0 && (
-                          <div className="text-center text-gray-500 py-8">
-                            <MessageCircle className="w-8 h-8 mx-auto mb-2 opacity-50" />
-                            <p>Nenhuma mensagem configurada</p>
-                            <p className="text-xs">Habilite o chat para carregar mensagens padrão</p>
-                          </div>
+              <div className="space-y-2">
+                {customElements.map((element) => (
+                  <Card key={element.id} className="p-3">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-2">
+                        {element.type === "text" ? (
+                          <Type className="w-4 h-4" />
+                        ) : (
+                          <Image className="w-4 h-4" />
                         )}
-                      </div>
-
-                      <Separator />
-
-                      <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-                        <div className="flex items-start gap-2">
-                          <Info className="w-4 h-4 text-blue-600 mt-0.5" />
-                          <div className="text-sm text-blue-800">
-                            <p className="font-medium">Como funciona o Chat:</p>
-                            <ul className="mt-1 list-disc list-inside space-y-1 text-xs">
-                              <li>O chat aparece antes do formulário de checkout</li>
-                              <li>Mensagens são exibidas em sequência com delays configuráveis</li>
-                              <li>Ao final do chat, aparece o botão de pagamento</li>
-                              <li>Use a IA para otimizar as mensagens para conversão</li>
-                            </ul>
+                        <div>
+                          <div className="font-medium text-sm">
+                            {element.type === "text" ? "Texto" : "Imagem"}
+                          </div>
+                          <div className="text-xs text-gray-600 truncate max-w-32">
+                            {element.content}
                           </div>
                         </div>
                       </div>
-                    </>
-                  )}
-                </div>
-              </Form>
+                      <div className="flex gap-1">
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => setEditingElement(element.id)}
+                        >
+                          <Edit className="w-3 h-3" />
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => deleteElement(element.id)}
+                        >
+                          <X className="w-3 h-3" />
+                        </Button>
+                      </div>
+                    </div>
+                  </Card>
+                ))}
+              </div>
             </TabsContent>
           </Tabs>
         </div>
@@ -1173,118 +900,16 @@ export default function EditPage() {
         <div className="w-[28rem] bg-gray-50 overflow-auto border-l">
           <Tabs value={previewTab} onValueChange={setPreviewTab} className="h-full">
             <TabsList className="m-4">
-              {formData.chatEnabled ? (
-                <TabsTrigger value="chat">
-                  <MessageCircle className="w-4 h-4 mr-2" />
-                  Chat
-                </TabsTrigger>
-              ) : (
-                <TabsTrigger value="form">
-                  <ShoppingBag className="w-4 h-4 mr-2" />
-                  Formulário
-                </TabsTrigger>
-              )}
+              <TabsTrigger value="form">
+                <ShoppingBag className="w-4 h-4 mr-2" />
+                Formulário
+              </TabsTrigger>
               <TabsTrigger value="payment">
                 <QrCode className="w-4 h-4 mr-2" />
                 Pagamento
               </TabsTrigger>
             </TabsList>
             
-            <TabsContent value="chat" className="p-4 h-full">
-              <div className="flex justify-center h-full">
-                <div className="w-full max-w-md border bg-white overflow-auto shadow-lg" style={{ height: '100%', minHeight: '600px' }}>
-                  {chatMessages.length > 0 ? (
-                    <div className="h-full flex flex-col">
-                      <div className="bg-gray-800 text-white py-2 px-4">
-                        <div className="text-xs">Preview do Chat</div>
-                      </div>
-                      
-                      <div 
-                        className="py-3 px-4"
-                        style={{ backgroundColor: formData.primaryColor || '#044785' }}
-                      >
-                        <div className="text-center">
-                          {formData.showLogo && formData.logoUrl && (
-                            <img 
-                              src={formData.logoUrl} 
-                              alt="Logo" 
-                              className="h-8 mx-auto object-contain" 
-                            />
-                          )}
-                        </div>
-                      </div>
-
-                      <div className="bg-gray-100 text-gray-800 px-4 py-3">
-                        <div className="flex items-center">
-                          <div className="mr-4 relative">
-                            <img 
-                              src={formData.chatProfilePhoto || "https://i.ibb.co/BHcYZ8tf/assets-task-01jy21c21yewes4neft2x006sh-1750267829-img-1-11zon.webp"}
-                              className="w-12 h-12 rounded-full object-cover border-2"
-                              style={{ borderColor: formData.primaryColor || '#044785' }}
-                              alt={formData.chatAttendantName || "Atendente"}
-                            />
-                            <span 
-                              className="absolute bottom-0 right-0 w-3 h-3 rounded-full border-2 border-white"
-                              style={{ backgroundColor: '#28a745' }}
-                            ></span>
-                          </div>
-                          <div>
-                            <h2 className="text-gray-800 text-lg font-semibold">
-                              {formData.chatAttendantName || "Atendente"}
-                            </h2>
-                            <p className="text-gray-600 text-sm">Coordenadora de RH</p>
-                          </div>
-                        </div>
-                      </div>
-
-                      <div className="p-4 space-y-4 flex-1 overflow-y-auto">
-                        {chatMessages.slice(0, 2).map((message, index) => (
-                          <div key={index} className="message-bubble incoming-message mb-3">
-                            <div 
-                              className="message-content px-4 py-3 rounded-lg text-white text-sm"
-                              style={{ 
-                                backgroundColor: formData.primaryColor || '#044785',
-                                borderTopLeftRadius: '2px',
-                                maxWidth: '75%',
-                                minWidth: '200px'
-                              }}
-                            >
-                              {message.content}
-                            </div>
-                          </div>
-                        ))}
-                        
-                        {chatMessages.length > 2 && (
-                          <div className="text-center text-gray-500 text-sm">
-                            ... mais {chatMessages.length - 2} mensagens
-                          </div>
-                        )}
-
-                        <div className="text-center mt-4">
-                          <button 
-                            className="text-white font-semibold py-3 px-6 rounded-full text-sm"
-                            style={{ 
-                              background: `linear-gradient(90deg, ${formData.primaryColor || '#044785'} 0%, ${formData.accentColor || '#FFD700'} 100%)`,
-                            }}
-                          >
-                            Prosseguir para Pagamento
-                          </button>
-                        </div>
-                      </div>
-                    </div>
-                  ) : (
-                    <div className="flex items-center justify-center h-full text-gray-500">
-                      <div className="text-center">
-                        <MessageCircle className="w-16 h-16 mx-auto mb-4 opacity-50" />
-                        <p>Nenhuma mensagem de chat configurada</p>
-                        <p className="text-sm">Configure o chat na aba Chat</p>
-                      </div>
-                    </div>
-                  )}
-                </div>
-              </div>
-            </TabsContent>
-
             <TabsContent value="form" className="p-4 h-full">
               <div className="flex justify-center h-full">
                 <div className="w-full max-w-md border bg-white overflow-auto shadow-lg" style={{ height: '100%', minHeight: '600px' }}>

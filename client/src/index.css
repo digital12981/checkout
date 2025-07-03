@@ -2,21 +2,6 @@
 @tailwind components;
 @tailwind utilities;
 
-@keyframes loadingFade {
-  0% {
-    opacity: 0.3;
-    transform: scale(0.8);
-  }
-  50% {
-    opacity: 1;
-    transform: scale(1.2);
-  }
-  100% {
-    opacity: 0.3;
-    transform: scale(0.8);
-  }
-}
-
 :root {
   --background: hsl(0, 0%, 100%);
   --foreground: hsl(240, 10%, 3.9%);

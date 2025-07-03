@@ -4,7 +4,6 @@ import { storage } from "./storage";
 import { insertPaymentPageSchema, insertPixPaymentSchema, insertSettingSchema } from "@shared/schema";
 import { createFor4PaymentsClient } from "./for4payments";
 import { processTemplateWithAI, generateCheckoutTemplate } from "./ai";
-import { processMessagesWithAI } from "./chat";
 import { z } from "zod";
 
 const createPixPaymentRequestSchema = z.object({
@@ -480,22 +479,5 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   const httpServer = createServer(app);
-  // Chat AI processing route
-  app.post("/api/chat/process", async (req, res) => {
-    try {
-      const { prompt, currentMessages, productName, price } = req.body;
-      
-      if (!prompt || !productName) {
-        return res.status(400).json({ message: "Missing required fields" });
-      }
-
-      const messages = await processMessagesWithAI(prompt, currentMessages || [], productName, price || "0");
-      res.json({ messages });
-    } catch (error) {
-      console.error("Error processing chat with AI:", error);
-      res.status(500).json({ message: "Failed to process chat with AI" });
-    }
-  });
-
   return httpServer;
 }

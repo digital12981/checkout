@@ -51,12 +51,6 @@ export const paymentPages = pgTable("payment_pages", {
   // Skip form option
   skipForm: boolean("skip_form").default(false),
   
-  // Chat configuration fields
-  chatEnabled: boolean("chat_enabled").default(false),
-  chatProfilePhoto: text("chat_profile_photo"),
-  chatAttendantName: text("chat_attendant_name"),
-  chatMessages: text("chat_messages"), // JSON string of chat messages
-  
   status: text("status").notNull().default("active"),
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
