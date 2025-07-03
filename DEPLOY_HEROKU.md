@@ -54,11 +54,15 @@ heroku logs --tail
 
 Se a aplicação estiver crashando com ERR_MODULE_NOT_FOUND:
 
-### Método 1: Rebuild Manual
+### Método 1: Build Específico para Heroku
 ```bash
-# Forçar rebuild
-heroku run npm run build
-heroku restart
+# Primeiro, buildar o servidor localmente
+node build-server.js
+
+# Depois fazer deploy
+git add .
+git commit -m "Fix server build for Heroku"
+git push heroku main
 ```
 
 ### Método 2: Verificar Logs

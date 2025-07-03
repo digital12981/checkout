@@ -112,8 +112,11 @@ heroku logs --tail
 
 2. **Erro ERR_MODULE_NOT_FOUND**: 
    ```bash
-   heroku run npm run build
-   heroku restart
+   # Build do servidor
+   node build-server.js
+   git add dist/
+   git commit -m "Add server build"
+   git push heroku main
    ```
 
 2. **Erro de build**: Verifique se todas as dependências estão instaladas corretamente

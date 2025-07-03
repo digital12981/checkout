@@ -106,6 +106,9 @@ CheckoutFy is a full-stack web application for creating and managing customizabl
   - Criado script de build customizado (build.js) para resolver problemas de módulos ESM
   - Atualizado Procfile para usar arquivo compilado diretamente
   - Adicionado tsconfig.server.json para build otimizado do servidor
+  - Removido import estático do Vite no servidor, usando import dinâmico apenas em desenvolvimento
+  - Criado build-server.js para compilação específica do servidor sem dependências de desenvolvimento
+  - Testado servidor em modo produção com sucesso
   - Criada documentação completa de deploy com troubleshooting
 - June 19, 2025: Implementado rodapé configurável com logo
   - Adicionado rodapé com cor do header e texto branco

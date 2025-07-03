@@ -1,0 +1,31 @@
+2025-07-03T17:24:26.337585+00:00 app[web.1]:     at ModuleLoader.resolve (node:internal/modules/esm/loader:708:38)
+2025-07-03T17:24:26.337585+00:00 app[web.1]:     at ModuleLoader.getModuleJobForImport (node:internal/modules/esm/loader:309:38)
+2025-07-03T17:24:26.337586+00:00 app[web.1]:     at #link (node:internal/modules/esm/module_job:202:49) {
+2025-07-03T17:24:26.337586+00:00 app[web.1]:   code: 'ERR_MODULE_NOT_FOUND'
+2025-07-03T17:24:26.337586+00:00 app[web.1]: }
+2025-07-03T17:24:26.337586+00:00 app[web.1]: 
+2025-07-03T17:24:26.337586+00:00 app[web.1]: Node.js v24.3.0
+2025-07-03T17:24:26.393263+00:00 heroku[web.1]: Process exited with status 1
+2025-07-03T17:24:26.415407+00:00 heroku[web.1]: State changed from starting to crashed
+2025-07-03T17:24:26.419237+00:00 heroku[web.1]: State changed from crashed to starting
+2025-07-03T17:24:31.711935+00:00 heroku[web.1]: Starting process with command `node dist/index.js`
+2025-07-03T17:24:32.749229+00:00 heroku[web.1]: Process exited with status 1
+2025-07-03T17:24:32.702430+00:00 app[web.1]: node:internal/modules/package_json_reader:255
+2025-07-03T17:24:32.702445+00:00 app[web.1]:   throw new ERR_MODULE_NOT_FOUND(packageName, fileURLToPath(base), null);
+2025-07-03T17:24:32.702446+00:00 app[web.1]:         ^
+2025-07-03T17:24:32.702446+00:00 app[web.1]: 
+2025-07-03T17:24:32.702446+00:00 app[web.1]: Error [ERR_MODULE_NOT_FOUND]: Cannot find package 'vite' imported from /app/dist/index.js
+2025-07-03T17:24:32.702447+00:00 app[web.1]:     at Object.getPackageJSONURL (node:internal/modules/package_json_reader:255:9)
+2025-07-03T17:24:32.702447+00:00 app[web.1]:     at packageResolve (node:internal/modules/esm/resolve:767:81)
+2025-07-03T17:24:32.702461+00:00 app[web.1]:     at moduleResolve (node:internal/modules/esm/resolve:853:18)
+2025-07-03T17:24:32.702462+00:00 app[web.1]:     at defaultResolve (node:internal/modules/esm/resolve:983:11)
+2025-07-03T17:24:32.702462+00:00 app[web.1]:     at ModuleLoader.defaultResolve (node:internal/modules/esm/loader:801:12)
+2025-07-03T17:24:32.702462+00:00 app[web.1]:     at #cachedDefaultResolve (node:internal/modules/esm/loader:725:25)
+2025-07-03T17:24:32.702463+00:00 app[web.1]:     at ModuleLoader.resolve (node:internal/modules/esm/loader:708:38)
+2025-07-03T17:24:32.702463+00:00 app[web.1]:     at ModuleLoader.getModuleJobForImport (node:internal/modules/esm/loader:309:38)
+2025-07-03T17:24:32.702463+00:00 app[web.1]:     at #link (node:internal/modules/esm/module_job:202:49) {
+2025-07-03T17:24:32.702464+00:00 app[web.1]:   code: 'ERR_MODULE_NOT_FOUND'
+2025-07-03T17:24:32.702464+00:00 app[web.1]: }
+2025-07-03T17:24:32.702464+00:00 app[web.1]: 
+2025-07-03T17:24:32.702465+00:00 app[web.1]: Node.js v24.3.0
+2025-07-03T17:24:32.777586+00:00 heroku[web.1]: State changed from starting to crashed
