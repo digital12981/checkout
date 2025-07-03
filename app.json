@@ -1,0 +1,45 @@
+{
+  "name": "CheckoutFy",
+  "description": "Advanced SaaS platform for creating dynamic PIX payment pages",
+  "repository": "https://github.com/yourusername/checkoutfy",
+  "logo": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRyfdJp32agPjLuykaFC5jv63CguiyCEm4eOA&s",
+  "keywords": ["nodejs", "react", "payment", "pix", "saas"],
+  "image": "heroku/nodejs",
+  "stack": "heroku-22",
+  "buildpacks": [
+    {
+      "url": "heroku/nodejs"
+    }
+  ],
+  "formation": {
+    "web": {
+      "quantity": 1,
+      "size": "basic"
+    }
+  },
+  "addons": [
+    {
+      "plan": "heroku-postgresql:essential-0"
+    }
+  ],
+  "env": {
+    "NODE_ENV": {
+      "description": "Environment setting",
+      "value": "production"
+    },
+    "DATABASE_URL": {
+      "description": "PostgreSQL database URL (automatically set by Heroku Postgres addon)"
+    },
+    "FOR4PAYMENTS_API_KEY": {
+      "description": "API key for For4Payments integration",
+      "required": false
+    },
+    "ANTHROPIC_API_KEY": {
+      "description": "API key for Anthropic Claude AI",
+      "required": false
+    }
+  },
+  "scripts": {
+    "postdeploy": "npm run db:push"
+  }
+}
