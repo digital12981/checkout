@@ -41,5 +41,10 @@
   },
   "scripts": {
     "postdeploy": "npm run db:push"
+  },
+  "build": {
+    "packages": {
+      "heroku/nodejs": {}
+    }
   }
 }

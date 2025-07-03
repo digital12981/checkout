@@ -49,6 +49,8 @@ heroku config:set ANTHROPIC_API_KEY=your_api_key_here
 
 7. **Deploy**
 ```bash
+git add .
+git commit -m "Deploy to Heroku"
 git push heroku main
 ```
 
@@ -108,11 +110,23 @@ heroku logs --tail
    heroku buildpacks:set heroku/nodejs
    ```
 
+2. **Erro ERR_MODULE_NOT_FOUND**: 
+   ```bash
+   heroku run npm run build
+   heroku restart
+   ```
+
 2. **Erro de build**: Verifique se todas as dependências estão instaladas corretamente
 
-3. **Erro de banco**: Execute `heroku run npm run db:push` para aplicar migrações
+3. **Erro de build durante deploy**: 
+   ```bash
+   heroku logs --tail
+   ```
+   Verifique se todas as dependências estão instaladas
 
-4. **Erro de porta**: O Heroku configura automaticamente a variável PORT
+4. **Erro de banco**: Execute `heroku run npm run db:push` para aplicar migrações
+
+5. **Erro de porta**: O Heroku configura automaticamente a variável PORT
 
 ### Suporte
 

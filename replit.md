@@ -103,6 +103,9 @@ CheckoutFy is a full-stack web application for creating and managing customizabl
   - Adicionado suporte a PostgreSQL do Heroku
   - Removido runtime.txt que causava conflito com buildpack Python
   - Configurado engines no package.json para forçar Node.js
+  - Criado script de build customizado (build.js) para resolver problemas de módulos ESM
+  - Atualizado Procfile para usar arquivo compilado diretamente
+  - Adicionado tsconfig.server.json para build otimizado do servidor
   - Criada documentação completa de deploy com troubleshooting
 - June 19, 2025: Implementado rodapé configurável com logo
   - Adicionado rodapé com cor do header e texto branco
